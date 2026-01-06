@@ -65,7 +65,8 @@ await fastify.register(emailRoutes, { prefix: '/api/email' });
 const start = async () => {
   try {
     const port = process.env.PORT || 3333;
-    const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+    // Always use 0.0.0.0 for cloud deployments (Railway, etc.)
+    const host = '0.0.0.0';
 
     await fastify.listen({ port, host });
     console.log(`\n🚀 La Manufacture API running on http://${host}:${port}`);
