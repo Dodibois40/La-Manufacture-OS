@@ -21,7 +21,36 @@
 </head>
 
 <body>
-  <div class="container" id="app">
+  <!-- Auth Screen -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-container">
+      <div class="auth-logo">
+        <img src="/src/assets/logo.png" alt="Logo">
+        <h1>La Manufacture OS</h1>
+      </div>
+
+      <div class="auth-form" id="loginForm">
+        <h2>Connexion</h2>
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+        <input type="password" id="loginPassword" placeholder="Mot de passe" autocomplete="current-password">
+        <button class="btn btn-primary btn-full" id="loginBtn">Se connecter</button>
+        <p class="auth-switch">Pas de compte ? <a href="#" id="showRegister">Créer un compte</a></p>
+        <div class="auth-error" id="loginError"></div>
+      </div>
+
+      <div class="auth-form hidden" id="registerForm">
+        <h2>Créer un compte</h2>
+        <input type="text" id="registerName" placeholder="Nom" autocomplete="name">
+        <input type="email" id="registerEmail" placeholder="Email" autocomplete="email">
+        <input type="password" id="registerPassword" placeholder="Mot de passe" autocomplete="new-password">
+        <button class="btn btn-primary btn-full" id="registerBtn">S'inscrire</button>
+        <p class="auth-switch">Déjà un compte ? <a href="#" id="showLogin">Se connecter</a></p>
+        <div class="auth-error" id="registerError"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container hidden" id="app">
     <header>
       <div class="brand">
         <div class="logoImg"><img alt="Logo" src="/src/assets/logo.png"></div>
