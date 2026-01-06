@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="La Manufacture OS - Votre système d'organisation personnel avec IA">
+  <title>La Manufacture OS</title>
+  <link rel="icon" type="image/png" href="/src/assets/logo.png">
+
+  <!-- CSS imports -->
+  <link rel="stylesheet" href="/src/css/variables.css">
+  <link rel="stylesheet" href="/src/css/reset.css">
+  <link rel="stylesheet" href="/src/css/components.css">
+  <link rel="stylesheet" href="/src/css/commandbar.css">
+  <link rel="stylesheet" href="/src/css/morning.css">
+  <link rel="stylesheet" href="/src/css/app.css">
+</head>
+
+<body>
+  <div class="container" id="app">
+    <header>
+      <div class="brand">
+        <div class="logoImg"><img alt="Logo" src="/src/assets/logo.png"></div>
+        <div class="logoText">LA MANUFACTURE OS</div>
+      </div>
+      <div class="sub">Votre productivité, organisée</div>
+      <div class="topStatus">
+        <span class="badge" id="storageBadge">Storage...</span>
+        <span class="badge" id="progressBadge">—</span>
+      </div>
+      <div id="storageWarn"></div>
+    </header>
+
+    <!-- Vue: JOUR -->
+    <div class="view active" id="view-day">
+      <div class="view-header">
+        <h1 id="dayNum">—</h1>
+        <div class="date-sub" id="dayLabel">—</div>
+      </div>
+      <div id="lateBox"></div>
+
+      <!-- Barre d'édition (hidden par défaut) -->
+      <div class="edit-bar" id="editBar">
+        <span id="selectedCount">0 sélectionnée(s)</span>
+        <button class="edit-bar-btn danger" id="deleteSelectedBtn">🗑️ Supprimer</button>
+        <button class="edit-bar-btn" id="cancelEditBtn">Annuler</button>
+      </div>
+
+      <div class="list" id="dayList"></div>
+
+      <div class="day-actions">
+        <button class="btn btn-secondary btn-small" id="editModeBtn">Éditer</button>
+        <button class="btn btn-primary" id="addBtn">＋ Nouvelle tâche</button>
+      </div>
+    </div>
+
+    <!-- Vue: SEMAINE -->
+    <div class="view" id="view-week">
+      <div class="view-header">
+        <span class="view-icon">📅</span>
+        <h2>Semaine en cours</h2>
+      </div>
+      <div class="list" id="weekList"></div>
+    </div>
+
+    <!-- Vue: INBOX -->
+    <div class="view" id="view-inbox">
+      <div class="view-header">
+        <span class="view-icon">📥</span>
+        <h2>Inbox</h2>
+      </div>
+
+      <div class="inbox-toolbar">
+        <div class="inbox-toolbar-row">
+          <select id="inboxOwner" class="inbox-select">
+            <option>Thibaud</option>
+          </select>
+          <button class="inbox-chip" id="inboxUrgentBtn">🔥 Urgent</button>
+          <button class="inbox-chip" id="inboxPickBtn">📅 <span id="inboxDateLabel">Auto</span></button>
+          <input type="date" id="inboxDateInput" class="hidden-input">
+        </div>
+      </div>
+
+      <textarea id="inbox" rows="4"
+        placeholder="Tape tes tâches...&#10;demain, lundi, urgent, @Nom sont détectés automatiquement"></textarea>
+
+      <div class="inbox-actions">
+        <button class="btn btn-icon-only" id="micBtn" title="Dictée vocale">🎤</button>
+        <button class="btn btn-primary" id="inboxBtn">Ajouter</button>
+      </div>
+
+      <div class="shortcut-hint">
+        <kbd>Ctrl</kbd> + <kbd>↵</kbd> pour valider
+      </div>
+    </div>
+
+    <!-- Vue: CONFIG -->
+    <div class="view" id="view-config">
+      <div class="view-header">
+        <span class="view-icon">⚙️</span>
+        <h2>Réglages</h2>
+      </div>
+
+      <div class="settings-section">
+        <label class="settings-label">
+          <span class="label-icon">👥</span>
+          Responsables
+        </label>
+        <input type="text" id="owners" class="settings-input" placeholder="Thibaud, Maxime, ...">
+        <p class="settings-hint">Séparez les noms par des virgules</p>
+      </div>
+
+      <div class="settings-section">
+        <label class="settings-label">
+          <span class="label-icon">💾</span>
+          Données
+        </label>
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="exportBtn">
+            <span class="btn-icon">📤</span>
+            <span>Exporter</span>
+          </button>
+          <button class="btn btn-secondary" id="importBtn">
+            <span class="btn-icon">📥</span>
+            <span>Importer</span>
+          </button>
+          <input type="file" id="importFile" accept=".json" class="hidden-input">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <label class="settings-label">
+          <span class="label-icon">🗑️</span>
+          Zone de danger
+        </label>
+        <div class="btn-group">
+          <button class="btn btn-danger" id="wipeBtn">
+            <span>Vider les données</span>
+          </button>
+          <button class="btn btn-secondary" id="resetUiBtn">
+            <span>Reset UI</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav>
+    <button class="active" id="nav-day">
+      <span class="nav-icon">📆</span>
+      <span class="nav-label">Jour</span>
+    </button>
+    <button id="nav-week">
+      <span class="nav-icon">🗓️</span>
+      <span class="nav-label">Semaine</span>
+    </button>
+    <button id="nav-inbox">
+      <span class="nav-icon">📥</span>
+      <span class="nav-label">Inbox</span>
+    </button>
+    <button id="nav-config">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Réglages</span>
+    </button>
+  </nav>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Main App -->
+  <script type="module" src="/src/js/app.js"></script>
+</body>
+
+</html>

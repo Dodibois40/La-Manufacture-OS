@@ -1,0 +1,158 @@
+/* ========================================
+   COMMAND BAR - iOS Style
+   ======================================== */
+
+.cmd-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 15vh;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cmd-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.cmd-box {
+    width: 600px;
+    max-width: 92vw;
+    background: rgba(28, 28, 30, 0.9);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.95) translateY(-20px);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cmd-overlay.active .cmd-box {
+    transform: scale(1) translateY(0);
+}
+
+.cmd-input-wrap {
+    display: flex;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cmd-icon {
+    font-size: 1.6rem;
+    margin-right: 16px;
+    user-select: none;
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+}
+
+#cmdInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 500;
+    font-family: inherit;
+    outline: none;
+    letter-spacing: -0.01em;
+}
+
+#cmdInput::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.cmd-preview {
+    padding: 14px 24px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.cmd-tag {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    animation: tagAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tagAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.cmd-tag.owner {
+    background: rgba(10, 132, 255, 0.15);
+    border: 1px solid rgba(10, 132, 255, 0.3);
+    color: #409cff;
+}
+
+.cmd-tag.urgent {
+    background: rgba(255, 69, 58, 0.15);
+    border: 1px solid rgba(255, 69, 58, 0.3);
+    color: #ff6961;
+}
+
+.cmd-tag.date {
+    background: rgba(50, 215, 75, 0.15);
+    border: 1px solid rgba(50, 215, 75, 0.3);
+    color: #32d74b;
+}
+
+.cmd-tag.placeholder {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.2);
+    font-style: italic;
+    font-weight: 400;
+}
+
+.cmd-hints {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    padding: 10px 24px;
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.cmd-hints span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cmd-hints kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-family: inherit;
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

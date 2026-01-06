@@ -1,0 +1,235 @@
+/* ========================================
+   MORNING BRIEFING - premium iOS Style
+   ======================================== */
+
+.brief-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, #1c1c1e 0%, #000 100%);
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    opacity: 1;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 32px;
+    text-align: center;
+}
+
+.brief-overlay::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0%, transparent 40%, rgba(50, 215, 75, 0.05) 100%);
+    animation: rotateBg 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateBg {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.brief-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.brief-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -2px;
+    background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0.6) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleAppear 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes titleAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+.brief-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 60px;
+    font-weight: 500;
+    animation: subtitleAppear 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes subtitleAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.brief-stat {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 60px;
+    width: 100%;
+    max-width: 500px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stat-box {
+    background: rgba(44, 44, 46, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 130px;
+    flex: 1;
+    animation: statAppear 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.stat-box:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.stat-box:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.stat-box:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes statAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.b-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: -1px;
+}
+
+.b-lbl {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.start-btn {
+    background: #fff;
+    color: #000;
+    padding: 18px 48px;
+    border-radius: 99px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+    animation: btnAppear 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes btnAppear {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.start-btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.3);
+}
+
+.start-btn:active {
+    transform: scale(0.95);
+}
+
+/* Focus Timer Widget */
+.focus-timer {
+    position: fixed;
+    top: env(safe-area-inset-top, 20px);
+    right: 20px;
+    background: rgba(28, 28, 30, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    z-index: 1000;
+    cursor: pointer;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.focus-timer.active {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: focusAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes focusAppear {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.focus-timer::before {
+    content: '⏱️';
+    font-size: 0.9rem;
+}
