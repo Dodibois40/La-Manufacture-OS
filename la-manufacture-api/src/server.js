@@ -3,6 +3,10 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import pool from './db/connection.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
@@ -12,6 +16,20 @@ import aiRoutes from './routes/ai.js';
 import emailRoutes from './routes/email.js';
 
 dotenv.config();
+
+// Auto-run migrations on startup
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+async function runMigrations() {
+  try {
+    console.log('🔄 Running database migrations...');
+    const schemaSQL = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
+    await pool.query(schemaSQL);
+    console.log('✅ Database migrations completed');
+  } catch (error) {
+    console.error('⚠️ Migration warning:', error.message);
+  }
+}
+await runMigrations();
 
 const fastify = Fastify({
   logger: {
