@@ -24,8 +24,9 @@ const fastify = Fastify({
 });
 
 // Register plugins
+const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').trim();
 await fastify.register(cors, {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: frontendUrl,
   credentials: true,
 });
 
