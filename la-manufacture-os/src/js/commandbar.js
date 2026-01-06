@@ -1,6 +1,7 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
-import { saveState, syncTaskToAPI } from './storage.js';
+import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { smartParseDate, smartParseUrgent, smartParseOwner, cleanTitle } from './parser.js';
+import { isApiMode } from './api-client.js';
 
 export const initCommandBar = (state, renderCallback) => {
   // Create Modal HTML with iOS style
@@ -130,16 +131,20 @@ export const initCommandBar = (state, renderCallback) => {
         updatedAt: nowISO()
       }, state.settings.owners[0]);
 
-      state.tasks.push(newTask);
-      saveState(state);
-
-      // Sync to API (returns created task with server ID)
-      const created = await syncTaskToAPI(newTask, 'create');
-      if (created && created.id) {
-        newTask.id = created.id; // Update with server ID
-        saveState(state);
+      try {
+        // Sync to API if in API mode
+        if (isApiMode && isLoggedIn()) {
+          const created = await taskApi.create(newTask);
+          state.tasks.push(created);
+        } else {
+          state.tasks.push(newTask);
+        }
+      } catch (error) {
+        console.error('Failed to create task:', error);
+        state.tasks.push(newTask); // Fallback to local
       }
 
+      saveState(state);
       renderCallback();
       toast('Tâche créée ⚡');
       close();
