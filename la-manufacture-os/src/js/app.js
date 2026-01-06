@@ -1,5 +1,6 @@
 import { toast } from './utils.js';
-import { loadState, saveState, initStorageUI } from './storage.js';
+import { loadState, saveState, initStorageUI, syncFromAPI } from './storage.js';
+import { isApiMode } from './api-client.js';
 import { renderDay, renderWeek, initAddTask, initEditMode } from './views.js';
 import { renderInboxUI, initInboxControls, inboxCtx } from './inbox.js';
 import { renderConfig, initConfig } from './config.js';
@@ -8,21 +9,12 @@ import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
 
-// Load state
+// Load state (local first, then sync from API)
 let state = loadState();
 window._debugState = state; // Expose for debugging
 state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
 state.settings = state.settings && typeof state.settings === 'object' ? state.settings : { owners: ['Thibaud'] };
 state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length ? state.settings.owners : ['Thibaud'];
-
-// Auto Carry-Over (Silent)
-runAutoCarryOver(state);
-
-// Init inbox context
-inboxCtx.owner = state.settings.owners[0] || 'Thibaud';
-
-// Storage UI
-initStorageUI();
 
 // Navigation
 const views = ['day', 'week', 'inbox', 'config'];
@@ -50,21 +42,51 @@ const render = () => {
 // Store render globally for views.js to access
 window._renderCallback = render;
 
-// Navigation listeners
-document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
-document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
-document.getElementById('nav-inbox')?.addEventListener('click', () => setView('inbox'));
-document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
+// Init app
+const initApp = async () => {
+  // Storage UI
+  initStorageUI();
 
-// Init modules
-initInboxControls(state, render);
-initConfig(state, render);
-initEditMode(state, render);
-initCommandBar(state, render);
-initMorningBriefing(state);
-initFocusTimer();
-initSpeechToText();
+  // Sync from API if in API mode
+  if (isApiMode) {
+    toast('Synchronisation...');
+    const apiState = await syncFromAPI();
+    if (apiState) {
+      state.tasks = apiState.tasks;
+      state.settings = apiState.settings || state.settings;
+      state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length
+        ? state.settings.owners
+        : ['Thibaud'];
+      saveState(state);
+      toast('Synchronisé ✓');
+    }
+  }
 
-// Initial render
-render();
-toast('Prêt');
+  // Auto Carry-Over (Silent)
+  runAutoCarryOver(state);
+
+  // Init inbox context
+  inboxCtx.owner = state.settings.owners[0] || 'Thibaud';
+
+  // Navigation listeners
+  document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
+  document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
+  document.getElementById('nav-inbox')?.addEventListener('click', () => setView('inbox'));
+  document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
+
+  // Init modules
+  initInboxControls(state, render);
+  initConfig(state, render);
+  initEditMode(state, render);
+  initCommandBar(state, render);
+  initMorningBriefing(state);
+  initFocusTimer();
+  initSpeechToText();
+
+  // Initial render
+  render();
+  if (!isApiMode) toast('Prêt (mode local)');
+};
+
+// Start app
+initApp();

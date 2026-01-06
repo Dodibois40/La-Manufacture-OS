@@ -1,4 +1,5 @@
 import { nowISO, storageOK } from './utils.js';
+import { api, isApiMode } from './api-client.js';
 
 const STORE_KEY = 'lm_os_state_v65';
 const LEGACY_KEYS = [
@@ -21,7 +22,8 @@ export const defaultState = () => ({
   }
 });
 
-export const loadState = () => {
+// Local storage helpers
+const loadFromLocal = () => {
   if (!okStorage) return defaultState();
 
   // Current key
@@ -41,7 +43,6 @@ export const loadState = () => {
         merged.settings = legacy.settings && typeof legacy.settings === 'object' ? legacy.settings : merged.settings;
         merged.meta = legacy.meta && typeof legacy.meta === 'object' ? legacy.meta : merged.meta;
         merged.meta.schema = 'v65';
-        // Toast will be called from app.js
         return merged;
       }
     } catch (_) {}
@@ -49,7 +50,7 @@ export const loadState = () => {
   return defaultState();
 };
 
-export const saveState = (state) => {
+const saveToLocal = (state) => {
   state.meta.updatedAt = nowISO();
   state.meta.rev = (state.meta.rev || 0) + 1;
   if (okStorage) {
@@ -57,6 +58,48 @@ export const saveState = (state) => {
       localStorage.setItem(STORE_KEY, JSON.stringify(state));
     } catch (_) {}
   }
+};
+
+// API sync functions
+export const syncFromAPI = async () => {
+  if (!isApiMode) return null;
+  try {
+    const tasks = await api.tasks.getAll();
+    const settings = await api.settings.get().catch(() => ({ owners: ['Thibaud'] }));
+    return {
+      tasks: Array.isArray(tasks) ? tasks : [],
+      settings: settings || { owners: ['Thibaud'] },
+      meta: { updatedAt: nowISO(), rev: 0, schema: 'v65' }
+    };
+  } catch (err) {
+    console.warn('API sync failed, using local:', err.message);
+    return null;
+  }
+};
+
+export const syncTaskToAPI = async (task, action = 'create') => {
+  if (!isApiMode) return;
+  try {
+    if (action === 'create') {
+      const created = await api.tasks.create(task);
+      return created;
+    } else if (action === 'update') {
+      await api.tasks.update(task.id, task);
+    } else if (action === 'delete') {
+      await api.tasks.delete(task.id);
+    }
+  } catch (err) {
+    console.warn(`API ${action} failed:`, err.message);
+  }
+};
+
+// Main exports (keep backward compatibility)
+export const loadState = () => {
+  return loadFromLocal();
+};
+
+export const saveState = (state) => {
+  saveToLocal(state);
 };
 
 export function initStorageUI() {

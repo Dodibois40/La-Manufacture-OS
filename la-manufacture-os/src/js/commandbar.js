@@ -1,5 +1,5 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
-import { saveState } from './storage.js';
+import { saveState, syncTaskToAPI } from './storage.js';
 import { smartParseDate, smartParseUrgent, smartParseOwner, cleanTitle } from './parser.js';
 
 export const initCommandBar = (state, renderCallback) => {
@@ -116,21 +116,30 @@ export const initCommandBar = (state, renderCallback) => {
 
   input.addEventListener('input', updatePreview);
 
-  input.addEventListener('keydown', (e) => {
+  input.addEventListener('keydown', async (e) => {
     if (e.key === 'Enter') {
       const meta = analyze(input.value);
       if (!meta || !meta.title) return;
 
-      state.tasks.push(ensureTask({
+      const newTask = ensureTask({
         text: meta.title,
         owner: meta.owner,
         urgent: meta.urgent,
         date: meta.date,
         done: false,
         updatedAt: nowISO()
-      }, state.settings.owners[0]));
+      }, state.settings.owners[0]);
 
+      state.tasks.push(newTask);
       saveState(state);
+
+      // Sync to API (returns created task with server ID)
+      const created = await syncTaskToAPI(newTask, 'create');
+      if (created && created.id) {
+        newTask.id = created.id; // Update with server ID
+        saveState(state);
+      }
+
       renderCallback();
       toast('Tâche créée ⚡');
       close();

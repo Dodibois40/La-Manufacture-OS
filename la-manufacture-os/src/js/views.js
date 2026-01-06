@@ -1,5 +1,5 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
-import { saveState } from './storage.js';
+import { saveState, syncTaskToAPI } from './storage.js';
 
 // Edit mode state
 let editMode = false;
@@ -40,6 +40,7 @@ const taskRow = (t, state) => {
       task.done = false;
       task.updatedAt = nowISO();
       saveState(state);
+      syncTaskToAPI(task, 'update');
       window._renderCallback?.();
       return;
     }
@@ -49,6 +50,7 @@ const taskRow = (t, state) => {
       task.done = true;
       task.updatedAt = nowISO();
       saveState(state);
+      syncTaskToAPI(task, 'update');
       window._renderCallback?.();
     }, 450);
   });
@@ -98,16 +100,19 @@ const taskRow = (t, state) => {
 
         if (action === 'delete') {
           state.tasks = state.tasks.filter(item => item.id !== task.id);
+          syncTaskToAPI(task, 'delete');
           toast('Tâche supprimée');
         } else if (action === 'tomorrow') {
           const d = new Date();
           d.setDate(d.getDate() + 1);
           task.date = isoLocal(d);
           task.updatedAt = nowISO();
+          syncTaskToAPI(task, 'update');
           toast('Reporté à demain');
         } else if (action === 'urgent') {
           task.urgent = !task.urgent;
           task.updatedAt = nowISO();
+          syncTaskToAPI(task, 'update');
         }
 
         saveState(state);
@@ -194,6 +199,11 @@ export const initEditMode = (state, renderCallback) => {
       }
 
       const count = selectedTasks.size;
+      // Sync deletions to API
+      for (const taskId of selectedTasks) {
+        const task = state.tasks.find(t => t.id === taskId);
+        if (task) syncTaskToAPI(task, 'delete');
+      }
       state.tasks = state.tasks.filter(t => !selectedTasks.has(t.id));
       saveState(state);
 
