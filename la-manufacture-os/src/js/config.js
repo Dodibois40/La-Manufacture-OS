@@ -123,6 +123,9 @@ export const initConfig = (state, renderCallback) => {
       console.error('Logout error:', e);
     }
 
+    // Set force logout flag BEFORE clearing localStorage
+    localStorage.setItem('force_logout', 'true');
+
     toast('Déconnexion...');
 
     // Reload to login screen

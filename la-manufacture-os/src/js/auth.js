@@ -107,6 +107,12 @@ export const initAuth = (state, renderCallback) => {
 
 // Check session on load
 export const checkSession = async () => {
+  // If logout was requested, force return null
+  if (localStorage.getItem('force_logout') === 'true') {
+    localStorage.removeItem('force_logout');
+    return null;
+  }
+
   try {
     const { api } = await import('./api-client.js');
     const res = await api.auth.me();
