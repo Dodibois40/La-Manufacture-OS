@@ -1,6 +1,7 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
 import { smartParseDate, smartParseUrgent, smartParseOwner, cleanTitle } from './parser.js';
-import { saveState } from './storage.js';
+import { saveState, taskApi, isLoggedIn } from './storage.js';
+import { isApiMode } from './api-client.js';
 
 export const inboxCtx = {
   dateISO: null, // null = auto-detect, otherwise manual override
@@ -117,7 +118,7 @@ export const initInboxControls = (state, renderCallback) => {
   // SMART Inbox Button
   const inboxBtn = document.getElementById('inboxBtn');
   if (inboxBtn) {
-    inboxBtn.addEventListener('click', () => {
+    inboxBtn.addEventListener('click', async () => {
       const val = document.getElementById('inbox')?.value || '';
       const baseToday = isoLocal();
 
@@ -127,6 +128,7 @@ export const initInboxControls = (state, renderCallback) => {
 
       const lines = val.split('\n');
       let created = 0;
+      const tasksToCreate = [];
 
       for (const line of lines) {
         const raw = String(line || '').trim();
@@ -143,20 +145,39 @@ export const initInboxControls = (state, renderCallback) => {
         const finalUrgent = inboxCtx.urgent || autoUrgent;
         const finalOwner = autoOwner;
 
-        state.tasks.push(ensureTask({
+        const newTask = ensureTask({
           text: title,
           owner: finalOwner,
           urgent: finalUrgent,
           date: finalDate,
           done: false,
           updatedAt: nowISO()
-        }, state.settings.owners[0]));
+        }, state.settings.owners[0]);
 
-        created++;
+        tasksToCreate.push(newTask);
       }
 
+      // Clear textarea immediately
       const inboxTextarea = document.getElementById('inbox');
       if (inboxTextarea) inboxTextarea.value = '';
+
+      // Create tasks (API or local)
+      for (const task of tasksToCreate) {
+        try {
+          if (isApiMode && isLoggedIn()) {
+            const apiTask = await taskApi.create(task);
+            state.tasks.push(apiTask);
+          } else {
+            state.tasks.push(task);
+          }
+          created++;
+        } catch (error) {
+          console.error('Failed to create task:', error);
+          // Still add locally as fallback
+          state.tasks.push(task);
+          created++;
+        }
+      }
 
       saveState(state);
       renderCallback();
