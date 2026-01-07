@@ -8,6 +8,7 @@ import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
+import { initAuth, checkSession } from './auth.js';
 
 // Load state (local first, then sync from API)
 let state = loadState();
@@ -17,15 +18,24 @@ state.settings = state.settings && typeof state.settings === 'object' ? state.se
 state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length ? state.settings.owners : ['Thibaud'];
 
 // Navigation
-const views = ['day', 'week', 'inbox', 'config'];
+const views = ['day', 'week', 'inbox', 'config', 'auth'];
 const setView = (name) => {
+  const nav = document.querySelector('nav');
+
+  if (name === 'auth') {
+    if (nav) nav.style.display = 'none';
+  } else {
+    if (nav) nav.style.display = 'flex';
+  }
+
   for (const v of views) {
     const el = document.getElementById('view-' + v);
     const nb = document.getElementById('nav-' + v);
     if (el) el.classList.toggle('active', v === name);
     if (nb) nb.classList.toggle('active', v === name);
   }
-  render();
+
+  if (name !== 'auth') render();
 };
 
 // Store setView globally for config.js to access
@@ -47,8 +57,21 @@ const initApp = async () => {
   // Storage UI
   initStorageUI();
 
-  // Sync from API if in API mode
+  // Init Auth UI (listeners)
+  initAuth(state, render);
+
+  // API Mode Logic
   if (isApiMode) {
+    // 1. Check Session
+    const user = await checkSession();
+
+    if (!user) {
+      // Not logged in -> Show Auth Screen
+      setView('auth');
+      return;
+    }
+
+    // 2. Logged in -> Sync Data
     toast('Synchronisation...');
     const apiState = await syncFromAPI();
     if (apiState) {
@@ -84,8 +107,14 @@ const initApp = async () => {
   initSpeechToText();
 
   // Initial render
-  render();
-  if (!isApiMode) toast('Prêt (mode local)');
+  if (isApiMode) {
+    // If we are here, we are logged in
+    setView('day');
+  } else {
+    // Local mode
+    toast('Prêt (mode local)');
+    setView('day');
+  }
 };
 
 // Start app

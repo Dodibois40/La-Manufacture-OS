@@ -447,3 +447,87 @@ nav button.active .nav-icon {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* ========================================
+   AUTH VIEW
+   ======================================== */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 20px;
+}
+
+.auth-form {
+  background: rgba(28, 28, 30, 0.8);
+  backdrop-filter: blur(20px);
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 360px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.auth-form h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #fff;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.auth-form input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-sec);
+}
+
+.auth-switch a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.auth-error {
+  margin-top: 16px;
+  color: #ff453a;
+  font-size: 0.85rem;
+  text-align: center;
+  background: rgba(255, 69, 58, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  display: none;
+}
+
+.hidden {
+  display: none !important;
+}
