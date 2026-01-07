@@ -19,8 +19,6 @@ export const runAutoCarryOver = (state) => {
 
     if (movedCount > 0) {
         saveState(state);
-        console.log(`Auto Carry-Over: ${movedCount} tâches déplacées à aujourd'hui.`);
-        // On ne notifie pas l'utilisateur pour être transparent, ou juste un log discret
     }
 
     return movedCount;

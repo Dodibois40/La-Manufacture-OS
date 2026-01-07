@@ -68,3 +68,60 @@ src/
 - [ ] Les citations/infos importantes sont toujours visibles
 - [ ] Le design est cohérent avec le reste de l'app
 - [ ] Pas d'emojis laids ou mal placés
+
+---
+
+## Agent Clean Code
+
+Avant chaque commit ou à la demande, effectuer une revue de code:
+
+### 1. CSS - Vérifications
+```
+□ Pas de styles dupliqués entre fichiers
+□ Pas de !important sauf nécessité absolue
+□ Utiliser les variables CSS (--accent, --text-main, etc.)
+□ Pas de valeurs magiques (utiliser les spacing standards)
+□ Animations avec cubic-bezier ou var(--ease-spring)
+□ Supprimer les styles morts/non utilisés
+```
+
+### 2. JS - Vérifications
+```
+□ Pas de console.log oubliés
+□ Pas de code commenté inutile
+□ Fonctions < 50 lignes (sinon découper)
+□ Pas de duplication de logique
+□ Event listeners nettoyés si nécessaire
+□ Pas de variables non utilisées
+```
+
+### 3. HTML - Vérifications
+```
+□ Pas d'éléments vides ou inutiles
+□ IDs uniques et cohérents
+□ Classes avec naming cohérent (kebab-case)
+□ Pas de styles inline (sauf exceptions dynamiques)
+```
+
+### 4. Performance
+```
+□ Pas de re-render inutiles
+□ Images optimisées
+□ Pas de listeners sur scroll/resize sans throttle
+□ Lazy loading si nécessaire
+```
+
+### 5. UX
+```
+□ Feedback visuel sur les interactions (hover, active)
+□ Transitions fluides (pas de changements brusques)
+□ États de chargement si opération longue
+□ Messages d'erreur clairs
+```
+
+### Commande de revue
+Pour lancer une revue complète:
+1. Lister tous les fichiers modifiés
+2. Vérifier chaque point de la checklist
+3. Corriger les problèmes trouvés
+4. Reporter les corrections faites

@@ -3,8 +3,6 @@
 const MODE = import.meta.env.VITE_MODE || 'local';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
-console.log(`🔧 Running in ${MODE.toUpperCase()} mode`);
-
 // Helper pour les requêtes API
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
