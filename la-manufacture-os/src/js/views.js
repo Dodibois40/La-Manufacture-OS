@@ -241,7 +241,7 @@ export const renderDay = (state) => {
   const dayLabelEl = document.getElementById('dayLabel');
 
   if (dayNumEl) dayNumEl.textContent = String(d.getDate());
-  if (dayLabelEl) dayLabelEl.textContent = `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  if (dayLabelEl) dayLabelEl.textContent = `${DAYS[d.getDay()]} ${MONTHS[d.getMonth()]}`;
 
   const dayList = document.getElementById('dayList');
   if (!dayList) return;
@@ -275,7 +275,11 @@ export const renderDay = (state) => {
     focusContainer.className = 'focus-launch-container';
     focusContainer.innerHTML = `
         <button class="btn-focus-start" id="startZenMode">
-           <span class="icon">🧘</span>
+           <svg class="focus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <circle cx="12" cy="12" r="10"/>
+             <circle cx="12" cy="12" r="6"/>
+             <circle cx="12" cy="12" r="2"/>
+           </svg>
            <span class="text">Mode Focus</span>
         </button>
      `;

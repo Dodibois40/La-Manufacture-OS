@@ -103,7 +103,9 @@ header {
 }
 
 .view-icon {
-  font-size: 1.8rem;
+  width: 28px;
+  height: 28px;
+  color: var(--text-sec);
 }
 
 .view-desc {
@@ -120,18 +122,30 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-.view-header h1 {
-  font-size: 2.8rem;
-  background: linear-gradient(180deg, #FFF 0%, #AAA 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 4px;
+/* Day View Header - Apple Calendar Style */
+#view-day .view-header {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 0 24px;
+  margin-bottom: 8px;
 }
 
-.date-sub {
+#view-day .view-header h1 {
+  font-size: 5rem;
+  font-weight: 200;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1;
+  margin: 0;
+}
+
+#view-day .view-header .date-sub {
+  font-size: 1.1rem;
+  font-weight: 500;
   color: var(--text-sec);
-  font-size: 1rem;
-  margin-bottom: 16px;
+  text-transform: capitalize;
+  margin: 0;
 }
 
 /* === Lists === */
@@ -200,10 +214,11 @@ h3 {
   margin-bottom: 20px;
 }
 
-.inbox-title {
-  font-size: 4rem;
-  margin-bottom: 8px;
-  line-height: 1;
+.inbox-title-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+  color: var(--accent);
 }
 
 .inbox-subtitle {
@@ -288,8 +303,8 @@ h3 {
 }
 
 .chip-icon {
-  font-size: 1.1rem;
-  line-height: 1;
+  width: 18px;
+  height: 18px;
 }
 
 .chip-text {
@@ -432,6 +447,11 @@ h3 {
   background: rgba(255, 69, 58, 0.3);
 }
 
+.edit-bar-icon {
+  width: 16px;
+  height: 16px;
+}
+
 /* === Task Selection Mode === */
 .task.selectable {
   cursor: pointer;
@@ -483,7 +503,9 @@ h3 {
 }
 
 .label-icon {
-  font-size: 1.1rem;
+  width: 18px;
+  height: 18px;
+  color: var(--text-sec);
 }
 
 .settings-input {
@@ -587,9 +609,10 @@ nav button.active .nav-icon {
 }
 
 .nav-icon {
-  font-size: 1.4rem;
+  width: 22px;
+  height: 22px;
   margin-bottom: 2px;
-  transition: transform 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring), filter 0.3s ease;
 }
 
 .nav-label {
@@ -710,6 +733,11 @@ nav button.active .nav-icon {
 
 .btn-focus-start:active {
   transform: scale(0.98);
+}
+
+.focus-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .focus-overlay {
