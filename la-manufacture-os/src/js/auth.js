@@ -113,6 +113,9 @@ const setLoading = (btn, isLoading) => {
 };
 
 const handleAuthSuccess = async (user, state, renderCallback) => {
+  // Reset morning briefing so it shows after login
+  localStorage.removeItem('last_briefing');
+
   // Update local state owner with user's name
   if (user && user.name) {
     // Remplace le premier owner par le nom de l'utilisateur
