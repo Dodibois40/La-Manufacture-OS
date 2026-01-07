@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/src/css/components.css">
   <link rel="stylesheet" href="/src/css/commandbar.css">
   <link rel="stylesheet" href="/src/css/morning.css">
+  <link rel="stylesheet" href="/src/css/planning.css">
   <link rel="stylesheet" href="/src/css/app.css">
 </head>
 
@@ -83,45 +84,68 @@
         <button class="btn btn-secondary btn-small" id="editModeBtn">Éditer</button>
         <button class="btn btn-primary" id="addBtn">＋ Nouvelle tâche</button>
       </div>
+      <div class="shortcut-hint">
+        <kbd>Ctrl</kbd> + <kbd>K</kbd> pour ajout rapide
+      </div>
     </div>
 
-    <!-- Vue: SEMAINE -->
+    <!-- Vue: PLANNING -->
     <div class="view" id="view-week">
-      <div class="view-header">
-        <span class="view-icon">📅</span>
-        <h2>Semaine en cours</h2>
+      <div class="planning-container">
+        <div class="planning-header">
+          <button class="month-nav" id="prevMonth">‹</button>
+          <h2 class="month-title" id="monthTitle">Janvier 2026</h2>
+          <button class="month-nav" id="nextMonth">›</button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+          <!-- Calendar will be generated here -->
+        </div>
+
+        <div class="day-detail" id="dayDetail">
+          <div class="day-detail-header">
+            <h3 id="selectedDayTitle">Sélectionne un jour</h3>
+            <button class="btn btn-primary btn-small" id="addTaskToDay" style="display:none;">+ Ajouter</button>
+          </div>
+          <div class="day-tasks-list" id="dayTasksList"></div>
+        </div>
       </div>
-      <div class="list" id="weekList"></div>
     </div>
 
     <!-- Vue: INBOX -->
     <div class="view" id="view-inbox">
-      <div class="view-header">
-        <span class="view-icon">📥</span>
-        <h2>Inbox</h2>
-      </div>
-
-      <div class="inbox-toolbar">
-        <div class="inbox-toolbar-row">
-          <select id="inboxOwner" class="inbox-select">
-            <option>Thibaud</option>
-          </select>
-          <button class="inbox-chip" id="inboxUrgentBtn">🔥 Urgent</button>
-          <button class="inbox-chip" id="inboxPickBtn">📅 <span id="inboxDateLabel">Auto</span></button>
-          <input type="date" id="inboxDateInput" class="hidden-input">
+      <div class="inbox-container">
+        <div class="inbox-header">
+          <h1 class="inbox-title">📥</h1>
+          <p class="inbox-subtitle">Capture rapide</p>
         </div>
-      </div>
 
-      <textarea id="inbox" rows="4"
-        placeholder="Tape tes tâches...&#10;demain, lundi, urgent, @Nom sont détectés automatiquement"></textarea>
+        <div class="inbox-input-wrapper">
+          <textarea id="inbox" rows="6"
+            placeholder="Tape tes idées...&#10;&#10;demain, lundi, urgent, @Nom sont détectés"></textarea>
 
-      <div class="inbox-actions">
-        <button class="btn btn-icon-only" id="micBtn" title="Dictée vocale">🎤</button>
-        <button class="btn btn-primary" id="inboxBtn">Ajouter</button>
-      </div>
+          <div class="inbox-toolbar">
+            <select id="inboxOwner" class="inbox-chip">
+              <option>Thibaud</option>
+            </select>
+            <button class="inbox-chip" id="inboxUrgentBtn">
+              <span class="chip-icon">🔥</span>
+            </button>
+            <button class="inbox-chip" id="inboxPickBtn">
+              <span class="chip-icon">📅</span>
+              <span class="chip-text" id="inboxDateLabel">Auto</span>
+            </button>
+            <input type="date" id="inboxDateInput" class="hidden-input">
+            <button class="inbox-chip" id="micBtn" title="Dictée vocale">
+              <span class="chip-icon">🎤</span>
+            </button>
+          </div>
+        </div>
 
-      <div class="shortcut-hint">
-        <kbd>Ctrl</kbd> + <kbd>↵</kbd> pour valider
+        <button class="inbox-submit-btn" id="inboxBtn">
+          <span>Ajouter</span>
+          <kbd class="submit-hint">⏎</kbd>
+        </button>
       </div>
     </div>
 
@@ -176,15 +200,15 @@
     </div>
   </div>
 
-  <!-- Navigation -->
+  <!-- Navigation Dock (macOS style) -->
   <nav>
     <button class="active" id="nav-day">
-      <span class="nav-icon">📆</span>
+      <span class="nav-icon">☀️</span>
       <span class="nav-label">Jour</span>
     </button>
     <button id="nav-week">
-      <span class="nav-icon">🗓️</span>
-      <span class="nav-label">Semaine</span>
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Planning</span>
     </button>
     <button id="nav-inbox">
       <span class="nav-icon">📥</span>

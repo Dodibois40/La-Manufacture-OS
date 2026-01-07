@@ -7,13 +7,71 @@ export const isoLocal = (d = new Date()) => {
 
 export const nowISO = () => new Date().toISOString();
 
-export const toast = (msg) => {
+export const toast = (msg, type = 'default') => {
   const t = document.getElementById('toast');
   if (!t) return;
   t.textContent = msg;
-  t.classList.add('show');
+  t.className = 'toast show' + (type !== 'default' ? ` toast-${type}` : '');
   window.clearTimeout(toast._timer);
-  toast._timer = window.setTimeout(() => t.classList.remove('show'), 1400);
+  toast._timer = window.setTimeout(() => t.classList.remove('show'), 1800);
+};
+
+// 🎉 Célébration confetti pour les tâches complétées
+export const celebrate = () => {
+  let container = document.getElementById('confetti-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'confetti-container';
+    document.body.appendChild(container);
+  }
+  container.innerHTML = '';
+
+  const colors = ['#FFD60A', '#FF9F0A', '#30D158', '#0A84FF', '#FF453A', '#BF5AF2'];
+  const confettiCount = 40;
+
+  for (let i = 0; i < confettiCount; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.3 + 's';
+    confetti.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+    container.appendChild(confetti);
+  }
+
+  playSound('complete');
+  setTimeout(() => container.innerHTML = '', 2500);
+};
+
+// 🔊 Sons subtils
+export const playSound = (type) => {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.type = 'sine';
+
+    if (type === 'complete') {
+      oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+      oscillator.frequency.setValueAtTime(739.99, audioCtx.currentTime + 0.08); // F#5
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.16); // A5
+      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.35);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.35);
+    } else if (type === 'timer') {
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+      oscillator.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.15);
+      gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.4);
+    }
+  } catch (e) {
+    // Audio non supporté
+  }
 };
 
 export const storageOK = () => {
@@ -37,4 +95,35 @@ export const ensureTask = (t, defaultOwner) => {
   task.urgent = Boolean(task.urgent);
   if (!task.updatedAt) task.updatedAt = nowISO();
   return task;
+};
+
+// 🚨 Confirmation Dialog Premium
+export const confirmDialog = ({ icon = '⚠️', title, message, confirmText = 'Confirmer', cancelText = 'Annuler', danger = false }) => {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-box">
+        <div class="confirm-icon">${icon}</div>
+        <div class="confirm-title">${title}</div>
+        <div class="confirm-message">${message}</div>
+        <div class="confirm-actions">
+          <button class="confirm-btn cancel">${cancelText}</button>
+          <button class="confirm-btn ${danger ? 'danger' : 'primary'}">${confirmText}</button>
+        </div>
+      </div>
+    `;
+
+    const close = (result) => {
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 200);
+      resolve(result);
+    };
+
+    overlay.querySelector('.confirm-btn.cancel').onclick = () => close(false);
+    overlay.querySelector('.confirm-btn:not(.cancel)').onclick = () => close(true);
+    overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+
+    document.body.appendChild(overlay);
+  });
 };

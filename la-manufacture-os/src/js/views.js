@@ -1,4 +1,4 @@
-import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
+import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode } from './api-client.js';
 
@@ -51,6 +51,9 @@ const taskRow = (t, state) => {
       task.updatedAt = nowISO();
       saveState(state);
       window._renderCallback?.();
+      // 🎉 Célébration !
+      celebrate();
+      toast('✨ Bien joué !', 'success');
     }, 450);
   });
 
@@ -232,11 +235,32 @@ export const renderDay = (state) => {
     editModeBtn.style.display = tasks.length > 0 ? 'inline-flex' : 'none';
   }
 
+  // --- ZEN MODE BUTTON ---
+  // On insère le bouton Mode Zen (Focus) avant la liste si il y a des tâches
+  if (tasks.filter(t => !t.done).length > 0) {
+    const focusContainer = document.createElement('div');
+    focusContainer.className = 'focus-launch-container';
+    focusContainer.innerHTML = `
+        <button class="btn-focus-start" id="startZenMode">
+           <span class="icon">🧘</span>
+           <span class="text">Mode Focus</span>
+        </button>
+     `;
+    focusContainer.querySelector('#startZenMode').addEventListener('click', () => {
+      // Trigger Focus Mode
+      const firstTask = tasks.find(t => !t.done);
+      if (firstTask) {
+        import('./focus-mode.js').then(mod => mod.startFocusMode(firstTask, state, window._renderCallback));
+      }
+    });
+    dayList.appendChild(focusContainer);
+  }
+
   if (tasks.length === 0) {
     dayList.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">🌟</div>
-        <p>Rien de prévu pour l'instant. Profitez !</p>
+        <div class="empty-icon">☀️</div>
+        <p>Journée libre. Ajoutez une tâche pour commencer.</p>
       </div>
     `;
   } else {
@@ -267,67 +291,172 @@ export const renderDay = (state) => {
   }
 };
 
+// Planning calendar state
+let currentMonth = new Date();
+let selectedDate = null;
+
 export const renderWeek = (state) => {
-  const box = document.getElementById('weekList');
-  if (!box) return;
-  box.innerHTML = '';
+  renderPlanning(state);
+};
 
-  const today = new Date();
-  const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const mondayOffset = (base.getDay() + 6) % 7;
-  base.setDate(base.getDate() - mondayOffset);
+const renderPlanning = (state) => {
+  renderCalendar(state);
+  renderDayDetail(state);
+};
 
-  const DAYS_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const renderCalendar = (state) => {
+  const grid = document.getElementById('calendarGrid');
+  const titleEl = document.getElementById('monthTitle');
+  if (!grid || !titleEl) return;
 
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(base.getTime());
-    d.setDate(base.getDate() + i);
-    const iso = isoLocal(d);
-    const isToday = iso === isoLocal(new Date());
+  // Update title
+  const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  titleEl.textContent = `${months[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
 
-    const tasks = state.tasks
-      .map(t => ensureTask(t, state.settings.owners[0]))
-      .filter(t => t.date === iso);
+  grid.innerHTML = '';
 
-    const open = tasks.filter(t => !t.done).length;
-    const progress = tasks.length === 0 ? 0 : (tasks.length - open) / tasks.length;
+  // Day headers
+  const dayHeaders = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  dayHeaders.forEach(day => {
+    const header = document.createElement('div');
+    header.className = 'calendar-day-header';
+    header.textContent = day;
+    grid.appendChild(header);
+  });
 
-    const row = document.createElement('div');
-    row.className = 'week-row' + (isToday ? ' current' : '');
+  // Get first day of month
+  const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+  const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
 
-    const dayMeta = document.createElement('div');
-    dayMeta.className = 'week-day-meta';
-    dayMeta.innerHTML = `
-      <span class="week-day-name">${DAYS_SHORT[i]}</span>
-      <span class="week-day-num">${d.getDate()}</span>
-    `;
+  // Get offset (Monday = 0)
+  const startOffset = (firstDay.getDay() + 6) % 7;
 
-    const content = document.createElement('div');
-    content.className = 'week-content';
+  // Previous month days
+  const prevMonthLastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate();
+  for (let i = startOffset - 1; i >= 0; i--) {
+    const day = prevMonthLastDay - i;
+    const cell = createCalendarDay(day, true, state);
+    grid.appendChild(cell);
+  }
 
-    const count = document.createElement('div');
-    count.className = 'week-count';
+  // Current month days
+  const today = isoLocal(new Date());
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    const iso = isoLocal(date);
+    const cell = createCalendarDay(day, false, state, date, iso === today, iso);
+    grid.appendChild(cell);
+  }
+
+  // Next month days to fill grid
+  const totalCells = grid.children.length - 7; // Minus headers
+  const remainingCells = 42 - totalCells - 7; // 6 weeks * 7 days
+  for (let day = 1; day <= remainingCells; day++) {
+    const cell = createCalendarDay(day, true, state);
+    grid.appendChild(cell);
+  }
+};
+
+const createCalendarDay = (dayNumber, otherMonth, state, date = null, isToday = false, iso = null) => {
+  const cell = document.createElement('div');
+  cell.className = 'calendar-day';
+  if (otherMonth) cell.classList.add('other-month');
+  if (isToday) cell.classList.add('today');
+  if (selectedDate && iso === selectedDate) cell.classList.add('selected');
+
+  const number = document.createElement('div');
+  number.className = 'calendar-day-number';
+  number.textContent = dayNumber;
+  cell.appendChild(number);
+
+  if (iso && !otherMonth) {
+    const tasks = state.tasks.filter(t => t.date === iso);
+    const openTasks = tasks.filter(t => !t.done).length;
+
     if (tasks.length > 0) {
-      count.innerHTML = `<b>${open}</b> restants <span class="dim">/ ${tasks.length}</span>`;
-
-      const barWrap = document.createElement('div');
-      barWrap.className = 'week-bar-wrap';
-      const bar = document.createElement('div');
-      bar.className = 'week-bar';
-      bar.style.width = `${progress * 100}%`;
-      if (progress === 1) bar.style.background = 'var(--ok)';
-      barWrap.appendChild(bar);
-      content.appendChild(count);
-      content.appendChild(barWrap);
-    } else {
-      count.innerHTML = `<span class="dim">—</span>`;
-      content.appendChild(count);
+      cell.classList.add('has-tasks');
+      const count = document.createElement('div');
+      count.className = 'calendar-day-count';
+      count.textContent = `${openTasks}/${tasks.length}`;
+      cell.appendChild(count);
     }
 
-    row.appendChild(dayMeta);
-    row.appendChild(content);
+    cell.addEventListener('click', () => {
+      selectedDate = iso;
+      renderPlanning(state);
+    });
+  }
 
-    box.appendChild(row);
+  return cell;
+};
+
+const renderDayDetail = (state) => {
+  const titleEl = document.getElementById('selectedDayTitle');
+  const listEl = document.getElementById('dayTasksList');
+  const addBtn = document.getElementById('addTaskToDay');
+
+  if (!titleEl || !listEl || !addBtn) return;
+
+  if (!selectedDate) {
+    titleEl.textContent = 'Sélectionne un jour';
+    listEl.innerHTML = '<div class="empty-state">Clique sur un jour pour voir ses tâches</div>';
+    addBtn.style.display = 'none';
+    return;
+  }
+
+  const date = new Date(selectedDate + 'T00:00:00');
+  const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  titleEl.textContent = `${dayNames[date.getDay()]} ${date.getDate()}`;
+  addBtn.style.display = 'block';
+
+  const tasks = state.tasks
+    .map(t => ensureTask(t, state.settings.owners[0]))
+    .filter(t => t.date === selectedDate);
+
+  listEl.innerHTML = '';
+
+  if (tasks.length === 0) {
+    listEl.innerHTML = '<div class="empty-state">Aucune tâche ce jour-là</div>';
+  } else {
+    tasks.forEach(task => {
+      listEl.appendChild(taskRow(task, state));
+    });
+  }
+};
+
+// Initialize month navigation
+export const initPlanningControls = (state, renderCallback) => {
+  const prevBtn = document.getElementById('prevMonth');
+  const nextBtn = document.getElementById('nextMonth');
+  const addBtn = document.getElementById('addTaskToDay');
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentMonth.setMonth(currentMonth.getMonth() - 1);
+      renderCallback();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      currentMonth.setMonth(currentMonth.getMonth() + 1);
+      renderCallback();
+    });
+  }
+
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      if (selectedDate) {
+        // Open command bar with pre-filled date
+        const commandBar = document.getElementById('commandbar');
+        const input = document.getElementById('commandbar-input');
+        if (commandBar && input) {
+          commandBar.classList.add('active');
+          input.focus();
+        }
+      }
+    });
   }
 };
 

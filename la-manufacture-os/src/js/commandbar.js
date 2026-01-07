@@ -53,29 +53,15 @@ export const initCommandBar = (state, renderCallback) => {
     }
   });
 
-  // Global redirect for any "Add Task" button - ensure it targets all buttons with specific roles
-  const setupAddButtons = () => {
-    const addBtns = document.querySelectorAll('#addBtn, .btn-primary:not(#inboxBtn)');
-    addBtns.forEach(btn => {
-      // Avoid infinite loop if clicking the same button
-      const newBtn = btn.cloneNode(true);
-      if (btn.parentNode) {
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          open();
-        });
-      }
+  // Redirect "Add Task" button to command bar
+  const addBtn = document.getElementById('addBtn');
+  if (addBtn) {
+    addBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      open();
     });
-  };
-
-  // Run once and on view changes
-  setupAddButtons();
-  const originalSetView = window._setViewCallback;
-  window._setViewCallback = (name) => {
-    if (originalSetView) originalSetView(name);
-    setTimeout(setupAddButtons, 50); // Small delay to let DOM update
-  };
+  }
+  // Observer for dynamic changes if needed, but manual hook is fine for now
 
   // Live Parsing logic using unified Smart Parser
   const analyze = (text) => {

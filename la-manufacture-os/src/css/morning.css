@@ -1,5 +1,5 @@
 /* ========================================
-   MORNING BRIEFING - premium iOS Style
+   MORNING BRIEFING - Earth Sunrise Style
    ======================================== */
 
 .brief-overlay {
@@ -8,7 +8,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 50% 50%, #1c1c1e 0%, #000 100%);
+    background: #000;
     z-index: 3000;
     display: flex;
     flex-direction: column;
@@ -19,25 +19,100 @@
     transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 32px;
     text-align: center;
+    overflow: hidden;
 }
 
+/* Halo lumineux - Centré derrière le titre */
 .brief-overlay::before {
     content: '';
     position: absolute;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0%, transparent 40%, rgba(50, 215, 75, 0.05) 100%);
-    animation: rotateBg 20s linear infinite;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(
+        ellipse 100% 100% at 50% 50%,
+        rgba(10, 132, 255, 0.5) 0%,
+        rgba(10, 132, 255, 0.3) 25%,
+        rgba(60, 140, 255, 0.15) 50%,
+        rgba(30, 80, 180, 0.05) 70%,
+        transparent 100%
+    );
+    filter: blur(60px);
     pointer-events: none;
+    animation: haloBreath 4s ease-in-out infinite;
+    transition: all 0.8s ease;
 }
 
-@keyframes rotateBg {
-    from {
-        transform: rotate(0deg);
-    }
+/* Second layer - lueur plus concentrée */
+.brief-overlay::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 500px;
+    height: 250px;
+    background: radial-gradient(
+        ellipse 100% 100% at 50% 50%,
+        rgba(100, 180, 255, 0.4) 0%,
+        rgba(10, 132, 255, 0.2) 40%,
+        transparent 80%
+    );
+    filter: blur(40px);
+    pointer-events: none;
+    animation: haloBreath 4s ease-in-out infinite 0.5s;
+    transition: all 0.8s ease;
+}
 
-    to {
-        transform: rotate(360deg);
+/* Animation de respiration du halo */
+@keyframes haloBreath {
+    0%, 100% {
+        opacity: 0.8;
+        transform: translate(-50%, -60%) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -60%) scale(1.1);
+    }
+}
+
+/* État activé - halo qui s'intensifie au clic */
+.brief-overlay.launching::before {
+    opacity: 1;
+    width: 1200px;
+    height: 600px;
+    filter: blur(50px);
+    background: radial-gradient(
+        ellipse 100% 100% at 50% 50%,
+        rgba(10, 132, 255, 0.7) 0%,
+        rgba(100, 180, 255, 0.5) 30%,
+        rgba(50, 150, 255, 0.2) 60%,
+        transparent 100%
+    );
+    animation: haloExpand 0.8s ease-out forwards;
+}
+
+.brief-overlay.launching::after {
+    opacity: 1;
+    width: 800px;
+    height: 400px;
+    filter: blur(30px);
+    animation: haloExpand 0.8s ease-out 0.1s forwards;
+}
+
+@keyframes haloExpand {
+    0% {
+        transform: translate(-50%, -60%) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -60%) scale(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -60%) scale(2);
+        opacity: 0;
     }
 }
 

@@ -1,0 +1,177 @@
+/* ========================================
+   PLANNING - Apple Calendar Style
+   ======================================== */
+
+.planning-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.planning-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.month-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  flex: 1;
+  text-align: center;
+}
+
+.month-nav {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 2rem;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--ease-spring);
+}
+
+.month-nav:hover {
+  background: rgba(10, 132, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.month-nav:active {
+  transform: scale(0.95);
+}
+
+/* Calendar Grid */
+.calendar-grid {
+  background: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  padding: 12px 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-spring);
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.calendar-day:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.05);
+}
+
+.calendar-day.today {
+  background: rgba(10, 132, 255, 0.15);
+  border-color: var(--accent);
+}
+
+.calendar-day.selected {
+  background: rgba(10, 132, 255, 0.25);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+}
+
+.calendar-day.other-month {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.calendar-day.has-tasks::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.calendar-day-number {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.calendar-day-count {
+  font-size: 0.65rem;
+  color: var(--text-sec);
+  margin-top: 2px;
+}
+
+/* Day Detail Panel */
+.day-detail {
+  background: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 20px;
+  min-height: 200px;
+}
+
+.day-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.day-detail-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.day-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.day-tasks-list .task {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.day-tasks-list .empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-sec);
+  font-size: 0.9rem;
+}

@@ -1,10 +1,55 @@
 :root {
-  --bg: #000;
-  --card: #1c1c1e;
-  --accent: #d4af37;
-  --text: #fff;
-  --text-sec: #8e8e93;
-  --stroke: #2c2c2e;
-  --urgent: #ff453a;
-  --ok: #32d74b;
+  /* --- PALETTE PREMIUM (Deep Dark) --- */
+
+  /* Backgrounds */
+  --bg-app: #050505;
+  /* Noir profond, mais pas #000 absolu */
+  --bg-card: rgba(28, 28, 30, 0.60);
+  /* Translucide pour le glassmorphism */
+  --bg-card-hover: rgba(44, 44, 46, 0.70);
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+  /* Pour les focus modes */
+
+  /* Glassmorphism Tokens */
+  --glass-blur: 25px;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* Accents (Premium - Subtil et élégant) */
+  --accent: #0A84FF;
+  /* Bleu iOS - propre et pro */
+  --accent-glow: rgba(10, 132, 255, 0.3);
+  --gold: #D4AF37;
+  /* Or subtil - uniquement pour highlights spéciaux */
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --danger: #FF453A;
+  /* Urgent / Delete */
+  --success: #30D158;
+  /* Terminé */
+  --warning: #FF9F0A;
+  /* Attention */
+
+  /* Typography */
+  --text-main: #FFFFFF;
+  --text-sec: #8E8E93;
+  /* Gris Apple */
+  --text-tert: #48484A;
+
+  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Spacing & Radius */
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --radius-xl: 32px;
+
+  --pad-page: 20px;
+}
+
+/* Animations Variables */
+:root {
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Effet rebond */
+  --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+  /* Apple default ease */
 }

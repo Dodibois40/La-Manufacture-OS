@@ -112,26 +112,30 @@ const setLoading = (btn, isLoading) => {
   }
 };
 
-const handleAuthSuccess = (user, state, renderCallback) => {
-  // Update local state owner if needed
+const handleAuthSuccess = async (user, state, renderCallback) => {
+  // Update local state owner with user's name
   if (user && user.name) {
-    // Si c'est la première connexion et qu'il n'y a pas d'owner défini ou que c'est le défaut
+    // Remplace le premier owner par le nom de l'utilisateur
     if (!state.settings.owners.includes(user.name)) {
-        // On pourrait ajouter l'user aux owners, ou juste le définir comme actif
-        // Pour l'instant on ne touche pas trop aux settings locaux pour pas casser la synchro
+      state.settings.owners = [user.name, ...state.settings.owners.filter(o => o !== 'Thibaud')];
+    } else {
+      // S'assurer que le nom de l'user est en premier
+      state.settings.owners = [user.name, ...state.settings.owners.filter(o => o !== user.name)];
+    }
+
+    // Sauvegarder localement
+    const { saveState } = await import('./storage.js');
+    saveState(state);
+
+    // Synchroniser avec l'API
+    try {
+      const { syncStateToApi } = await import('./storage.js');
+      await syncStateToApi(state);
+    } catch (e) {
+      console.error('Failed to sync settings to API:', e);
     }
   }
 
-  // Refresh page or trigger render
-  // Le plus simple pour s'assurer que tout est propre est de recharger ou de lancer l'init
-  // Mais ici on va juste cacher l'auth scren et lancer l'app
-  
-  const authView = document.getElementById('view-auth');
-  if (authView) authView.classList.remove('active');
-  
-  // Re-trigger global app init handled by callback or implicit flow
-  // Dans notre cas, initApp attend la fin de checkSession le plus souvent.
-  // Si on est déclenché depuis le bouton login, on doit lancer la suite.
-  
-  window.location.reload(); // Force reload to ensure clean state init from server
+  // Refresh page to reload with personalized name
+  window.location.reload();
 };

@@ -1,4 +1,4 @@
-import { toast } from './utils.js';
+import { toast, confirmDialog } from './utils.js';
 import { saveState, defaultState } from './storage.js';
 import { inboxCtx } from './inbox.js';
 
@@ -69,13 +69,23 @@ export const initConfig = (state, renderCallback) => {
     reader.readAsText(file);
   });
 
-  // Wipe
-  document.getElementById('wipeBtn').addEventListener('click', () => {
-    if (!confirm('Supprimer toutes les tâches locales ?')) return;
+  // Wipe - avec confirmation premium
+  document.getElementById('wipeBtn').addEventListener('click', async () => {
+    const confirmed = await confirmDialog({
+      icon: '🗑️',
+      title: 'Supprimer toutes les données ?',
+      message: 'Cette action est irréversible. Toutes vos tâches seront définitivement supprimées.',
+      confirmText: 'Supprimer tout',
+      cancelText: 'Annuler',
+      danger: true
+    });
+
+    if (!confirmed) return;
+
     state.tasks = [];
     saveState(state);
     renderCallback();
-    toast('Local vidé');
+    toast('Données supprimées', 'warning');
   });
 
   // Reset UI

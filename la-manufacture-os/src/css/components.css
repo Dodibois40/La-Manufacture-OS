@@ -270,14 +270,19 @@
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
-  color: rgba(255, 255, 255, 0.3);
+  padding: 50px 20px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-state p {
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .empty-icon {
-  font-size: 3.5rem;
-  margin-bottom: 16px;
-  filter: grayscale(1) opacity(0.5);
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.6;
 }
 
 /* ========================================
@@ -327,8 +332,8 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent) 0%, #c4a030 100%);
-  color: #000;
+  background: var(--accent);
+  color: #fff;
 }
 
 .btn-secondary {
@@ -349,7 +354,8 @@
 }
 
 .btn-primary:hover {
-  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+  background: #007AFF;
+  box-shadow: 0 8px 24px var(--accent-glow);
 }
 
 .btn:active {

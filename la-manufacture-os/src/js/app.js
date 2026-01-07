@@ -1,7 +1,7 @@
 import { toast } from './utils.js';
-import { loadState, saveState, initStorageUI, syncFromAPI } from './storage.js';
+import { loadState, saveState, initStorageUI, loadStateFromApi } from './storage.js';
 import { isApiMode } from './api-client.js';
-import { renderDay, renderWeek, initAddTask, initEditMode } from './views.js';
+import { renderDay, renderWeek, initAddTask, initEditMode, initPlanningControls } from './views.js';
 import { renderInboxUI, initInboxControls, inboxCtx } from './inbox.js';
 import { renderConfig, initConfig } from './config.js';
 import { initCommandBar } from './commandbar.js';
@@ -16,6 +16,47 @@ window._debugState = state; // Expose for debugging
 state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
 state.settings = state.settings && typeof state.settings === 'object' ? state.settings : { owners: ['Thibaud'] };
 state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length ? state.settings.owners : ['Thibaud'];
+
+// macOS Dock Magnification
+const initDockMagnification = () => {
+  const nav = document.querySelector('nav');
+  if (!nav) return;
+
+  const buttons = nav.querySelectorAll('button');
+
+  buttons.forEach((btn, index) => {
+    btn.addEventListener('mouseenter', () => {
+      buttons.forEach((b, i) => {
+        b.classList.remove('dock-neighbor-1', 'dock-neighbor-2');
+        const distance = Math.abs(i - index);
+        if (distance === 1) {
+          b.classList.add('dock-neighbor-1');
+        } else if (distance === 2) {
+          b.classList.add('dock-neighbor-2');
+        }
+      });
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      // Small delay to allow transition to another button
+      setTimeout(() => {
+        const hoveredBtn = nav.querySelector('button:hover');
+        if (!hoveredBtn) {
+          buttons.forEach(b => {
+            b.classList.remove('dock-neighbor-1', 'dock-neighbor-2');
+          });
+        }
+      }, 50);
+    });
+  });
+
+  // Clear all when leaving the nav entirely
+  nav.addEventListener('mouseleave', () => {
+    buttons.forEach(b => {
+      b.classList.remove('dock-neighbor-1', 'dock-neighbor-2');
+    });
+  });
+};
 
 // Navigation
 const views = ['day', 'week', 'inbox', 'config', 'auth'];
@@ -73,7 +114,7 @@ const initApp = async () => {
 
     // 2. Logged in -> Sync Data
     toast('Synchronisation...');
-    const apiState = await syncFromAPI();
+    const apiState = await loadStateFromApi();
     if (apiState) {
       state.tasks = apiState.tasks;
       state.settings = apiState.settings || state.settings;
@@ -97,10 +138,14 @@ const initApp = async () => {
   document.getElementById('nav-inbox')?.addEventListener('click', () => setView('inbox'));
   document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
 
+  // macOS Dock Magnification Effect
+  initDockMagnification();
+
   // Init modules
   initInboxControls(state, render);
   initConfig(state, render);
   initEditMode(state, render);
+  initPlanningControls(state, render);
   initCommandBar(state, render);
   initMorningBriefing(state);
   initFocusTimer();

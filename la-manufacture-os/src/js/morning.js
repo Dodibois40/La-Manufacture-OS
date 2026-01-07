@@ -18,7 +18,7 @@ export const initMorningBriefing = (state) => {
 
     const html = `
     <div id="briefOverlay" class="brief-overlay">
-      <div class="brief-title">Bonjour ${user} ☕</div>
+      <div class="brief-title">Bonjour ${user}</div>
       <div class="brief-subtitle">Voici ton briefing pour aujourd'hui</div>
       
       <div class="brief-stat">
@@ -46,9 +46,14 @@ export const initMorningBriefing = (state) => {
 
     document.getElementById('startDayBtn').addEventListener('click', () => {
         const el = document.getElementById('briefOverlay');
-        el.classList.add('hidden');
-        localStorage.setItem('last_briefing', today);
-        setTimeout(() => el.remove(), 600);
+        // Effet de halo qui s'intensifie
+        el.classList.add('launching');
+
+        setTimeout(() => {
+            el.classList.add('hidden');
+            localStorage.setItem('last_briefing', today);
+            setTimeout(() => el.remove(), 600);
+        }, 400);
     });
 };
 
