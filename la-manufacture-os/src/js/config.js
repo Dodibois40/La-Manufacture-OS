@@ -107,7 +107,7 @@ export const initConfig = (state, renderCallback) => {
 
   logoutBtn?.addEventListener('click', async () => {
     const confirmed = await confirmDialog({
-      icon: '👋',
+      icon: '🚪',
       title: 'Se déconnecter ?',
       message: 'Vous serez redirigé vers la page de connexion.',
       confirmText: 'Déconnexion',
