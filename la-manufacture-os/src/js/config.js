@@ -30,7 +30,7 @@ export const initConfig = (state, renderCallback) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'la-manufacture-os-export.json';
+    a.download = 'wave-os-export.json';
     document.body.appendChild(a);
     a.click();
     a.remove();
