@@ -2,28 +2,141 @@ import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode } from './api-client.js';
 
-// Inspirational quotes collection
+// Inspirational quotes collection - 60+ citations pour ne jamais voir les memes
 const QUOTES = [
+  // Classiques
   { text: "La simplicité est la sophistication suprême.", author: "Léonard de Vinci" },
   { text: "Le seul moyen de faire du bon travail est d'aimer ce que vous faites.", author: "Steve Jobs" },
   { text: "Commencez là où vous êtes. Utilisez ce que vous avez. Faites ce que vous pouvez.", author: "Arthur Ashe" },
-  { text: "Chaque jour est une nouvelle chance de changer votre vie.", author: "Anonyme" },
   { text: "Le succès c'est d'aller d'échec en échec sans perdre son enthousiasme.", author: "Winston Churchill" },
   { text: "La meilleure façon de prédire l'avenir est de le créer.", author: "Peter Drucker" },
   { text: "Un voyage de mille lieues commence par un seul pas.", author: "Lao Tseu" },
   { text: "Ce n'est pas le vent qui décide de votre destination, c'est l'orientation que vous donnez à votre voile.", author: "Jim Rohn" },
-  { text: "Le talent gagne des matchs, mais le travail d'équipe et l'intelligence gagnent des championnats.", author: "Michael Jordan" },
-  { text: "Ne rêvez pas votre vie, vivez vos rêves.", author: "Anonyme" },
   { text: "L'excellence n'est pas un acte, mais une habitude.", author: "Aristote" },
-  { text: "La discipline est le pont entre les objectifs et l'accomplissement.", author: "Jim Rohn" }
+  { text: "La discipline est le pont entre les objectifs et l'accomplissement.", author: "Jim Rohn" },
+
+  // Productivité & Focus
+  { text: "Concentrez tous vos efforts sur un seul point, et vous serez étonné du résultat.", author: "Swami Vivekananda" },
+  { text: "Ce qui se mesure s'améliore.", author: "Peter Drucker" },
+  { text: "Le temps est la ressource la plus rare. Si on ne le gère pas, rien d'autre ne peut être géré.", author: "Peter Drucker" },
+  { text: "Fais ce que tu peux, avec ce que tu as, là où tu es.", author: "Theodore Roosevelt" },
+  { text: "Une tâche commencée est une tâche à moitié terminée.", author: "Proverbe" },
+  { text: "Le secret pour avancer est de commencer.", author: "Mark Twain" },
+  { text: "Ne remettez jamais à demain ce que vous pouvez faire aujourd'hui.", author: "Benjamin Franklin" },
+  { text: "La productivité n'est jamais un accident. C'est toujours le résultat d'un engagement vers l'excellence.", author: "Paul J. Meyer" },
+
+  // Motivation & Action
+  { text: "Le moment présent est le seul moment sur lequel nous avons du contrôle.", author: "Bouddha" },
+  { text: "Les grands accomplissements sont le résultat de petits efforts quotidiens.", author: "Robert Collier" },
+  { text: "Agissez comme s'il était impossible d'échouer.", author: "Dorothea Brande" },
+  { text: "Ce n'est pas parce que les choses sont difficiles que nous n'osons pas, c'est parce que nous n'osons pas qu'elles sont difficiles.", author: "Sénèque" },
+  { text: "La seule limite à notre épanouissement de demain sera nos doutes d'aujourd'hui.", author: "Franklin D. Roosevelt" },
+  { text: "Croyez que vous pouvez et vous êtes déjà à mi-chemin.", author: "Theodore Roosevelt" },
+  { text: "L'action est la clé fondamentale de tout succès.", author: "Pablo Picasso" },
+  { text: "Il n'y a qu'une façon d'éviter les critiques: ne rien faire, ne rien dire et n'être rien.", author: "Aristote" },
+
+  // Persévérance
+  { text: "Je n'ai pas échoué. J'ai simplement trouvé 10 000 solutions qui ne fonctionnent pas.", author: "Thomas Edison" },
+  { text: "Le succès n'est pas final, l'échec n'est pas fatal: c'est le courage de continuer qui compte.", author: "Winston Churchill" },
+  { text: "Les obstacles sont ces choses effrayantes que vous voyez quand vous quittez votre objectif des yeux.", author: "Henry Ford" },
+  { text: "La persévérance n'est pas une longue course; c'est plusieurs petites courses les unes après les autres.", author: "Walter Elliot" },
+  { text: "Notre plus grande gloire n'est pas de ne jamais tomber, mais de nous relever chaque fois.", author: "Confucius" },
+  { text: "Le succès est la somme de petits efforts répétés jour après jour.", author: "Robert Collier" },
+
+  // Créativité & Innovation
+  { text: "La créativité, c'est l'intelligence qui s'amuse.", author: "Albert Einstein" },
+  { text: "L'innovation distingue un leader d'un suiveur.", author: "Steve Jobs" },
+  { text: "Soyez vous-même, tous les autres sont déjà pris.", author: "Oscar Wilde" },
+  { text: "La logique vous mènera de A à B. L'imagination vous mènera partout.", author: "Albert Einstein" },
+  { text: "Les esprits créatifs survivent à tout.", author: "Anna Freud" },
+
+  // Leadership & Travail d'équipe
+  { text: "Le talent gagne des matchs, mais le travail d'équipe et l'intelligence gagnent des championnats.", author: "Michael Jordan" },
+  { text: "Seul on va plus vite, ensemble on va plus loin.", author: "Proverbe africain" },
+  { text: "Un leader est quelqu'un qui connaît le chemin, montre le chemin et emprunte le chemin.", author: "John C. Maxwell" },
+  { text: "Le meilleur moyen de diriger est de montrer l'exemple.", author: "Jack Welch" },
+
+  // Sagesse & Philosophie
+  { text: "Celui qui déplace une montagne commence par déplacer de petites pierres.", author: "Confucius" },
+  { text: "La vie est ce qui arrive quand vous êtes occupé à faire d'autres projets.", author: "John Lennon" },
+  { text: "Nous sommes ce que nous faisons de manière répétée. L'excellence n'est donc pas un acte, mais une habitude.", author: "Will Durant" },
+  { text: "Le bonheur n'est pas quelque chose de tout fait. Il vient de vos propres actions.", author: "Dalaï Lama" },
+  { text: "La connaissance parle, mais la sagesse écoute.", author: "Jimi Hendrix" },
+  { text: "Votre temps est limité, ne le gâchez pas en vivant la vie de quelqu'un d'autre.", author: "Steve Jobs" },
+
+  // Ambition & Rêves
+  { text: "Visez la lune. Même si vous la manquez, vous atterrirez parmi les étoiles.", author: "Oscar Wilde" },
+  { text: "Le futur appartient à ceux qui croient à la beauté de leurs rêves.", author: "Eleanor Roosevelt" },
+  { text: "N'attendez pas d'être parfait pour commencer. Commencez et vous serez parfait.", author: "Proverbe" },
+  { text: "Les grandes choses ne sont jamais faites par une seule personne. Elles sont faites par une équipe.", author: "Steve Jobs" },
+  { text: "Faites de votre vie un rêve, et d'un rêve, une réalité.", author: "Antoine de Saint-Exupéry" },
+
+  // Changement & Adaptation
+  { text: "Le changement est la loi de la vie. Et ceux qui ne regardent que le passé ou le présent manqueront certainement l'avenir.", author: "John F. Kennedy" },
+  { text: "Si vous voulez des résultats différents, ne faites pas toujours la même chose.", author: "Albert Einstein" },
+  { text: "L'adaptabilité n'est pas une imitation. Cela signifie le pouvoir de résistance et d'assimilation.", author: "Mahatma Gandhi" },
+  { text: "Tout ce que l'esprit peut concevoir et croire, il peut le réaliser.", author: "Napoleon Hill" },
+
+  // Minimalisme & Essentialisme
+  { text: "La perfection est atteinte, non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer.", author: "Antoine de Saint-Exupéry" },
+  { text: "Moins mais mieux.", author: "Dieter Rams" },
+  { text: "Celui qui sait qu'il en a assez est riche.", author: "Lao Tseu" },
+  { text: "L'essentiel est invisible pour les yeux.", author: "Antoine de Saint-Exupéry" },
+
+  // Sport & Performance
+  { text: "Je ne perds jamais. Soit je gagne, soit j'apprends.", author: "Nelson Mandela" },
+  { text: "La douleur que vous ressentez aujourd'hui sera la force que vous ressentirez demain.", author: "Arnold Schwarzenegger" },
+  { text: "Les champions continuent de jouer jusqu'à ce qu'ils réussissent.", author: "Billie Jean King" },
+  { text: "La différence entre l'impossible et le possible réside dans la détermination.", author: "Tommy Lasorda" }
 ];
 
-// Get quote of the day (changes daily, same throughout the day)
-const getQuoteOfDay = () => {
-  const today = new Date();
-  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-  return QUOTES[dayOfYear % QUOTES.length];
+// Shuffle array using Fisher-Yates algorithm (seeded for consistency within 2min windows)
+const shuffleWithSeed = (array, seed) => {
+  const shuffled = [...array];
+  let m = shuffled.length, t, i;
+  while (m) {
+    i = Math.floor(((seed * 9301 + 49297) % 233280) / 233280 * m--);
+    seed = (seed * 9301 + 49297) % 233280;
+    t = shuffled[m];
+    shuffled[m] = shuffled[i];
+    shuffled[i] = t;
+  }
+  return shuffled;
 };
+
+// Get current quote - changes every 2 minutes
+const getQuoteOfDay = () => {
+  const now = Date.now();
+  const twoMinutes = 2 * 60 * 1000;
+  const windowIndex = Math.floor(now / twoMinutes);
+
+  // Use window index as seed for shuffling, then pick based on window
+  const shuffled = shuffleWithSeed(QUOTES, Math.floor(windowIndex / QUOTES.length));
+  return shuffled[windowIndex % QUOTES.length];
+};
+
+// Start quote rotation interval
+let quoteInterval = null;
+const startQuoteRotation = () => {
+  if (quoteInterval) return;
+  quoteInterval = setInterval(() => {
+    const quoteEl = document.querySelector('.daily-inspiration');
+    if (quoteEl) {
+      const quote = getQuoteOfDay();
+      quoteEl.innerHTML = `
+        <p class="inspiration-text">"${quote.text}"</p>
+        <p class="inspiration-author">— ${quote.author}</p>
+      `;
+      // Add fade animation
+      quoteEl.classList.remove('fade-in');
+      void quoteEl.offsetWidth; // Trigger reflow
+      quoteEl.classList.add('fade-in');
+    }
+  }, 2 * 60 * 1000); // Every 2 minutes
+};
+
+// Initialize rotation on first call
+startQuoteRotation();
 
 // Edit mode state
 let editMode = false;
