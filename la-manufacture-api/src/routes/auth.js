@@ -40,8 +40,8 @@ export default async function authRoutes(fastify) {
       reply.setCookie('token', token, {
         path: '/',
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60, // 7 days
       });
 
@@ -79,8 +79,8 @@ export default async function authRoutes(fastify) {
       reply.setCookie('token', token, {
         path: '/',
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60,
       });
 
