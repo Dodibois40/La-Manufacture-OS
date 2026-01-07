@@ -1,5 +1,5 @@
 /* ========================================
-   MORNING BRIEFING - Earth Sunrise Style
+   MORNING BRIEFING - Siri Vortex Style
    ======================================== */
 
 .brief-overlay {
@@ -22,97 +22,233 @@
     overflow: hidden;
 }
 
-/* Halo lumineux - Centré derrière le titre */
-.brief-overlay::before {
-    content: '';
+/* Siri Vortex Container - Subtle & Elegant */
+.siri-vortex {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -60%);
-    width: 800px;
-    height: 400px;
-    background: radial-gradient(
-        ellipse 100% 100% at 50% 50%,
-        rgba(10, 132, 255, 0.5) 0%,
-        rgba(10, 132, 255, 0.3) 25%,
-        rgba(60, 140, 255, 0.15) 50%,
-        rgba(30, 80, 180, 0.05) 70%,
-        transparent 100%
-    );
-    filter: blur(60px);
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 200px;
     pointer-events: none;
-    animation: haloBreath 4s ease-in-out infinite;
-    transition: all 0.8s ease;
+    opacity: 0.5;
 }
 
-/* Second layer - lueur plus concentrée */
-.brief-overlay::after {
-    content: '';
+/* Vortex orbs - soft, distant glows */
+.vortex-orb {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -60%);
-    width: 500px;
-    height: 250px;
-    background: radial-gradient(
-        ellipse 100% 100% at 50% 50%,
-        rgba(100, 180, 255, 0.4) 0%,
-        rgba(10, 132, 255, 0.2) 40%,
-        transparent 80%
-    );
-    filter: blur(40px);
-    pointer-events: none;
-    animation: haloBreath 4s ease-in-out infinite 0.5s;
-    transition: all 0.8s ease;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: vortexFloat 12s ease-in-out infinite;
 }
 
-/* Animation de respiration du halo */
-@keyframes haloBreath {
+.vortex-orb:nth-child(1) {
+    width: 300px;
+    height: 150px;
+    background: #FF2D55;
+    top: -20%;
+    left: -10%;
+    animation-delay: 0s;
+}
+
+.vortex-orb:nth-child(2) {
+    width: 280px;
+    height: 140px;
+    background: #AF52DE;
+    top: -10%;
+    left: 20%;
+    animation-delay: -3s;
+}
+
+.vortex-orb:nth-child(3) {
+    width: 320px;
+    height: 160px;
+    background: #0A84FF;
+    top: 0%;
+    left: 40%;
+    animation-delay: -6s;
+}
+
+.vortex-orb:nth-child(4) {
+    width: 260px;
+    height: 130px;
+    background: #30D158;
+    top: -15%;
+    right: 0%;
+    animation-delay: -9s;
+}
+
+.vortex-orb:nth-child(5) {
+    width: 240px;
+    height: 120px;
+    background: #FF9F0A;
+    top: 10%;
+    right: -5%;
+    animation-delay: -2s;
+}
+
+@keyframes vortexFloat {
     0%, 100% {
-        opacity: 0.8;
-        transform: translate(-50%, -60%) scale(1);
+        transform: translateX(0) scale(1);
+        opacity: 0.5;
     }
     50% {
-        opacity: 1;
-        transform: translate(-50%, -60%) scale(1.1);
+        transform: translateX(20px) scale(1.05);
+        opacity: 0.7;
     }
 }
 
-/* État activé - halo qui s'intensifie au clic */
-.brief-overlay.launching::before {
-    opacity: 1;
-    width: 1200px;
-    height: 600px;
-    filter: blur(50px);
-    background: radial-gradient(
-        ellipse 100% 100% at 50% 50%,
-        rgba(10, 132, 255, 0.7) 0%,
-        rgba(100, 180, 255, 0.5) 30%,
-        rgba(50, 150, 255, 0.2) 60%,
+/* Wave ribbon - the signature Siri effect */
+.vortex-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 6px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        #FF2D55 15%,
+        #AF52DE 30%,
+        #0A84FF 50%,
+        #30D158 70%,
+        #FF9F0A 85%,
         transparent 100%
     );
-    animation: haloExpand 0.8s ease-out forwards;
+    border-radius: 3px;
+    filter: blur(8px);
+    opacity: 0.8;
+    animation: waveRibbon 4s ease-in-out infinite;
 }
 
-.brief-overlay.launching::after {
-    opacity: 1;
-    width: 800px;
-    height: 400px;
-    filter: blur(30px);
-    animation: haloExpand 0.8s ease-out 0.1s forwards;
+/* Second wave layer for depth */
+.siri-vortex::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 4px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.8) 20%,
+        rgba(255, 255, 255, 0.9) 50%,
+        rgba(255, 255, 255, 0.8) 80%,
+        transparent 100%
+    );
+    border-radius: 2px;
+    filter: blur(2px);
+    animation: waveRibbon 4s ease-in-out infinite 0.5s;
 }
 
-@keyframes haloExpand {
-    0% {
-        transform: translate(-50%, -60%) scale(1);
+@keyframes waveRibbon {
+    0%, 100% {
+        transform: translate(-50%, -50%) scaleX(0.8);
+        opacity: 0.6;
     }
     50% {
-        transform: translate(-50%, -60%) scale(1.5);
+        transform: translate(-50%, -50%) scaleX(1);
+        opacity: 1;
+    }
+}
+
+/* État activé - expansion élégante */
+.brief-overlay.launching .siri-vortex {
+    animation: vortexExpand 0.6s ease-out forwards;
+}
+
+.brief-overlay.launching .vortex-wave {
+    animation: waveFlash 0.6s ease-out forwards;
+}
+
+@keyframes vortexExpand {
+    0% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+@keyframes waveFlash {
+    0% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scaleX(1);
+    }
+    30% {
+        opacity: 1;
+        filter: blur(4px);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scaleX(3);
+        filter: blur(20px);
+    }
+}
+
+/* Phase de transition - fading avec flash */
+.brief-overlay.fading {
+    animation: briefFadeOut 0.5s ease-out forwards;
+}
+
+.brief-overlay.fading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
+    animation: flashPulse 0.4s ease-out forwards;
+    pointer-events: none;
+}
+
+.brief-overlay.fading .brief-title,
+.brief-overlay.fading .brief-subtitle,
+.brief-overlay.fading .brief-stat,
+.brief-overlay.fading .start-btn {
+    animation: contentFadeUp 0.4s ease-out forwards;
+}
+
+@keyframes briefFadeOut {
+    0% {
         opacity: 1;
     }
     100% {
-        transform: translate(-50%, -60%) scale(2);
         opacity: 0;
+    }
+}
+
+@keyframes flashPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes contentFadeUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
     }
 }
 

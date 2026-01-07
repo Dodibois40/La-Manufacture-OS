@@ -18,9 +18,19 @@ export const initMorningBriefing = (state) => {
 
     const html = `
     <div id="briefOverlay" class="brief-overlay">
+      <!-- Siri Vortex Effect -->
+      <div class="siri-vortex">
+        <div class="vortex-orb"></div>
+        <div class="vortex-orb"></div>
+        <div class="vortex-orb"></div>
+        <div class="vortex-orb"></div>
+        <div class="vortex-orb"></div>
+        <div class="vortex-wave"></div>
+      </div>
+
       <div class="brief-title">Bonjour ${user}</div>
       <div class="brief-subtitle">Voici ton briefing pour aujourd'hui</div>
-      
+
       <div class="brief-stat">
         <div class="stat-box">
           <div class="b-num">${todayCount}</div>
@@ -28,11 +38,11 @@ export const initMorningBriefing = (state) => {
         </div>
         <div class="stat-box">
           <div class="b-num" style="color:#ff453a">${urgentCount}</div>
-          <div class="b-lbl">Urgences 🔥</div>
+          <div class="b-lbl">Urgences</div>
         </div>
         <div class="stat-box">
           <div class="b-num" style="color:var(--text-sec)">${Math.floor(Math.random() * 20 + 70)}%</div>
-          <div class="b-lbl">Batterie Mentale</div>
+          <div class="b-lbl">Énergie</div>
         </div>
       </div>
 
@@ -46,14 +56,28 @@ export const initMorningBriefing = (state) => {
 
     document.getElementById('startDayBtn').addEventListener('click', () => {
         const el = document.getElementById('briefOverlay');
-        // Effet de halo qui s'intensifie
+        const btn = document.getElementById('startDayBtn');
+
+        // Feedback immédiat sur le bouton
+        btn.style.transform = 'scale(0.95)';
+        btn.style.opacity = '0.8';
+
+        // Phase 1: Vortex s'intensifie
         el.classList.add('launching');
 
+        // Phase 2: Flash blanc subtil + fondu
+        setTimeout(() => {
+            el.classList.add('fading');
+        }, 300);
+
+        // Phase 3: Disparition
         setTimeout(() => {
             el.classList.add('hidden');
             localStorage.setItem('last_briefing', today);
-            setTimeout(() => el.remove(), 600);
-        }, 400);
+        }, 800);
+
+        // Phase 4: Cleanup
+        setTimeout(() => el.remove(), 1200);
     });
 };
 

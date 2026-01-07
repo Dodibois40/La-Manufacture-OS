@@ -2,6 +2,29 @@ import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode } from './api-client.js';
 
+// Inspirational quotes collection
+const QUOTES = [
+  { text: "La simplicité est la sophistication suprême.", author: "Léonard de Vinci" },
+  { text: "Le seul moyen de faire du bon travail est d'aimer ce que vous faites.", author: "Steve Jobs" },
+  { text: "Commencez là où vous êtes. Utilisez ce que vous avez. Faites ce que vous pouvez.", author: "Arthur Ashe" },
+  { text: "Chaque jour est une nouvelle chance de changer votre vie.", author: "Anonyme" },
+  { text: "Le succès c'est d'aller d'échec en échec sans perdre son enthousiasme.", author: "Winston Churchill" },
+  { text: "La meilleure façon de prédire l'avenir est de le créer.", author: "Peter Drucker" },
+  { text: "Un voyage de mille lieues commence par un seul pas.", author: "Lao Tseu" },
+  { text: "Ce n'est pas le vent qui décide de votre destination, c'est l'orientation que vous donnez à votre voile.", author: "Jim Rohn" },
+  { text: "Le talent gagne des matchs, mais le travail d'équipe et l'intelligence gagnent des championnats.", author: "Michael Jordan" },
+  { text: "Ne rêvez pas votre vie, vivez vos rêves.", author: "Anonyme" },
+  { text: "L'excellence n'est pas un acte, mais une habitude.", author: "Aristote" },
+  { text: "La discipline est le pont entre les objectifs et l'accomplissement.", author: "Jim Rohn" }
+];
+
+// Get quote of the day (changes daily, same throughout the day)
+const getQuoteOfDay = () => {
+  const today = new Date();
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  return QUOTES[dayOfYear % QUOTES.length];
+};
+
 // Edit mode state
 let editMode = false;
 let selectedTasks = new Set();
@@ -235,6 +258,16 @@ export const renderDay = (state) => {
     editModeBtn.style.display = tasks.length > 0 ? 'inline-flex' : 'none';
   }
 
+  // Always show inspirational quote at the top
+  const quote = getQuoteOfDay();
+  const quoteEl = document.createElement('div');
+  quoteEl.className = 'daily-inspiration';
+  quoteEl.innerHTML = `
+    <p class="inspiration-text">"${quote.text}"</p>
+    <p class="inspiration-author">— ${quote.author}</p>
+  `;
+  dayList.appendChild(quoteEl);
+
   // --- ZEN MODE BUTTON ---
   // On insère le bouton Mode Zen (Focus) avant la liste si il y a des tâches
   if (tasks.filter(t => !t.done).length > 0) {
@@ -257,12 +290,10 @@ export const renderDay = (state) => {
   }
 
   if (tasks.length === 0) {
-    dayList.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">☀️</div>
-        <p>Journée libre. Ajoutez une tâche pour commencer.</p>
-      </div>
-    `;
+    const emptyEl = document.createElement('div');
+    emptyEl.className = 'day-empty-state';
+    emptyEl.innerHTML = `<p>Aucune tâche pour aujourd'hui</p>`;
+    dayList.appendChild(emptyEl);
   } else {
     for (const t of tasks) dayList.appendChild(taskRow(t, state));
   }
@@ -408,7 +439,7 @@ const renderDayDetail = (state) => {
   const date = new Date(selectedDate + 'T00:00:00');
   const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
   titleEl.textContent = `${dayNames[date.getDay()]} ${date.getDate()}`;
-  addBtn.style.display = 'block';
+  addBtn.style.display = 'inline-flex';
 
   const tasks = state.tasks
     .map(t => ensureTask(t, state.settings.owners[0]))
@@ -449,11 +480,20 @@ export const initPlanningControls = (state, renderCallback) => {
     addBtn.addEventListener('click', () => {
       if (selectedDate) {
         // Open command bar with pre-filled date
-        const commandBar = document.getElementById('commandbar');
-        const input = document.getElementById('commandbar-input');
-        if (commandBar && input) {
-          commandBar.classList.add('active');
+        const overlay = document.getElementById('cmdBarOverlay');
+        const input = document.getElementById('cmdInput');
+        if (overlay && input) {
+          // Format date for display
+          const date = new Date(selectedDate + 'T00:00:00');
+          const day = date.getDate();
+          const month = date.getMonth() + 1;
+          const dateStr = `${day}/${month}`;
+
+          overlay.classList.add('active');
+          input.value = `${dateStr} `;
           input.focus();
+          // Trigger preview update
+          input.dispatchEvent(new Event('input'));
         }
       }
     });

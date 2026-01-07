@@ -334,12 +334,49 @@ h3 {
 /* === Day Actions === */
 .day-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .day-actions .btn {
-  flex: 1;
+  flex: 0 0 auto;
+}
+
+.day-actions #addBtn {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 12px 0;
+  width: auto;
+}
+
+.day-actions #addBtn:hover {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.day-actions #editModeBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  padding: 10px 16px;
+  width: auto;
+}
+
+.day-actions #editModeBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-small {

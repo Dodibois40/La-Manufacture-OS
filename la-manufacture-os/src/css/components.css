@@ -265,7 +265,7 @@
 }
 
 /* ========================================
-   EMPTY STATE 
+   EMPTY STATE
    ======================================== */
 
 .empty-state {
@@ -283,6 +283,46 @@
   font-size: 2.5rem;
   margin-bottom: 12px;
   opacity: 0.6;
+}
+
+/* ========================================
+   DAY VIEW - Daily Inspiration Quote
+   ======================================== */
+
+.daily-inspiration {
+  text-align: center;
+  padding: 20px 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.inspiration-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.inspiration-author {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Empty state when no tasks */
+.day-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.day-empty-state p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
 }
 
 /* ========================================
