@@ -702,6 +702,48 @@ nav button.active .nav-icon {
   display: none;
 }
 
+/* Password visibility toggle */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 48px;
+  margin-bottom: 0;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sec);
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: var(--text);
+}
+
+.eye-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.eye-icon.hidden {
+  display: none;
+}
+
 /* ========================================
    FOCUS MODE (ZEN)
    ======================================== */

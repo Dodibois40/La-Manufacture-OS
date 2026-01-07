@@ -3,7 +3,7 @@ export const initAuth = (state, renderCallback) => {
   const authView = document.getElementById('view-auth');
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
-  
+
   // Inputs Login
   const loginEmail = document.getElementById('loginEmail');
   const loginPass = document.getElementById('loginPassword');
@@ -16,6 +16,26 @@ export const initAuth = (state, renderCallback) => {
   const regPass = document.getElementById('registerPassword');
   const regBtn = document.getElementById('registerBtn');
   const regError = document.getElementById('registerError');
+
+  // Password visibility toggles
+  document.querySelectorAll('.password-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      const eyeOpen = btn.querySelector('.eye-open');
+      const eyeClosed = btn.querySelector('.eye-closed');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeOpen.classList.add('hidden');
+        eyeClosed.classList.remove('hidden');
+      } else {
+        input.type = 'password';
+        eyeOpen.classList.remove('hidden');
+        eyeClosed.classList.add('hidden');
+      }
+    });
+  });
 
   // Toggle links
   document.getElementById('showRegister')?.addEventListener('click', (e) => {

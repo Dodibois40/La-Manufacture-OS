@@ -1,6 +1,7 @@
 import { toast, confirmDialog } from './utils.js';
 import { saveState, defaultState } from './storage.js';
 import { inboxCtx } from './inbox.js';
+import { isApiMode, api } from './api-client.js';
 
 export const renderConfig = (state) => {
   document.getElementById('owners').value = (state.settings.owners || []).join(', ');
@@ -93,5 +94,40 @@ export const initConfig = (state, renderCallback) => {
     const setViewCallback = window._setViewCallback;
     if (setViewCallback) setViewCallback('day');
     toast('UI reset');
+  });
+
+  // Logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  const logoutSection = document.getElementById('logoutSection');
+
+  // Only show logout in API mode
+  if (logoutSection) {
+    logoutSection.style.display = isApiMode ? 'block' : 'none';
+  }
+
+  logoutBtn?.addEventListener('click', async () => {
+    const confirmed = await confirmDialog({
+      icon: '👋',
+      title: 'Se déconnecter ?',
+      message: 'Vous serez redirigé vers la page de connexion.',
+      confirmText: 'Déconnexion',
+      cancelText: 'Annuler',
+      danger: false
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await api.auth.logout();
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+
+    // Clear local data
+    localStorage.removeItem('last_briefing');
+    toast('Déconnexion...');
+
+    // Reload to login screen
+    setTimeout(() => window.location.reload(), 500);
   });
 };
