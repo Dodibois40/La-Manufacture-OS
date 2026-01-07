@@ -123,8 +123,6 @@ export const initConfig = (state, renderCallback) => {
       console.error('Logout error:', e);
     }
 
-    // Clear local data
-    localStorage.removeItem('last_briefing');
     toast('Déconnexion...');
 
     // Reload to login screen
