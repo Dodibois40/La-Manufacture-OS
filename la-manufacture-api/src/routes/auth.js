@@ -96,7 +96,12 @@ export default async function authRoutes(fastify) {
 
   // Logout
   fastify.post('/logout', async (request, reply) => {
-    reply.clearCookie('token', { path: '/' });
+    reply.clearCookie('token', {
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
     return { success: true };
   });
 
