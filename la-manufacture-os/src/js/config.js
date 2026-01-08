@@ -70,14 +70,13 @@ export const initConfig = (state, renderCallback) => {
     reader.readAsText(file);
   });
 
-  // Wipe - avec confirmation premium
+  // Wipe - avec confirmation FLOW style
   document.getElementById('wipeBtn').addEventListener('click', async () => {
     const confirmed = await confirmDialog({
-      icon: '🗑️',
-      title: 'Supprimer toutes les données ?',
-      message: 'Cette action est irréversible. Toutes vos tâches seront définitivement supprimées.',
-      confirmText: 'Supprimer tout',
-      cancelText: 'Annuler',
+      title: 'Delete all data?',
+      message: 'This action cannot be undone. All your tasks will be permanently deleted.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
       danger: true
     });
 
@@ -107,10 +106,10 @@ export const initConfig = (state, renderCallback) => {
 
   logoutBtn?.addEventListener('click', async () => {
     const confirmed = await confirmDialog({
-      title: 'Se déconnecter ?',
-      message: 'Vous serez redirigé vers la page de connexion.',
-      confirmText: 'Déconnexion',
-      cancelText: 'Annuler',
+      title: 'Sign out?',
+      message: 'You will be redirected to the login page.',
+      confirmText: 'Sign Out',
+      cancelText: 'Cancel',
       danger: false
     });
 

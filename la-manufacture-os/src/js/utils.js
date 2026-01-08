@@ -97,14 +97,13 @@ export const ensureTask = (t, defaultOwner) => {
   return task;
 };
 
-// 🚨 Confirmation Dialog Premium
-export const confirmDialog = ({ icon = '⚠️', title, message, confirmText = 'Confirmer', cancelText = 'Annuler', danger = false }) => {
+// Confirmation Dialog - FLOW Style (no emoji icons)
+export const confirmDialog = ({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', danger = false }) => {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.className = 'confirm-overlay';
     overlay.innerHTML = `
       <div class="confirm-box">
-        <div class="confirm-icon">${icon}</div>
         <div class="confirm-title">${title}</div>
         <div class="confirm-message">${message}</div>
         <div class="confirm-actions">
