@@ -20,14 +20,21 @@ export const initMorningBriefing = (state) => {
 
     const html = `
     <div id="briefOverlay" class="brief-overlay-spacex">
-      <!-- Planet Container -->
+      <!-- Stars Background -->
+      <div class="stars"></div>
+
+      <!-- Planet Container - Earth -->
       <div class="planet-container">
+        <div class="planet-glow"></div>
         <div class="planet">
           <div class="planet-surface"></div>
+          <div class="planet-continents"></div>
+          <div class="planet-clouds"></div>
+          <div class="planet-cities"></div>
+          <div class="planet-shadow"></div>
           <div class="planet-atmosphere"></div>
-          <div class="planet-glow"></div>
+          <div class="planet-highlight"></div>
         </div>
-        <div class="stars"></div>
       </div>
 
       <!-- Content Left Side -->
