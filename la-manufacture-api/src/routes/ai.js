@@ -142,18 +142,37 @@ Ton: direct, pro, encourageant. Max 100 mots.`;
     }
 
     try {
-      const prompt = `Tu es un assistant de parsing de tâches. L'utilisateur a tapé rapidement ses tâches.
-Extrait chaque tâche avec :
-- text: le texte de la tâche
-- urgent: true/false
-- date: YYYY-MM-DD (aujourd'hui par défaut, ou si mention de "demain", "lundi", etc.)
-- owner: nom si mentionné (format "Nom: tâche"), sinon null
+      // Get dynamic dates
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-Texte brut :
-${text}
+      // Get day names for context
+      const dayNames = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+      const todayName = dayNames[today.getDay()];
 
-Réponds UNIQUEMENT avec un JSON array, rien d'autre :
-[{"text":"...", "urgent":false, "date":"2026-01-06", "owner":null}, ...]`;
+      const prompt = `Tu es un parser intelligent de tâches. REFORMULE le texte en tâches claires et concises.
+
+RÈGLES IMPORTANTES :
+1. REFORMULE toujours le texte - ne copie JAMAIS mot pour mot
+2. Extrait l'ACTION principale (ex: "Finir les étagères du corps")
+3. Détecte le OWNER : "pour X", "@X", "X doit", "X:" → owner = "X"
+4. Détecte l'URGENCE : "urgent", "absolument", "impératif", "asap" → urgent = true
+5. Détecte la DATE :
+   - "aujourd'hui", "ce jour" → ${todayStr}
+   - "demain" → ${tomorrowStr}
+   - Nom de jour (ex: "lundi") → calcule la prochaine occurrence
+   - Sans mention de date → ${todayStr}
+
+Aujourd'hui : ${todayName} ${todayStr}
+
+TEXTE À PARSER :
+"${text}"
+
+RÉPONDS UNIQUEMENT avec un JSON array valide :
+[{"text":"Tâche reformulée courte et claire", "urgent":true/false, "date":"YYYY-MM-DD", "owner":"Nom" ou null}]`;
 
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250514',
