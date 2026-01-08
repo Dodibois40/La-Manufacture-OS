@@ -18,7 +18,7 @@ export const initAuth = (state, renderCallback) => {
   const regError = document.getElementById('registerError');
 
   // Password visibility toggles
-  document.querySelectorAll('.password-toggle').forEach(btn => {
+  document.querySelectorAll('.password-toggle, .password-toggle-minimal').forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
       const input = document.getElementById(targetId);

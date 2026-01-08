@@ -623,116 +623,259 @@ nav button.active .nav-icon {
 
 
 /* ========================================
-   AUTH VIEW
+   AUTH VIEW - SpaceX/Tesla Style
    ======================================== */
-.auth-container {
+
+/* Fullscreen container */
+.auth-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* Animated background */
+.auth-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  z-index: -1;
+}
+
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(20, 20, 25, 1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(15, 15, 20, 1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(10, 10, 15, 0.8) 0%, transparent 70%);
+}
+
+/* Subtle moving gradient animation */
+.auth-bg::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, transparent 50%);
+  animation: subtleMove 20s ease-in-out infinite;
+}
+
+@keyframes subtleMove {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(10%, 5%); }
+  50% { transform: translate(-5%, 10%); }
+  75% { transform: translate(-10%, -5%); }
+}
+
+/* Content wrapper */
+.auth-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  gap: 20px;
-}
-
-.auth-form {
-  background: rgba(28, 28, 30, 0.8);
-  backdrop-filter: blur(20px);
-  padding: 30px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px 20px;
   width: 100%;
-  max-width: 360px;
-  animation: slideIn 0.3s ease-out;
+  max-width: 400px;
 }
 
-.auth-form h2 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin-bottom: 24px;
-  text-align: center;
-  color: #fff;
-}
-
-.auth-form input {
-  width: 100%;
-  padding: 14px 16px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #fff;
+/* Logo - SpaceX style */
+.auth-logo {
+  display: flex;
+  gap: 12px;
   margin-bottom: 16px;
-  font-size: 1rem;
+  letter-spacing: 0.3em;
 }
 
-.auth-form input:focus {
-  border-color: var(--accent);
-  outline: none;
+.logo-letter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 3rem;
+  font-weight: 100;
+  color: #fff;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
-.btn-full {
+@media (min-width: 480px) {
+  .logo-letter {
+    font-size: 4rem;
+  }
+}
+
+/* Tagline */
+.auth-tagline {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  margin-bottom: 60px;
+}
+
+/* Forms wrapper */
+.auth-forms-wrapper {
   width: 100%;
-  margin-top: 8px;
+  max-width: 320px;
 }
 
-.auth-switch {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--text-sec);
+/* Minimal form */
+.auth-form-minimal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeInUp 0.5s ease-out;
 }
 
-.auth-switch a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 600;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.auth-switch a:hover {
-  text-decoration: underline;
+/* Minimal input */
+.input-minimal {
+  width: 100%;
+  padding: 16px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  outline: none;
+  transition: border-color 0.3s ease;
 }
 
-.auth-error {
-  margin-top: 16px;
-  color: #ff453a;
-  font-size: 0.85rem;
-  text-align: center;
-  background: rgba(255, 69, 58, 0.1);
-  padding: 10px;
-  border-radius: 8px;
-  display: none;
+.input-minimal::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 300;
 }
 
-/* Password visibility toggle */
-.password-wrapper {
+.input-minimal:focus {
+  border-bottom-color: #fff;
+}
+
+/* Password wrapper minimal */
+.password-wrapper-minimal {
   position: relative;
   width: 100%;
-  margin-bottom: 16px;
 }
 
-.password-wrapper input {
-  width: 100%;
-  padding-right: 48px;
-  margin-bottom: 0;
+.password-wrapper-minimal .input-minimal {
+  padding-right: 44px;
 }
 
-.password-toggle {
+.password-toggle-minimal {
   position: absolute;
-  right: 12px;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-sec);
+  padding: 8px;
+  color: rgba(255, 255, 255, 0.3);
   transition: color 0.2s;
 }
 
-.password-toggle:hover {
-  color: var(--text);
+.password-toggle-minimal:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.password-toggle-minimal .eye-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Minimal button */
+.btn-minimal {
+  width: 100%;
+  padding: 16px;
+  margin-top: 24px;
+  background: #fff;
+  color: #000;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-minimal:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.btn-minimal:active {
+  transform: translateY(0);
+}
+
+.btn-minimal:disabled {
+  background: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+/* Auth switch minimal */
+.auth-switch-minimal {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.auth-switch-minimal a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 400;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  transition: border-color 0.2s;
+}
+
+.auth-switch-minimal a:hover {
+  border-bottom-color: #fff;
+}
+
+/* Auth error */
+.auth-error {
+  margin-top: 16px;
+  color: #ff453a;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 12px;
+  background: rgba(255, 69, 58, 0.1);
+  border: 1px solid rgba(255, 69, 58, 0.2);
+  display: none;
+}
+
+/* Legacy support */
+.btn-full {
+  width: 100%;
+  margin-top: 8px;
 }
 
 .eye-icon {

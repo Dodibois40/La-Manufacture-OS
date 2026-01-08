@@ -7,9 +7,12 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Wave OS - Votre système d'organisation personnel avec IA">
-  <title>Wave OS</title>
+  <meta name="description" content="FLOW - Master your time">
+  <title>FLOW</title>
   <link rel="icon" type="image/png" href="/src/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- CSS imports -->
   <link rel="stylesheet" href="/src/css/variables.css">
@@ -36,52 +39,70 @@
       <div id="storageWarn"></div>
     </header>
 
-    <!-- Vue: AUTH -->
+    <!-- Vue: AUTH - SpaceX/Tesla Style -->
     <div class="view" id="view-auth">
-      <div class="auth-container">
-        <!-- Connexion -->
-        <div class="auth-form" id="loginForm">
-          <h2>Connexion</h2>
-          <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
-          <div class="password-wrapper">
-            <input type="password" id="loginPassword" placeholder="Mot de passe" autocomplete="current-password">
-            <button type="button" class="password-toggle" data-target="loginPassword">
-              <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            </button>
-          </div>
-          <button class="btn btn-primary btn-full" id="loginBtn">Se connecter</button>
-          <p class="auth-switch">Pas de compte ? <a href="#" id="showRegister">Créer un compte</a></p>
-          <div class="auth-error" id="loginError"></div>
-        </div>
+      <div class="auth-fullscreen">
+        <!-- Background avec effet subtil -->
+        <div class="auth-bg"></div>
 
-        <!-- Inscription -->
-        <div class="auth-form hidden" id="registerForm">
-          <h2>Créer un compte</h2>
-          <input type="text" id="registerName" placeholder="Nom" autocomplete="name">
-          <input type="email" id="registerEmail" placeholder="Email" autocomplete="email">
-          <div class="password-wrapper">
-            <input type="password" id="registerPassword" placeholder="Mot de passe" autocomplete="new-password">
-            <button type="button" class="password-toggle" data-target="registerPassword">
-              <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            </button>
+        <!-- Contenu -->
+        <div class="auth-content">
+          <!-- Logo texte style SpaceX -->
+          <div class="auth-logo">
+            <span class="logo-letter">F</span>
+            <span class="logo-letter">L</span>
+            <span class="logo-letter">O</span>
+            <span class="logo-letter">W</span>
           </div>
-          <button class="btn btn-primary btn-full" id="registerBtn">S'inscrire</button>
-          <p class="auth-switch">Déjà un compte ? <a href="#" id="showLogin">Se connecter</a></p>
-          <div class="auth-error" id="registerError"></div>
+
+          <!-- Tagline -->
+          <p class="auth-tagline">MASTER YOUR TIME</p>
+
+          <!-- Formulaires -->
+          <div class="auth-forms-wrapper">
+            <!-- Connexion -->
+            <div class="auth-form-minimal" id="loginForm">
+              <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" class="input-minimal">
+              <div class="password-wrapper-minimal">
+                <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" class="input-minimal">
+                <button type="button" class="password-toggle-minimal" data-target="loginPassword">
+                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
+              <button class="btn-minimal" id="loginBtn">Sign In</button>
+              <p class="auth-switch-minimal">No account? <a href="#" id="showRegister">Create one</a></p>
+              <div class="auth-error" id="loginError"></div>
+            </div>
+
+            <!-- Inscription -->
+            <div class="auth-form-minimal hidden" id="registerForm">
+              <input type="text" id="registerName" placeholder="Name" autocomplete="name" class="input-minimal">
+              <input type="email" id="registerEmail" placeholder="Email" autocomplete="email" class="input-minimal">
+              <div class="password-wrapper-minimal">
+                <input type="password" id="registerPassword" placeholder="Password" autocomplete="new-password" class="input-minimal">
+                <button type="button" class="password-toggle-minimal" data-target="registerPassword">
+                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
+              <button class="btn-minimal" id="registerBtn">Create Account</button>
+              <p class="auth-switch-minimal">Already have an account? <a href="#" id="showLogin">Sign in</a></p>
+              <div class="auth-error" id="registerError"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
