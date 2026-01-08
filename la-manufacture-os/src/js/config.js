@@ -122,6 +122,10 @@ export const initConfig = (state, renderCallback) => {
       console.error('Logout error:', e);
     }
 
+    // Supprimer le token localStorage (fallback mobile)
+    const { tokenStorage } = await import('./api-client.js');
+    tokenStorage.remove();
+
     // Set force logout flag BEFORE clearing localStorage
     localStorage.setItem('force_logout', 'true');
 

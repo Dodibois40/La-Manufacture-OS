@@ -62,11 +62,12 @@ export const initAuth = (state, renderCallback) => {
 
     setLoading(loginBtn, true);
     try {
-      const { api } = await import('./api-client.js');
+      const { api, tokenStorage } = await import('./api-client.js');
       const res = await api.auth.login(email, password);
-      
+
       if (res.token) {
-        // Success
+        // Sauvegarder le token en localStorage (fallback mobile/Safari)
+        tokenStorage.set(res.token);
         handleAuthSuccess(res.user, state, renderCallback);
       } else {
         showError(loginError, 'Erreur de connexion');
@@ -91,10 +92,12 @@ export const initAuth = (state, renderCallback) => {
 
     setLoading(regBtn, true);
     try {
-      const { api } = await import('./api-client.js');
+      const { api, tokenStorage } = await import('./api-client.js');
       const res = await api.auth.register(email, password, name);
-      
+
       if (res.token) {
+        // Sauvegarder le token en localStorage (fallback mobile/Safari)
+        tokenStorage.set(res.token);
         handleAuthSuccess(res.user, state, renderCallback);
       }
     } catch (e) {

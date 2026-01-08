@@ -3,14 +3,46 @@
 const MODE = import.meta.env.VITE_MODE || 'local';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
+// Token storage helpers (fallback pour mobile/Safari)
+const TOKEN_KEY = 'auth_token';
+
+export const tokenStorage = {
+  get() {
+    try {
+      return localStorage.getItem(TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  },
+  set(token) {
+    try {
+      localStorage.setItem(TOKEN_KEY, token);
+    } catch {
+      console.warn('localStorage non disponible');
+    }
+  },
+  remove() {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      // ignore
+    }
+  }
+};
+
 // Helper pour les requêtes API
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
 
+  // Ajouter le token en header si disponible (fallback pour mobile)
+  const token = tokenStorage.get();
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
   const defaultOptions = {
-    credentials: 'include', // Pour les cookies JWT
+    credentials: 'include', // Pour les cookies JWT (desktop)
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders,
       ...options.headers,
     },
   };

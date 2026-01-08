@@ -59,11 +59,25 @@ await fastify.register(jwt, {
   },
 });
 
-// Auth decorator
+// Auth decorator - supporte cookie ET header Authorization (pour mobile/Safari)
 fastify.decorate('authenticate', async function (request, reply) {
   try {
+    // Essayer d'abord le cookie
     await request.jwtVerify();
-  } catch (err) {
+  } catch (cookieErr) {
+    // Fallback: vérifier le header Authorization (Bearer token)
+    const authHeader = request.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      try {
+        const decoded = fastify.jwt.verify(token);
+        request.user = decoded;
+        return;
+      } catch (tokenErr) {
+        reply.status(401).send({ error: 'Unauthorized' });
+        return;
+      }
+    }
     reply.status(401).send({ error: 'Unauthorized' });
   }
 });
