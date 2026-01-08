@@ -107,8 +107,8 @@ export const confirmDialog = ({ title, message, confirmText = 'Confirm', cancelT
         <div class="confirm-title">${title}</div>
         <div class="confirm-message">${message}</div>
         <div class="confirm-actions">
-          <button class="confirm-btn cancel">${cancelText}</button>
-          <button class="confirm-btn ${danger ? 'danger' : 'primary'}">${confirmText}</button>
+          <button class="confirm-btn cancel" data-action="cancel">${cancelText}</button>
+          <button class="confirm-btn ${danger ? 'danger' : 'primary'}" data-action="confirm">${confirmText}</button>
         </div>
       </div>
     `;
@@ -119,8 +119,8 @@ export const confirmDialog = ({ title, message, confirmText = 'Confirm', cancelT
       resolve(result);
     };
 
-    overlay.querySelector('.confirm-btn.cancel').onclick = () => close(false);
-    overlay.querySelector('.confirm-btn:not(.cancel)').onclick = () => close(true);
+    overlay.querySelector('[data-action="cancel"]').onclick = () => close(false);
+    overlay.querySelector('[data-action="confirm"]').onclick = () => close(true);
     overlay.onclick = (e) => { if (e.target === overlay) close(false); };
 
     document.body.appendChild(overlay);
