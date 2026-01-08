@@ -156,7 +156,7 @@ Réponds UNIQUEMENT avec un JSON array, rien d'autre :
 [{"text":"...", "urgent":false, "date":"2026-01-06", "owner":null}, ...]`;
 
       const message = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-opus-4-5-20251101',
         max_tokens: 1000,
         messages: [{
           role: 'user',
