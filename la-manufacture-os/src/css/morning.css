@@ -1,8 +1,8 @@
 /* ========================================
-   MORNING BRIEFING - Siri Vortex Style
+   MORNING BRIEFING - SpaceX Planet Style
    ======================================== */
 
-.brief-overlay {
+.brief-overlay-spacex {
     position: fixed;
     top: 0;
     left: 0;
@@ -11,407 +11,333 @@
     background: #000;
     z-index: 3000;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
     color: #fff;
-    opacity: 1;
-    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 32px;
-    text-align: center;
     overflow: hidden;
+    transition: opacity 0.6s ease-out;
 }
 
-/* Siri Vortex Container - Subtle & Elegant */
-.siri-vortex {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px;
-    height: 200px;
+.brief-overlay-spacex.hidden {
+    opacity: 0;
     pointer-events: none;
-    opacity: 0.5;
 }
 
-/* Vortex orbs - soft, distant glows */
-.vortex-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.6;
-    animation: vortexFloat 12s ease-in-out infinite;
-}
-
-.vortex-orb:nth-child(1) {
-    width: 300px;
-    height: 150px;
-    background: #FF2D55;
-    top: -20%;
-    left: -10%;
-    animation-delay: 0s;
-}
-
-.vortex-orb:nth-child(2) {
-    width: 280px;
-    height: 140px;
-    background: #AF52DE;
-    top: -10%;
-    left: 20%;
-    animation-delay: -3s;
-}
-
-.vortex-orb:nth-child(3) {
-    width: 320px;
-    height: 160px;
-    background: #0A84FF;
-    top: 0%;
-    left: 40%;
-    animation-delay: -6s;
-}
-
-.vortex-orb:nth-child(4) {
-    width: 260px;
-    height: 130px;
-    background: #30D158;
-    top: -15%;
-    right: 0%;
-    animation-delay: -9s;
-}
-
-.vortex-orb:nth-child(5) {
-    width: 240px;
-    height: 120px;
-    background: #FF9F0A;
-    top: 10%;
-    right: -5%;
-    animation-delay: -2s;
-}
-
-@keyframes vortexFloat {
-    0%, 100% {
-        transform: translateX(0) scale(1);
-        opacity: 0.5;
-    }
-    50% {
-        transform: translateX(20px) scale(1.05);
-        opacity: 0.7;
-    }
-}
-
-/* Wave ribbon - the signature Siri effect */
-.vortex-wave {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 500px;
-    height: 6px;
-    background: linear-gradient(90deg,
-        transparent 0%,
-        #FF2D55 15%,
-        #AF52DE 30%,
-        #0A84FF 50%,
-        #30D158 70%,
-        #FF9F0A 85%,
-        transparent 100%
-    );
-    border-radius: 3px;
-    filter: blur(8px);
-    opacity: 0.8;
-    animation: waveRibbon 4s ease-in-out infinite;
-}
-
-/* Second wave layer for depth */
-.siri-vortex::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    height: 4px;
-    background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.8) 20%,
-        rgba(255, 255, 255, 0.9) 50%,
-        rgba(255, 255, 255, 0.8) 80%,
-        transparent 100%
-    );
-    border-radius: 2px;
-    filter: blur(2px);
-    animation: waveRibbon 4s ease-in-out infinite 0.5s;
-}
-
-@keyframes waveRibbon {
-    0%, 100% {
-        transform: translate(-50%, -50%) scaleX(0.8);
-        opacity: 0.6;
-    }
-    50% {
-        transform: translate(-50%, -50%) scaleX(1);
-        opacity: 1;
-    }
-}
-
-/* État activé - expansion élégante */
-.brief-overlay.launching .siri-vortex {
-    animation: vortexExpand 0.6s ease-out forwards;
-}
-
-.brief-overlay.launching .vortex-wave {
-    animation: waveFlash 0.6s ease-out forwards;
-}
-
-@keyframes vortexExpand {
-    0% {
-        opacity: 0.5;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    50% {
-        opacity: 0.8;
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(2);
-    }
-}
-
-@keyframes waveFlash {
-    0% {
-        opacity: 0.8;
-        transform: translate(-50%, -50%) scaleX(1);
-    }
-    30% {
-        opacity: 1;
-        filter: blur(4px);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scaleX(3);
-        filter: blur(20px);
-    }
-}
-
-/* Phase de transition - fading avec flash */
-.brief-overlay.fading {
-    animation: briefFadeOut 0.5s ease-out forwards;
-}
-
-.brief-overlay.fading::before {
-    content: '';
+/* Stars Background */
+.stars {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
-    animation: flashPulse 0.4s ease-out forwards;
-    pointer-events: none;
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 160px 30px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(2px 2px at 200px 60px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 250px 20px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(2px 2px at 280px 90px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 320px 50px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(2px 2px at 350px 10px, rgba(255,255,255,0.7), transparent);
+    background-size: 400px 100px;
+    animation: twinkle 8s ease-in-out infinite;
+    opacity: 0.6;
 }
 
-.brief-overlay.fading .brief-title,
-.brief-overlay.fading .brief-subtitle,
-.brief-overlay.fading .brief-stat,
-.brief-overlay.fading .start-btn {
-    animation: contentFadeUp 0.4s ease-out forwards;
+@keyframes twinkle {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.4; }
 }
 
-@keyframes briefFadeOut {
-    0% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
+/* Planet Container */
+.planet-container {
+    position: absolute;
+    right: -15%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80vmin;
+    height: 80vmin;
+    max-width: 700px;
+    max-height: 700px;
 }
 
-@keyframes flashPulse {
-    0% {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    30% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(1.5);
-    }
-}
-
-@keyframes contentFadeUp {
-    0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.98);
+@media (max-width: 768px) {
+    .planet-container {
+        right: -30%;
+        width: 90vmin;
+        height: 90vmin;
     }
 }
 
-.brief-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
+/* The Planet */
+.planet {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    animation: planetRotate 120s linear infinite;
+    transform-style: preserve-3d;
 }
 
-.brief-title {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 2.5rem;
-    font-weight: 200;
-    margin-bottom: 8px;
-    letter-spacing: 0.05em;
-    color: #fff;
-    animation: titleAppear 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+@keyframes planetRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-@media (min-width: 480px) {
-    .brief-title {
-        font-size: 3rem;
+/* Planet Surface - Mars-like texture */
+.planet-surface {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(255, 200, 150, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 70% 60%, rgba(180, 100, 60, 0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(120, 60, 40, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 20% 70%, rgba(200, 120, 80, 0.25) 0%, transparent 35%),
+        radial-gradient(ellipse at 80% 30%, rgba(160, 90, 50, 0.35) 0%, transparent 45%),
+        linear-gradient(135deg,
+            #8B4513 0%,
+            #CD853F 20%,
+            #D2691E 40%,
+            #A0522D 60%,
+            #8B4513 80%,
+            #654321 100%
+        );
+    box-shadow: inset -80px -20px 100px rgba(0, 0, 0, 0.6);
+}
+
+/* Atmosphere glow */
+.planet-atmosphere {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow:
+        inset 40px 0 80px rgba(255, 200, 150, 0.15),
+        0 0 60px rgba(255, 150, 100, 0.2),
+        0 0 120px rgba(255, 100, 50, 0.1);
+}
+
+/* Outer glow */
+.planet-glow {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 150, 100, 0.1) 0%, transparent 60%);
+    animation: glowPulse 8s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* Content - Left Side */
+.brief-content-spacex {
+    position: relative;
+    z-index: 10;
+    padding: 40px;
+    max-width: 500px;
+    animation: contentSlideIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (max-width: 768px) {
+    .brief-content-spacex {
+        padding: 24px;
+        max-width: 100%;
+        width: 100%;
     }
 }
 
-@keyframes titleAppear {
+@keyframes contentSlideIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
-        filter: blur(10px);
+        transform: translateX(-30px);
     }
-
     to {
         opacity: 1;
-        transform: translateY(0);
-        filter: blur(0);
+        transform: translateX(0);
     }
 }
 
-.brief-subtitle {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.4);
-    margin-bottom: 60px;
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    animation: subtitleAppear 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+/* Greeting */
+.brief-greeting {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px 0;
+    line-height: 1.1;
 }
 
-@keyframes subtitleAppear {
+@media (min-width: 768px) {
+    .brief-greeting {
+        font-size: 3.5rem;
+    }
+}
+
+/* Tagline */
+.brief-tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 48px 0;
+    max-width: 360px;
+    line-height: 1.6;
+}
+
+/* Stats */
+.brief-stats-spacex {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 48px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    animation: statFadeIn 0.8s ease-out backwards;
+}
+
+.stat-row:nth-child(1) { animation-delay: 0.3s; }
+.stat-row:nth-child(2) { animation-delay: 0.4s; }
+.stat-row:nth-child(3) { animation-delay: 0.5s; }
+
+@keyframes statFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.stat-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #fff;
+    min-width: 60px;
+}
+
+.stat-row.urgent .stat-value {
+    color: #ff453a;
+}
+
+.stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: lowercase;
+}
+
+/* SpaceX Button */
+.btn-spacex {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: btnFadeIn 1s ease-out 0.6s backwards;
+}
+
+@keyframes btnFadeIn {
     from {
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.brief-stat {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 60px;
-    width: 100%;
-    max-width: 500px;
-    justify-content: center;
-    flex-wrap: wrap;
+.btn-spacex svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
 }
 
-.stat-box {
-    background: rgba(44, 44, 46, 0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 24px;
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    min-width: 130px;
-    flex: 1;
-    animation: statAppear 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.btn-spacex:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
-.stat-box:nth-child(1) {
-    animation-delay: 0.2s;
+.btn-spacex:hover svg {
+    transform: translateX(4px);
 }
 
-.stat-box:nth-child(2) {
-    animation-delay: 0.3s;
+.btn-spacex:active {
+    transform: scale(0.98);
 }
 
-.stat-box:nth-child(3) {
-    animation-delay: 0.4s;
+/* Launch Animation */
+.brief-overlay-spacex.launching {
+    animation: zoomIntoSpace 0.6s ease-in forwards;
 }
 
-@keyframes statAppear {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
+.brief-overlay-spacex.launching .planet {
+    animation: planetZoom 0.6s ease-in forwards;
+}
 
-    to {
+.brief-overlay-spacex.launching .brief-content-spacex {
+    animation: contentFadeOut 0.4s ease-in forwards;
+}
+
+@keyframes zoomIntoSpace {
+    0% {
         opacity: 1;
-        transform: scale(1);
     }
-}
-
-.b-num {
-    font-family: 'Inter', sans-serif;
-    font-size: 2rem;
-    font-weight: 200;
-    margin-bottom: 4px;
-    letter-spacing: 0;
-}
-
-.b-lbl {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.4);
-    text-transform: uppercase;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-}
-
-.start-btn {
-    background: #fff;
-    color: #000;
-    padding: 16px 48px;
-    border-radius: 12px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    font-size: 0.9rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: none;
-    animation: btnAppear 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
-
-@keyframes btnAppear {
-    from {
+    100% {
         opacity: 0;
-        transform: translateY(30px);
     }
+}
 
-    to {
+@keyframes planetZoom {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    100% {
+        transform: rotate(10deg) scale(1.5);
+    }
+}
+
+@keyframes contentFadeOut {
+    0% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50px);
     }
 }
 
-.start-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
-}
+/* ========================================
+   FOCUS TIMER WIDGET
+   ======================================== */
 
-.start-btn:active {
-    transform: translateY(0);
-}
-
-/* Focus Timer Widget */
 .focus-timer {
     position: fixed;
     top: env(safe-area-inset-top, 20px);
@@ -445,7 +371,6 @@
         opacity: 0;
         transform: translateX(20px);
     }
-
     to {
         opacity: 1;
         transform: translateX(0);

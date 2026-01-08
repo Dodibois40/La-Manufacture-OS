@@ -12,41 +12,51 @@ export const initMorningBriefing = (state) => {
 
     // Stats calculation
     const tasks = state.tasks || [];
-    const late = tasks.filter(t => !t.done && t.date < today).length; // Should be 0 if carry-over ran, but good to check
     const todayCount = tasks.filter(t => !t.done && t.date === today).length;
     const urgentCount = tasks.filter(t => !t.done && t.urgent).length;
+    const completedToday = tasks.filter(t => t.done && t.date === today).length;
+    const totalToday = todayCount + completedToday;
+    const progress = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
     const html = `
-    <div id="briefOverlay" class="brief-overlay">
-      <!-- Siri Vortex Effect -->
-      <div class="siri-vortex">
-        <div class="vortex-orb"></div>
-        <div class="vortex-orb"></div>
-        <div class="vortex-orb"></div>
-        <div class="vortex-orb"></div>
-        <div class="vortex-orb"></div>
-        <div class="vortex-wave"></div>
+    <div id="briefOverlay" class="brief-overlay-spacex">
+      <!-- Planet Container -->
+      <div class="planet-container">
+        <div class="planet">
+          <div class="planet-surface"></div>
+          <div class="planet-atmosphere"></div>
+          <div class="planet-glow"></div>
+        </div>
+        <div class="stars"></div>
       </div>
 
-      <div class="brief-title">Bonjour ${user}</div>
-      <div class="brief-subtitle">Voici ton briefing pour aujourd'hui</div>
+      <!-- Content Left Side -->
+      <div class="brief-content-spacex">
+        <h1 class="brief-greeting">BONJOUR ${user.toUpperCase()}</h1>
+        <p class="brief-tagline">Voici ton briefing pour aujourd'hui</p>
 
-      <div class="brief-stat">
-        <div class="stat-box">
-          <div class="b-num">${todayCount}</div>
-          <div class="b-lbl">Tâches du jour</div>
+        <div class="brief-stats-spacex">
+          <div class="stat-row">
+            <span class="stat-value">${todayCount}</span>
+            <span class="stat-label">tâches à faire</span>
+          </div>
+          <div class="stat-row ${urgentCount > 0 ? 'urgent' : ''}">
+            <span class="stat-value">${urgentCount}</span>
+            <span class="stat-label">urgences</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-value">${progress}%</span>
+            <span class="stat-label">complété</span>
+          </div>
         </div>
-        <div class="stat-box">
-          <div class="b-num" style="color:#ff453a">${urgentCount}</div>
-          <div class="b-lbl">Urgences</div>
-        </div>
-        <div class="stat-box">
-          <div class="b-num" style="color:var(--text-sec)">${Math.floor(Math.random() * 20 + 70)}%</div>
-          <div class="b-lbl">Énergie</div>
-        </div>
+
+        <button class="btn-spacex" id="startDayBtn">
+          <span>EXPLORER</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
       </div>
-
-      <button class="start-btn" id="startDayBtn">Lancer la journée</button>
     </div>
   `;
 
@@ -58,26 +68,20 @@ export const initMorningBriefing = (state) => {
         const el = document.getElementById('briefOverlay');
         const btn = document.getElementById('startDayBtn');
 
-        // Feedback immédiat sur le bouton
+        // Feedback immédiat
         btn.style.transform = 'scale(0.95)';
-        btn.style.opacity = '0.8';
 
-        // Phase 1: Vortex s'intensifie
+        // Zoom into planet effect
         el.classList.add('launching');
 
-        // Phase 2: Flash blanc subtil + fondu
-        setTimeout(() => {
-            el.classList.add('fading');
-        }, 300);
-
-        // Phase 3: Disparition
+        // Disparition
         setTimeout(() => {
             el.classList.add('hidden');
             localStorage.setItem('last_briefing', today);
-        }, 800);
+        }, 600);
 
-        // Phase 4: Cleanup
-        setTimeout(() => el.remove(), 1200);
+        // Cleanup
+        setTimeout(() => el.remove(), 1000);
     });
 };
 
