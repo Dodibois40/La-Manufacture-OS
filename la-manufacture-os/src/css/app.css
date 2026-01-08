@@ -45,19 +45,20 @@ header {
   justify-content: center;
 }
 
-.logoImg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 12px;
+/* Header Logo - FLOW style */
+.header-logo {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
 }
 
-.logoText {
-  font-weight: 800;
-  /* Apple style bold */
-  font-size: 1.1rem;
-  letter-spacing: -0.5px;
-  color: var(--text-main);
+.header-logo-letter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
 }
 
 .sub {
@@ -751,20 +752,20 @@ nav button.active .nav-icon {
   }
 }
 
-/* Minimal input */
+/* Minimal input - with rounded corners */
 .input-minimal {
   width: 100%;
-  padding: 16px 0;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
   font-weight: 300;
   letter-spacing: 0.02em;
   outline: none;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .input-minimal::placeholder {
@@ -773,7 +774,8 @@ nav button.active .nav-icon {
 }
 
 .input-minimal:focus {
-  border-bottom-color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* Password wrapper minimal */
@@ -808,7 +810,7 @@ nav button.active .nav-icon {
   height: 20px;
 }
 
-/* Minimal button */
+/* Minimal button - with rounded corners */
 .btn-minimal {
   width: 100%;
   padding: 16px;
@@ -816,6 +818,7 @@ nav button.active .nav-icon {
   background: #fff;
   color: #000;
   border: none;
+  border-radius: 12px;
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
@@ -828,6 +831,7 @@ nav button.active .nav-icon {
 .btn-minimal:hover {
   background: rgba(255, 255, 255, 0.9);
   transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
 }
 
 .btn-minimal:active {
