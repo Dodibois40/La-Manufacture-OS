@@ -1,3 +1,5 @@
+import { playSound } from './utils.js';
+
 export const initAuth = (state, renderCallback) => {
   // Elements
   const authView = document.getElementById('view-auth');
@@ -168,6 +170,9 @@ const handleAuthSuccess = async (user, state, renderCallback) => {
     }
   }
 
-  // Refresh page to reload with personalized name
-  window.location.reload();
+  // Son de bienvenue style Tesla
+  playSound('prout');
+
+  // Refresh page to reload with personalized name (délai pour laisser le son jouer)
+  setTimeout(() => window.location.reload(), 700);
 };

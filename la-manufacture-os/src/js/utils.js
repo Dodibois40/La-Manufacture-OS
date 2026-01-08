@@ -68,6 +68,18 @@ export const playSound = (type) => {
       gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
       oscillator.start(audioCtx.currentTime);
       oscillator.stop(audioCtx.currentTime + 0.4);
+    } else if (type === 'prout') {
+      // Son de prout style Tesla - fréquences basses descendantes
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.15);
+      oscillator.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.4);
+      oscillator.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.6);
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.3);
+      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.6);
     }
   } catch (e) {
     // Audio non supporté
