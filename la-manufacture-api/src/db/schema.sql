@@ -87,6 +87,11 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Drop existing triggers first (idempotent)
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+DROP TRIGGER IF EXISTS update_tasks_updated_at ON tasks;
+DROP TRIGGER IF EXISTS update_settings_updated_at ON settings;
+
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
