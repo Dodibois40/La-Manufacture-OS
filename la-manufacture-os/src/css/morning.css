@@ -328,14 +328,14 @@
     padding: 16px 48px;
     background: #fff;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-m);
     color: #000;
     font-family: 'Inter', sans-serif;
     font-size: 0.9rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     animation: missionFadeUp 0.8s ease-out 0.3s backwards;
 }
 

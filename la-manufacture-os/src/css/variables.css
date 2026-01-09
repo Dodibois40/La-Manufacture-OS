@@ -37,11 +37,13 @@
 
   --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* Spacing & Radius */
+  /* Spacing & Radius - UNIFIED */
+  --radius-xs: 6px;
   --radius-s: 10px;
-  --radius-m: 16px;
-  --radius-l: 24px;
-  --radius-xl: 32px;
+  --radius-m: 12px;   /* Standard buttons */
+  --radius-l: 16px;   /* Large buttons, cards */
+  --radius-xl: 24px;  /* Modals, large cards */
+  --radius-full: 99px; /* Pills */
 
   --pad-page: 20px;
 }

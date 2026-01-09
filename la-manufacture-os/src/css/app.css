@@ -313,29 +313,29 @@ h3 {
 }
 
 .inbox-submit-btn {
-  background: var(--accent);
-  color: #fff;
+  background: #fff;
+  color: #000;
   border: none;
-  border-radius: 16px;
-  padding: 18px 32px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  border-radius: var(--radius-m);
+  padding: 16px 32px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  transition: all 0.2s var(--ease-spring);
-  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.3);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .inbox-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(10, 132, 255, 0.4);
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.02);
 }
 
 .inbox-submit-btn:active {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .submit-hint {
@@ -780,14 +780,14 @@ nav button.active .nav-icon {
   padding: 16px 20px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: var(--radius-m);
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
   font-weight: 300;
   letter-spacing: 0.02em;
   outline: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .input-minimal::placeholder {
@@ -840,24 +840,23 @@ nav button.active .nav-icon {
   background: #fff;
   color: #000;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-m);
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-minimal:hover {
   background: rgba(255, 255, 255, 0.9);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+  transform: scale(1.02);
 }
 
 .btn-minimal:active {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .btn-minimal:disabled {
@@ -1080,12 +1079,12 @@ nav button.active .nav-icon {
 
 .focus-btn {
   padding: 16px 32px;
-  border-radius: 30px;
+  border-radius: var(--radius-m);
   border: none;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
 }
 
 .focus-btn.primary {
@@ -1342,11 +1341,11 @@ nav button.active .nav-icon {
 .confirm-btn {
   flex: 1;
   padding: 14px 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-m);
   border: none;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
@@ -1371,7 +1370,7 @@ nav button.active .nav-icon {
 
 .confirm-btn.primary:hover {
   background: rgba(255, 255, 255, 0.9);
-  transform: translateY(-1px);
+  transform: scale(1.02);
 }
 
 .confirm-btn.danger {

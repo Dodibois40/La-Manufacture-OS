@@ -29,3 +29,6 @@ Thumbs.db
 # Temp
 your-project/
 nul
+
+# Local Netlify folder
+.netlify
