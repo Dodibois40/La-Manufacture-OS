@@ -64,7 +64,7 @@ async function parseWithClaude(text) {
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-opus-4-5-20251101',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
       system: buildSystemPrompt(),
       messages: [
