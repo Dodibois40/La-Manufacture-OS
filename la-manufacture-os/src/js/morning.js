@@ -24,39 +24,24 @@ export const initMorningBriefing = (state) => {
       <div class="planet-container">
         <div class="planet-glow"></div>
         <div class="planet">
-          <div class="planet-surface"></div>
+          <div class="planet-day"></div>
+          <div class="planet-clouds"></div>
+          <div class="planet-cities-mask">
+            <div class="planet-night"></div>
+          </div>
           <div class="planet-shadow"></div>
-          <div class="planet-cities"></div>
           <div class="planet-atmosphere"></div>
-          <div class="planet-highlight"></div>
         </div>
       </div>
 
-      <!-- Content Left Side -->
-      <div class="brief-content-spacex">
-        <h1 class="brief-greeting">BONJOUR ${user.toUpperCase()}</h1>
-        <p class="brief-tagline">Voici ton briefing pour aujourd'hui</p>
-
-        <div class="brief-stats-spacex">
-          <div class="stat-row">
-            <span class="stat-value">${todayCount}</span>
-            <span class="stat-label">tâches à faire</span>
-          </div>
-          <div class="stat-row ${urgentCount > 0 ? 'urgent' : ''}">
-            <span class="stat-value">${urgentCount}</span>
-            <span class="stat-label">urgences</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-value">${progress}%</span>
-            <span class="stat-label">complété</span>
-          </div>
-        </div>
-
-        <button class="btn-spacex" id="startDayBtn">
-          <span>EXPLORER</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
+      <!-- Content - Centered Mission Control Style -->
+      <div class="brief-content-mission">
+        <div class="mission-date">${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase()}</div>
+        <h1 class="mission-greeting">Bonjour, ${user}</h1>
+        <p class="mission-tagline">${todayCount > 0 ? `${todayCount} objectif${todayCount > 1 ? 's' : ''} aujourd'hui.` : 'Aucune mission planifiée.'}</p>
+        ${urgentCount > 0 ? `<p class="mission-urgent">${urgentCount} prioritaire${urgentCount > 1 ? 's' : ''}</p>` : ''}
+        <button class="btn-mission" id="startDayBtn">
+          C'est parti
         </button>
       </div>
     </div>
