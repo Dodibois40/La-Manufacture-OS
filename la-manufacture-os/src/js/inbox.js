@@ -13,33 +13,41 @@ export const inboxCtx = {
 };
 
 // Prompt système pour Claude Opus 4.5
-const buildSystemPrompt = () => `Tu es un assistant de productivité expert. L'utilisateur va te dicter ou écrire des notes en vrac, souvent de manière informelle, désorganisée, ou comme s'il parlait à voix haute.
+const buildSystemPrompt = () => `Tu es un assistant qui extrait des tâches à partir de texte dicté.
 
-Ta mission : extraire et structurer TOUTES les tâches/actions mentionnées.
+RÈGLES STRICTES:
+1. Extrais CHAQUE action/tâche distincte mentionnée
+2. Titre = MAXIMUM 8 MOTS, commence par un verbe à l'infinitif
+3. Supprime tout le blabla, garde uniquement l'essentiel
+4. Détecte les dates (demain, lundi, etc.) → format YYYY-MM-DD
+5. Détecte l'urgence (urgent, vite, asap, important)
+6. Détecte les personnes mentionnées (pour X, avec Y, appeler Z)
 
-RÈGLES IMPORTANTES:
-1. Chaque action distincte = une tâche séparée
-2. Détecte les dates relatives (demain, lundi, 15 janvier, la semaine prochaine, dans 3 jours, etc.) et convertis-les en dates absolues
-3. Détecte l'urgence (urgent, asap, critique, important, vite, prioritaire, etc.)
-4. Détecte les responsables si mentionnés ("pour Pierre", "avec Marie", "appeler Jean", etc.)
-5. Reformule proprement le titre de chaque tâche (clair, concis, actionnable, commence par un verbe)
-6. Si pas de date précise détectée, utilise la date du jour
-7. Ne rate AUCUNE tâche mentionnée, même implicitement
-8. Ignore les mots de liaison et reformule intelligemment
+EXEMPLE D'ENTRÉE:
+"bon alors aujourd'hui il faut que je finisse les trois étagères pour Bruno qui va venir les chercher et après faudra que je les livre à Hossegor, ah et aussi faut que j'aille chercher le tube en laiton à Cambo"
 
-RÉPONDS UNIQUEMENT en JSON valide avec ce format:
+EXEMPLE DE SORTIE:
 {
   "tasks": [
-    {
-      "text": "Titre clair de la tâche",
-      "date": "YYYY-MM-DD",
-      "urgent": true ou false,
-      "owner": "Prénom ou null"
-    }
+    {"text": "Finir les 3 étagères pour Bruno", "date": "2026-01-09", "urgent": false, "owner": null},
+    {"text": "Livrer étagères à Hossegor", "date": "2026-01-09", "urgent": false, "owner": null},
+    {"text": "Récupérer tube laiton à Cambo", "date": "2026-01-09", "urgent": false, "owner": null}
   ]
 }
 
-Date d'aujourd'hui: ${isoLocal()}`;
+AUTRE EXEMPLE:
+"faudra que je fasse la compta et après me préparer pour mon rendez-vous de ce soir"
+→
+{
+  "tasks": [
+    {"text": "Faire la compta", "date": "2026-01-09", "urgent": false, "owner": null},
+    {"text": "Se préparer pour rendez-vous ce soir", "date": "2026-01-09", "urgent": false, "owner": null}
+  ]
+}
+
+Date d'aujourd'hui: ${isoLocal()}
+
+RÉPONDS UNIQUEMENT EN JSON VALIDE, rien d'autre.`;
 
 // Appel à l'API Anthropic (Claude Opus 4.5)
 async function parseWithClaude(text) {
