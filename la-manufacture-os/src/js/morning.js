@@ -47,6 +47,9 @@ export const initMorningBriefing = (state) => {
     </div>
   `;
 
+    // Hide main content while briefing is shown
+    document.body.classList.add('briefing-active');
+
     const div = document.createElement('div');
     div.innerHTML = html;
     document.body.appendChild(div.firstElementChild);
@@ -60,6 +63,9 @@ export const initMorningBriefing = (state) => {
 
         // Zoom into planet effect
         el.classList.add('launching');
+
+        // Show main content
+        document.body.classList.remove('briefing-active');
 
         // Disparition
         setTimeout(() => {

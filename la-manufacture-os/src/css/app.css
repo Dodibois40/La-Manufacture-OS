@@ -19,6 +19,13 @@ body {
   /* Espace pour le dock flottant */
 }
 
+/* Hide main content when briefing is active */
+body.briefing-active .container,
+body.briefing-active nav {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* === Header & Branding === */
 header {
   text-align: center;
