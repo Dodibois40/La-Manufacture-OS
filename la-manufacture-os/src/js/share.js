@@ -34,18 +34,34 @@ export async function openShareModal(taskId, taskText) {
 
   // Charger les partages actuels et la liste des utilisateurs
   try {
-    const [sharesResponse, usersResponse] = await Promise.all([
-      api.tasks.getShares(taskId),
-      api.users.getAll()
-    ]);
-
-    currentShares = sharesResponse.shares || [];
+    // Charger les utilisateurs d'abord (toujours necessaire)
+    const usersResponse = await api.users.getAll();
     allUsers = usersResponse.users || [];
+
+    // Puis charger les partages actuels
+    const sharesResponse = await api.tasks.getShares(taskId);
+    currentShares = sharesResponse.shares || [];
 
     renderCurrentShares();
   } catch (error) {
     console.error('Error loading share data:', error);
-    currentSharesContainer.innerHTML = '<p class="share-error">Erreur de chargement</p>';
+
+    // Afficher un message d'erreur plus detaille
+    let errorMsg = 'Erreur de chargement';
+    if (error.message.includes('Unauthorized')) {
+      errorMsg = 'Session expiree - reconnectez-vous';
+    } else if (error.message.includes('not found')) {
+      errorMsg = 'Tache non trouvee';
+    } else if (error.message.includes('403')) {
+      errorMsg = 'Vous ne pouvez partager que vos propres taches';
+    }
+
+    currentSharesContainer.innerHTML = `<p class="share-error">${errorMsg}</p>`;
+
+    // Si on a quand meme les utilisateurs, permettre la recherche
+    if (allUsers.length > 0) {
+      currentSharesContainer.innerHTML += '<p class="share-empty">Recherchez un utilisateur ci-dessus</p>';
+    }
   }
 }
 

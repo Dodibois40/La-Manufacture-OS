@@ -696,15 +696,119 @@ textarea:focus {
 }
 
 .share-modal {
-  background: rgba(28, 28, 30, 0.95);
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.share-modal.hidden {
+  display: none;
+}
+
+.share-modal-content {
+  background: rgba(28, 28, 30, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  width: 90%;
+  width: 100%;
   max-width: 400px;
   padding: 24px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.share-modal-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+.share-modal-close {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.share-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.share-modal-close svg {
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.share-task-title {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 20px 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.share-search-section {
+  margin-bottom: 16px;
+}
+
+.share-current-section h4 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-loading,
+.share-empty,
+.share-error,
+.share-no-results {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
+
+.share-error {
+  color: #ff453a;
+}
+
+.share-search-results {
+  margin-top: 8px;
+}
+
+.share-search-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.share-search-result:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .share-modal-title {
