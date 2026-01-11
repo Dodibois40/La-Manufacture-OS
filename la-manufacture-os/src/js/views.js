@@ -1,6 +1,7 @@
 import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode } from './api-client.js';
+import { openShareModal } from './share.js';
 
 // Inspirational quotes collection - 60+ citations pour ne jamais voir les memes
 const QUOTES = [
@@ -206,7 +207,14 @@ const taskRow = (t, state) => {
 
   const ownerIcon = '👤';
   const urgentIcon = task.urgent ? ' 🔥' : '';
-  meta.innerHTML = `<span class="meta-item">${ownerIcon} ${task.owner}${urgentIcon}</span>`;
+
+  // Indicateur de partage si la tache vient de quelqu'un d'autre
+  let sharedIndicator = '';
+  if (task.shared_by_name) {
+    sharedIndicator = `<span class="meta-item shared-indicator">📤 De ${task.shared_by_name}</span>`;
+  }
+
+  meta.innerHTML = `<span class="meta-item">${ownerIcon} ${task.owner}${urgentIcon}</span>${sharedIndicator}`;
 
   body.appendChild(tx);
   body.appendChild(meta);
@@ -225,9 +233,17 @@ const taskRow = (t, state) => {
 
       const menu = document.createElement('div');
       menu.className = 'task-menu';
+
+      // Option Partager uniquement en mode API et pour les taches qu'on possede
+      const isOwned = !task.access_type || task.access_type === 'owner';
+      const shareOption = isApiMode && isOwned
+        ? `<div class="menu-item" data-action="share">📤 Partager</div>`
+        : '';
+
       menu.innerHTML = `
         <div class="menu-item" data-action="urgent">🔥 ${task.urgent ? 'Enlever urgence' : 'Marquer urgent'}</div>
         <div class="menu-item" data-action="tomorrow">⏭️ Reporter à demain</div>
+        ${shareOption}
         <div class="menu-item danger" data-action="delete">🗑️ Supprimer</div>
       `;
 
@@ -248,6 +264,10 @@ const taskRow = (t, state) => {
         } else if (action === 'urgent') {
           task.urgent = !task.urgent;
           task.updatedAt = nowISO();
+        } else if (action === 'share') {
+          openShareModal(task.id, task.text);
+          menu.remove();
+          return; // Ne pas sauvegarder/rerender
         }
 
         saveState(state);

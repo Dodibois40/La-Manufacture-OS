@@ -9,6 +9,8 @@ import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
 import { initAuth, checkSession } from './auth.js';
+import { initNotifications, startNotificationPolling, stopNotificationPolling } from './notifications.js';
+import { initShareModal } from './share.js';
 
 // Load state (local first, then sync from API)
 let state = loadState();
@@ -139,6 +141,11 @@ const initApp = async () => {
       saveState(state);
       toast('Synchronisé ✓');
     }
+
+    // 3. Init Notifications & Share
+    initNotifications();
+    initShareModal();
+    startNotificationPolling();
   }
 
   // Auto Carry-Over (Silent)

@@ -14,6 +14,8 @@ import tasksRoutes from './routes/tasks.js';
 import settingsRoutes from './routes/settings.js';
 import aiRoutes from './routes/ai.js';
 import emailRoutes from './routes/email.js';
+import usersRoutes from './routes/users.js';
+import notificationsRoutes from './routes/notifications.js';
 
 dotenv.config();
 
@@ -93,6 +95,8 @@ await fastify.register(tasksRoutes, { prefix: '/api/tasks' });
 await fastify.register(settingsRoutes, { prefix: '/api/settings' });
 await fastify.register(aiRoutes, { prefix: '/api/ai' });
 await fastify.register(emailRoutes, { prefix: '/api/email' });
+await fastify.register(usersRoutes, { prefix: '/api/users' });
+await fastify.register(notificationsRoutes, { prefix: '/api/notifications' });
 
 // Start server
 const start = async () => {

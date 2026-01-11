@@ -1,27 +1,54 @@
 import { query } from '../db/connection.js';
 
 export default async function tasksRoutes(fastify) {
-  // Get all tasks for user
+  // Get all tasks for user (owned + shared with user)
   fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
     const { userId } = request.user;
     const { date, status } = request.query;
 
-    let queryText = 'SELECT * FROM tasks WHERE user_id = $1';
+    // Query that includes both owned tasks and shared tasks
+    let baseQuery = `
+      WITH all_tasks AS (
+        SELECT t.*,
+               u.name as owner_user_name,
+               NULL::text as shared_by_name,
+               NULL::integer as shared_by_user_id,
+               'owner' as access_type
+        FROM tasks t
+        JOIN users u ON t.user_id = u.id
+        WHERE t.user_id = $1
+
+        UNION ALL
+
+        SELECT t.*,
+               owner_u.name as owner_user_name,
+               sharer_u.name as shared_by_name,
+               ts.shared_by_user_id,
+               ts.permission as access_type
+        FROM tasks t
+        JOIN task_sharing ts ON t.id = ts.task_id
+        JOIN users owner_u ON t.user_id = owner_u.id
+        JOIN users sharer_u ON ts.shared_by_user_id = sharer_u.id
+        WHERE ts.shared_with_user_id = $1
+      )
+      SELECT * FROM all_tasks WHERE 1=1
+    `;
+
     const params = [userId];
 
     if (date) {
-      queryText += ` AND date = $${params.length + 1}`;
+      baseQuery += ` AND date = $${params.length + 1}`;
       params.push(date);
     }
 
     if (status) {
-      queryText += ` AND status = $${params.length + 1}`;
+      baseQuery += ` AND status = $${params.length + 1}`;
       params.push(status);
     }
 
-    queryText += ' ORDER BY date DESC, urgent DESC, created_at DESC';
+    baseQuery += ' ORDER BY date DESC, urgent DESC, created_at DESC';
 
-    const result = await query(queryText, params);
+    const result = await query(baseQuery, params);
     return { tasks: result.rows };
   });
 
@@ -231,6 +258,125 @@ export default async function tasksRoutes(fastify) {
     } catch (error) {
       fastify.log.error(error);
       return reply.status(500).send({ error: 'Time tracking failed' });
+    }
+  });
+
+  // ========== SHARING ENDPOINTS ==========
+
+  // Share a task with another user
+  fastify.post('/:id/share', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
+    const { id } = request.params;
+    const { targetUserId, permission = 'view' } = request.body;
+
+    if (!targetUserId) {
+      return reply.status(400).send({ error: 'targetUserId required' });
+    }
+
+    try {
+      // Verify ownership
+      const taskCheck = await query('SELECT id, text FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
+      if (taskCheck.rows.length === 0) {
+        return reply.status(403).send({ error: 'Cannot share a task you do not own' });
+      }
+
+      // Verify target user exists
+      const targetCheck = await query('SELECT id, name FROM users WHERE id = $1', [targetUserId]);
+      if (targetCheck.rows.length === 0) {
+        return reply.status(404).send({ error: 'Target user not found' });
+      }
+
+      // Create sharing (upsert)
+      const result = await query(
+        `INSERT INTO task_sharing (task_id, shared_with_user_id, shared_by_user_id, permission)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (task_id, shared_with_user_id) DO UPDATE SET permission = $4
+         RETURNING *`,
+        [id, targetUserId, userId, permission]
+      );
+
+      // Get sharer name for notification
+      const sharerResult = await query('SELECT name FROM users WHERE id = $1', [userId]);
+      const sharerName = sharerResult.rows[0]?.name || 'Quelqu\'un';
+
+      // Create notification for target user
+      const taskText = taskCheck.rows[0].text.substring(0, 50);
+      await query(
+        `INSERT INTO notifications (user_id, type, title, message, data)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          targetUserId,
+          'task_shared',
+          'Nouvelle tache partagee',
+          `${sharerName} a partage une tache avec vous: "${taskText}"`,
+          JSON.stringify({ task_id: id, shared_by_user_id: userId })
+        ]
+      );
+
+      // Log activity
+      await query(
+        'INSERT INTO activity_log (user_id, task_id, action, metadata) VALUES ($1, $2, $3, $4)',
+        [userId, id, 'shared', { with_user_id: targetUserId, permission }]
+      );
+
+      return {
+        sharing: result.rows[0],
+        targetUser: targetCheck.rows[0]
+      };
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ error: 'Sharing failed' });
+    }
+  });
+
+  // Get shares for a task
+  fastify.get('/:id/shares', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
+    const { id } = request.params;
+
+    try {
+      // Verify ownership
+      const taskCheck = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
+      if (taskCheck.rows.length === 0) {
+        return reply.status(403).send({ error: 'Task not found or not owned' });
+      }
+
+      const result = await query(
+        `SELECT ts.*, u.name, u.email
+         FROM task_sharing ts
+         JOIN users u ON ts.shared_with_user_id = u.id
+         WHERE ts.task_id = $1`,
+        [id]
+      );
+
+      return { shares: result.rows };
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ error: 'Failed to get shares' });
+    }
+  });
+
+  // Remove a share
+  fastify.delete('/:id/share/:targetUserId', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
+    const { id, targetUserId } = request.params;
+
+    try {
+      // Verify ownership
+      const taskCheck = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
+      if (taskCheck.rows.length === 0) {
+        return reply.status(403).send({ error: 'Cannot unshare a task you do not own' });
+      }
+
+      await query(
+        `DELETE FROM task_sharing WHERE task_id = $1 AND shared_with_user_id = $2`,
+        [id, targetUserId]
+      );
+
+      return { success: true };
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ error: 'Unsharing failed' });
     }
   });
 }

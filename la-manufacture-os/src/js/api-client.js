@@ -130,6 +130,22 @@ export const api = {
         body: JSON.stringify({ minutes }),
       });
     },
+
+    // Sharing
+    async share(id, targetUserId, permission = 'view') {
+      return apiRequest(`/api/tasks/${id}/share`, {
+        method: 'POST',
+        body: JSON.stringify({ targetUserId, permission }),
+      });
+    },
+
+    async unshare(id, targetUserId) {
+      return apiRequest(`/api/tasks/${id}/share/${targetUserId}`, { method: 'DELETE' });
+    },
+
+    async getShares(id) {
+      return apiRequest(`/api/tasks/${id}/shares`);
+    },
   },
 
   // Settings
@@ -175,6 +191,40 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ taskText, date }),
       });
+    },
+  },
+
+  // Users
+  users: {
+    async getAll() {
+      return apiRequest('/api/users');
+    },
+
+    async search(q) {
+      return apiRequest(`/api/users/search?q=${encodeURIComponent(q)}`);
+    },
+  },
+
+  // Notifications
+  notifications: {
+    async getAll() {
+      return apiRequest('/api/notifications');
+    },
+
+    async getUnreadCount() {
+      return apiRequest('/api/notifications/unread-count');
+    },
+
+    async markRead(id) {
+      return apiRequest(`/api/notifications/${id}/read`, { method: 'PATCH' });
+    },
+
+    async markAllRead() {
+      return apiRequest('/api/notifications/mark-all-read', { method: 'POST' });
+    },
+
+    async delete(id) {
+      return apiRequest(`/api/notifications/${id}`, { method: 'DELETE' });
     },
   },
 };

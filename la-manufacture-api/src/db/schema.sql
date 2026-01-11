@@ -71,12 +71,38 @@ CREATE TABLE IF NOT EXISTS email_inbox (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Task sharing (partage de taches entre utilisateurs)
+CREATE TABLE IF NOT EXISTS task_sharing (
+  id SERIAL PRIMARY KEY,
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  shared_with_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  shared_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  permission VARCHAR(20) DEFAULT 'view' CHECK (permission IN ('view', 'edit')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(task_id, shared_with_user_id)
+);
+
+-- Notifications
+CREATE TABLE IF NOT EXISTS notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT,
+  data JSONB,
+  read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes pour performance
 CREATE INDEX IF NOT EXISTS idx_tasks_user_date ON tasks(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_tasks_user_done ON tasks(user_id, done);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_email_inbox_user ON email_inbox(user_id, processed);
+CREATE INDEX IF NOT EXISTS idx_task_sharing_user ON task_sharing(shared_with_user_id);
+CREATE INDEX IF NOT EXISTS idx_task_sharing_task ON task_sharing(task_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read);
 
 -- Trigger pour updated_at automatique
 CREATE OR REPLACE FUNCTION update_updated_at_column()
