@@ -26,6 +26,70 @@ body.briefing-active nav {
   pointer-events: none;
 }
 
+/* === App Loader === */
+.app-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.app-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-content {
+  text-align: center;
+}
+
+.loader-logo {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.loader-logo span {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 2rem;
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: 0.15em;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loader-logo span:nth-child(2) { animation-delay: 0.1s; }
+.loader-logo span:nth-child(3) { animation-delay: 0.2s; }
+.loader-logo span:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.loader-spinner {
+  width: 24px;
+  height: 24px;
+  margin: 0 auto;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* === Header & Branding === */
 header {
   text-align: center;

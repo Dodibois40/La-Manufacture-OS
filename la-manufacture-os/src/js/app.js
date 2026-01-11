@@ -93,12 +93,21 @@ const render = () => {
 // Store render globally for views.js to access
 window._renderCallback = render;
 
+// Hide app loader
+const hideLoader = () => {
+  const loader = document.getElementById('appLoader');
+  if (loader) loader.classList.add('hidden');
+};
+
 // Init app
 const initApp = async () => {
   // Fallback: enlever briefing-active apres 10s si toujours present
   setTimeout(() => {
     document.body.classList.remove('briefing-active');
   }, 10000);
+
+  // Fallback: cacher le loader apres 8s max
+  setTimeout(hideLoader, 8000);
 
   // Storage UI
   initStorageUI();
@@ -113,6 +122,7 @@ const initApp = async () => {
 
     if (!user) {
       // Not logged in -> Show Auth Screen
+      hideLoader();
       setView('auth');
       return;
     }
@@ -159,9 +169,11 @@ const initApp = async () => {
   // Initial render
   if (isApiMode) {
     // If we are here, we are logged in
+    hideLoader();
     setView('day');
   } else {
     // Local mode
+    hideLoader();
     toast('Prêt (mode local)');
     setView('day');
   }
