@@ -95,6 +95,11 @@ window._renderCallback = render;
 
 // Init app
 const initApp = async () => {
+  // Fallback: enlever briefing-active apres 10s si toujours present
+  setTimeout(() => {
+    document.body.classList.remove('briefing-active');
+  }, 10000);
+
   // Storage UI
   initStorageUI();
 

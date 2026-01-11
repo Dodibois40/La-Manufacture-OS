@@ -111,14 +111,22 @@ export const initAuth = (state, renderCallback) => {
 // Check session on load
 export const checkSession = async () => {
   // If logout was requested, force return null
-  if (localStorage.getItem('force_logout') === 'true') {
-    localStorage.removeItem('force_logout');
-    return null;
-  }
+  try {
+    if (localStorage.getItem('force_logout') === 'true') {
+      localStorage.removeItem('force_logout');
+      return null;
+    }
+  } catch (e) {}
 
   try {
     const { api } = await import('./api-client.js');
-    const res = await api.auth.me();
+
+    // Timeout de 5 secondes pour connexions mobiles lentes
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 5000)
+    );
+
+    const res = await Promise.race([api.auth.me(), timeoutPromise]);
     return res.user;
   } catch (err) {
     return null;

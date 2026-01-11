@@ -28,10 +28,14 @@
   <script>
     // Immediately hide content if morning briefing should show
     (function() {
-      var today = new Date().toISOString().slice(0, 10);
-      var lastBriefing = localStorage.getItem('last_briefing');
-      if (lastBriefing !== today) {
-        document.body.classList.add('briefing-active');
+      try {
+        var today = new Date().toISOString().slice(0, 10);
+        var lastBriefing = localStorage.getItem('last_briefing');
+        if (lastBriefing !== today) {
+          document.body.classList.add('briefing-active');
+        }
+      } catch (e) {
+        // localStorage indisponible (nav privee iOS) - skip briefing
       }
     })();
   </script>

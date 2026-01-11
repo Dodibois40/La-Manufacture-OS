@@ -3,7 +3,12 @@ import { isoLocal, nowISO } from './utils.js';
 export const initMorningBriefing = (state) => {
     // Check if first launch of the day
     const today = isoLocal();
-    const lastLaunch = localStorage.getItem('last_briefing');
+    let lastLaunch = null;
+    try {
+        lastLaunch = localStorage.getItem('last_briefing');
+    } catch (e) {
+        // localStorage indisponible (nav privee iOS)
+    }
 
     // If already seen today, skip (unless debug force)
     if (lastLaunch === today && !window.location.search.includes('forceBrief')) return;
@@ -70,7 +75,9 @@ export const initMorningBriefing = (state) => {
         // Disparition
         setTimeout(() => {
             el.classList.add('hidden');
-            localStorage.setItem('last_briefing', today);
+            try {
+                localStorage.setItem('last_briefing', today);
+            } catch (e) {}
         }, 600);
 
         // Cleanup
