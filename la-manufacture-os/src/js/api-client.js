@@ -178,6 +178,13 @@ export const api = {
         body: JSON.stringify({ text }),
       });
     },
+
+    async detectEvent(text) {
+      return apiRequest('/api/ai/detect-event', {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      });
+    },
   },
 
   // Email
@@ -308,6 +315,32 @@ export const api = {
 
     async deleteFile(id) {
       return apiRequest(`/api/team/files/${id}`, { method: 'DELETE' });
+    },
+  },
+
+  // Google Calendar
+  google: {
+    async getAuthUrl() {
+      return apiRequest('/api/google/auth-url');
+    },
+
+    async getStatus() {
+      return apiRequest('/api/google/status');
+    },
+
+    async disconnect() {
+      return apiRequest('/api/google/disconnect', { method: 'DELETE' });
+    },
+
+    async syncEvent(taskId, title, date, startTime, endTime, location, googleEventId) {
+      return apiRequest('/api/google/sync-event', {
+        method: 'POST',
+        body: JSON.stringify({ taskId, title, date, startTime, endTime, location, googleEventId }),
+      });
+    },
+
+    async deleteEvent(googleEventId) {
+      return apiRequest(`/api/google/event/${googleEventId}`, { method: 'DELETE' });
     },
   },
 };

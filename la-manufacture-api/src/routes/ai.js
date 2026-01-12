@@ -207,4 +207,84 @@ RÉPONDS UNIQUEMENT avec un JSON array valide :
       return reply.status(500).send({ error: 'Parse failed' });
     }
   });
+
+  // Detect if text is an event/RDV (for Google Calendar sync)
+  fastify.post('/detect-event', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
+    const { text, date } = request.body;
+
+    if (!text) {
+      return reply.status(400).send({ error: 'Missing text' });
+    }
+
+    try {
+      const prompt = `Tu analyses si un texte est un RDV/evenement ou une tache simple.
+
+RDV = quelque chose avec une heure precise (reunion, rdv, dejeuner, deplacement, appel programme, rendez-vous)
+Tache = action sans heure precise (appeler, faire, envoyer, preparer, finir)
+
+Exemples RDV:
+- "RDV dentiste 15h" → RDV, 15:00-16:00
+- "Dejeuner avec Marc 12h30" → RDV, 12:30-14:00
+- "Deplacement Paris 9h-18h" → RDV, 09:00-18:00
+- "Reunion equipe 14h salle B" → RDV, 14:00-15:00, lieu: "salle B"
+- "Appel client 10h" → RDV, 10:00-10:30
+- "Visite chantier 8h30" → RDV, 08:30-10:00
+
+Exemples Taches (PAS des RDV):
+- "Appeler le client" → Tache (pas d'heure)
+- "Preparer presentation" → Tache
+- "Envoyer devis Dupont" → Tache
+- "Faire les courses" → Tache
+
+TEXTE: "${text}"
+
+Si c'est un RDV, extrais:
+- title: titre court et clair
+- startTime: heure debut "HH:MM"
+- endTime: heure fin "HH:MM" (si non precise: +1h pour rdv, +30min pour appel, +2h pour deplacement/repas)
+- location: lieu si mentionne, sinon null
+
+Reponds UNIQUEMENT en JSON:
+{"isEvent":true/false,"title":"...","startTime":"HH:MM","endTime":"HH:MM","location":"..." ou null}`;
+
+      const message = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }]
+      });
+
+      const responseText = message.content[0].text;
+
+      // Parse JSON response
+      let result;
+      try {
+        // Extract JSON from response (in case there's extra text)
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          result = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found');
+        }
+      } catch (parseError) {
+        fastify.log.error('Event detection JSON parse failed:', parseError);
+        // Default to not an event
+        result = { isEvent: false };
+      }
+
+      // Log AI interaction
+      await query(
+        'INSERT INTO ai_interactions (user_id, type, prompt, response, tokens_used) VALUES ($1, $2, $3, $4, $5)',
+        [userId, 'detect_event', prompt, responseText, message.usage.output_tokens]
+      );
+
+      return result;
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ error: 'Event detection failed' });
+    }
+  });
 }

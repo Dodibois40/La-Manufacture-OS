@@ -200,7 +200,24 @@ const taskRow = (t, state) => {
 
   const tx = document.createElement('div');
   tx.className = 'text' + (task.done ? ' done' : '');
-  tx.textContent = task.text;
+
+  // If event, show time before text
+  if (task.is_event && task.start_time) {
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'task-event-time';
+    timeSpan.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${task.start_time.slice(0, 5)}`;
+    tx.appendChild(timeSpan);
+  }
+
+  tx.appendChild(document.createTextNode(task.text));
+
+  // Add event badge if it's a RDV
+  if (task.is_event) {
+    const eventBadge = document.createElement('span');
+    eventBadge.className = 'task-event-badge';
+    eventBadge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>RDV`;
+    tx.appendChild(eventBadge);
+  }
 
   const meta = document.createElement('div');
   meta.className = 'meta';
@@ -214,7 +231,13 @@ const taskRow = (t, state) => {
     sharedIndicator = `<span class="meta-item shared-indicator">📤 De ${task.shared_by_name}</span>`;
   }
 
-  meta.innerHTML = `<span class="meta-item">${ownerIcon} ${task.owner}${urgentIcon}</span>${sharedIndicator}`;
+  // Location indicator for events
+  let locationIndicator = '';
+  if (task.is_event && task.location) {
+    locationIndicator = `<span class="meta-item task-event-location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${task.location}</span>`;
+  }
+
+  meta.innerHTML = `<span class="meta-item">${ownerIcon} ${task.owner}${urgentIcon}</span>${locationIndicator}${sharedIndicator}`;
 
   body.appendChild(tx);
   body.appendChild(meta);

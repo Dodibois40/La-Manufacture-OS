@@ -1248,3 +1248,152 @@ textarea:focus {
 .btn-full {
   width: 100%;
 }
+
+/* ========================================
+   GOOGLE CALENDAR INTEGRATION
+   ======================================== */
+
+#googleCalendarSection {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.google-description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.google-connect-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.google-connect-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.google-logo {
+  width: 20px;
+  height: 20px;
+}
+
+.google-connected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+}
+
+.google-connected-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.google-icon {
+  width: 24px;
+  height: 24px;
+  color: #10b981;
+}
+
+.google-connected-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: white;
+}
+
+.google-connected-date {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.google-disconnect-btn {
+  padding: 8px 16px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.google-disconnect-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.google-error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+/* ========================================
+   EVENT/RDV INDICATOR IN TASKS
+   ======================================== */
+
+.task-event-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #60a5fa;
+  margin-left: 8px;
+}
+
+.task-event-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.task-event-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-right: 8px;
+}
+
+.task-event-time svg {
+  width: 14px;
+  height: 14px;
+}
+
+.task-event-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.task-event-location svg {
+  width: 12px;
+  height: 12px;
+}

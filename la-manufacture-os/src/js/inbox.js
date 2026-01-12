@@ -1,6 +1,7 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
-import { isApiMode } from './api-client.js';
+import { isApiMode, api } from './api-client.js';
+import { isGoogleConnected, syncTaskToGoogle } from './google-calendar.js';
 
 // Clé API Anthropic pour Claude Opus 4.5
 const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
@@ -269,19 +270,47 @@ export const initInboxControls = (state, renderCallback) => {
           // Owner: celui détecté par Claude ou le défaut
           const finalOwner = task.owner || defaultOwner;
 
+          // Detect if this is an event/RDV (has a specific time)
+          let eventData = { is_event: false };
+          if (isApiMode && isLoggedIn()) {
+            try {
+              eventData = await api.ai.detectEvent(taskText);
+            } catch (e) {
+              console.warn('Event detection failed:', e);
+            }
+          }
+
           const newTask = ensureTask({
-            text: taskText,
+            text: eventData.isEvent && eventData.title ? eventData.title : taskText,
             owner: finalOwner,
             urgent: finalUrgent,
             date: finalDate,
             done: false,
-            updatedAt: nowISO()
+            updatedAt: nowISO(),
+            // Event fields
+            is_event: eventData.isEvent || false,
+            start_time: eventData.startTime || null,
+            end_time: eventData.endTime || null,
+            location: eventData.location || null,
           }, defaultOwner);
 
           try {
             if (isApiMode && isLoggedIn()) {
               const apiTask = await taskApi.create(newTask);
               state.tasks.push(apiTask);
+
+              // Sync to Google Calendar if event and connected
+              if (apiTask.is_event && isGoogleConnected()) {
+                try {
+                  const googleEventId = await syncTaskToGoogle(apiTask);
+                  if (googleEventId) {
+                    await api.tasks.update(apiTask.id, { google_event_id: googleEventId });
+                    apiTask.google_event_id = googleEventId;
+                  }
+                } catch (syncError) {
+                  console.warn('Google sync failed:', syncError);
+                }
+              }
             } else {
               state.tasks.push(newTask);
             }

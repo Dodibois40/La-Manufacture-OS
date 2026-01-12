@@ -12,6 +12,7 @@ import { initAuth, checkSession } from './auth.js';
 import { initNotifications, startNotificationPolling, stopNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
+import { initGoogleCalendar } from './google-calendar.js';
 
 // Load state (local first, then sync from API)
 let state = loadState();
@@ -150,6 +151,7 @@ const initApp = async () => {
 
     // 4. Init Team Management
     initTeam(user.userId);
+    initGoogleCalendar();
   }
 
   // Auto Carry-Over (Silent)

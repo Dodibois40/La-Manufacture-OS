@@ -131,7 +131,7 @@ export default async function tasksRoutes(fastify) {
   // Create task
   fastify.post('/', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
-    const { text, date, owner, assignee, urgent, status } = request.body;
+    const { text, date, owner, assignee, urgent, status, is_event, start_time, end_time, location } = request.body;
 
     if (!text || !date || !owner) {
       return reply.status(400).send({ error: 'Missing required fields' });
@@ -139,13 +139,32 @@ export default async function tasksRoutes(fastify) {
 
     try {
       const result = await query(
-        `INSERT INTO tasks (user_id, text, date, owner, assignee, urgent, status, done)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO tasks (user_id, text, date, owner, assignee, urgent, status, done, is_event, start_time, end_time, location)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          RETURNING *`,
-        [userId, text, date, owner, assignee || owner, urgent || false, status || 'open', false]
+        [userId, text, date, owner, assignee || owner, urgent || false, status || 'open', false,
+         is_event || false, start_time || null, end_time || null, location || null]
       );
 
-      const task = result.rows[0];
+      let task = result.rows[0];
+
+      // If it's an event and Google Calendar is connected, sync it
+      if (task.is_event && task.start_time) {
+        try {
+          const googleTokens = await query(
+            'SELECT id FROM google_tokens WHERE user_id = $1',
+            [userId]
+          );
+
+          if (googleTokens.rows.length > 0) {
+            // Call the sync endpoint internally (we'll handle this in frontend instead)
+            // Just flag that Google sync is available
+            task.googleSyncAvailable = true;
+          }
+        } catch (syncError) {
+          fastify.log.error('Google sync check error:', syncError);
+        }
+      }
 
       // Log activity
       await query(
@@ -179,7 +198,8 @@ export default async function tasksRoutes(fastify) {
       let paramIndex = 1;
 
       for (const [key, value] of Object.entries(updates)) {
-        if (['text', 'date', 'owner', 'assignee', 'status', 'urgent', 'done', 'time_spent'].includes(key)) {
+        if (['text', 'date', 'owner', 'assignee', 'status', 'urgent', 'done', 'time_spent',
+             'is_event', 'start_time', 'end_time', 'location', 'google_event_id'].includes(key)) {
           fields.push(`${key} = $${paramIndex}`);
           values.push(value);
           paramIndex++;

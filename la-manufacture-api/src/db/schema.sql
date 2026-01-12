@@ -131,6 +131,29 @@ CREATE TABLE IF NOT EXISTS team_files (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Google Calendar tokens (OAuth2 pour sync calendrier)
+CREATE TABLE IF NOT EXISTS google_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  access_token TEXT NOT NULL,
+  refresh_token TEXT NOT NULL,
+  token_expiry TIMESTAMP NOT NULL,
+  calendar_id VARCHAR(255) DEFAULT 'primary',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Ajout colonnes RDV/Event a tasks (pour sync Google Calendar)
+-- is_event: true si c'est un RDV (detecte par AI), false si tache normale
+-- start_time/end_time: heure du RDV
+-- location: lieu du RDV (optionnel)
+-- google_event_id: ID de l'evenement dans Google Calendar
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_event BOOLEAN DEFAULT FALSE;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS start_time TIME;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS end_time TIME;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS location VARCHAR(255);
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS google_event_id VARCHAR(255);
+
 -- Indexes pour performance
 CREATE INDEX IF NOT EXISTS idx_tasks_user_date ON tasks(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_tasks_user_done ON tasks(user_id, done);
@@ -145,6 +168,8 @@ CREATE INDEX IF NOT EXISTS idx_team_tasks_member ON team_tasks(team_member_id, d
 CREATE INDEX IF NOT EXISTS idx_team_tasks_user ON team_tasks(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_team_files_user ON team_files(user_id);
 CREATE INDEX IF NOT EXISTS idx_team_files_member ON team_files(team_member_id);
+CREATE INDEX IF NOT EXISTS idx_google_tokens_user ON google_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_is_event ON tasks(user_id, is_event) WHERE is_event = TRUE;
 
 -- Trigger pour updated_at automatique
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -176,4 +201,9 @@ CREATE TRIGGER update_team_members_updated_at BEFORE UPDATE ON team_members
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_team_tasks_updated_at BEFORE UPDATE ON team_tasks
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_google_tokens_updated_at ON google_tokens;
+
+CREATE TRIGGER update_google_tokens_updated_at BEFORE UPDATE ON google_tokens
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
