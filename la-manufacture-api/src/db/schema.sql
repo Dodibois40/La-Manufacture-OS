@@ -94,6 +94,43 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Team members (employes sans compte, lies a un manager)
+CREATE TABLE IF NOT EXISTS team_members (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- le manager
+  name VARCHAR(255) NOT NULL,
+  avatar_color VARCHAR(7) DEFAULT '#3b82f6', -- couleur hex pour avatar
+  active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Team tasks (taches assignees aux membres d'equipe)
+CREATE TABLE IF NOT EXISTS team_tasks (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- le manager
+  team_member_id INTEGER NOT NULL REFERENCES team_members(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  date DATE NOT NULL,
+  urgent BOOLEAN DEFAULT FALSE,
+  done BOOLEAN DEFAULT FALSE,
+  done_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Team files (fichiers partages - globaux ou par membre)
+CREATE TABLE IF NOT EXISTS team_files (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- le manager
+  team_member_id INTEGER REFERENCES team_members(id) ON DELETE CASCADE, -- NULL = global
+  filename VARCHAR(255) NOT NULL, -- nom stocke sur le serveur
+  original_name VARCHAR(255) NOT NULL, -- nom original du fichier
+  mime_type VARCHAR(100),
+  size INTEGER, -- taille en bytes
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes pour performance
 CREATE INDEX IF NOT EXISTS idx_tasks_user_date ON tasks(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_tasks_user_done ON tasks(user_id, done);
@@ -103,6 +140,11 @@ CREATE INDEX IF NOT EXISTS idx_email_inbox_user ON email_inbox(user_id, processe
 CREATE INDEX IF NOT EXISTS idx_task_sharing_user ON task_sharing(shared_with_user_id);
 CREATE INDEX IF NOT EXISTS idx_task_sharing_task ON task_sharing(task_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_team_members_user ON team_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_team_tasks_member ON team_tasks(team_member_id, date);
+CREATE INDEX IF NOT EXISTS idx_team_tasks_user ON team_tasks(user_id, date);
+CREATE INDEX IF NOT EXISTS idx_team_files_user ON team_files(user_id);
+CREATE INDEX IF NOT EXISTS idx_team_files_member ON team_files(team_member_id);
 
 -- Trigger pour updated_at automatique
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -125,4 +167,13 @@ CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_settings_updated_at BEFORE UPDATE ON settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_team_members_updated_at ON team_members;
+DROP TRIGGER IF EXISTS update_team_tasks_updated_at ON team_tasks;
+
+CREATE TRIGGER update_team_members_updated_at BEFORE UPDATE ON team_members
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_team_tasks_updated_at BEFORE UPDATE ON team_tasks
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

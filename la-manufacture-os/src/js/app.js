@@ -11,6 +11,7 @@ import { initSpeechToText } from './speech.js';
 import { initAuth, checkSession } from './auth.js';
 import { initNotifications, startNotificationPolling, stopNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
+import { initTeam } from './team.js';
 
 // Load state (local first, then sync from API)
 let state = loadState();
@@ -146,6 +147,9 @@ const initApp = async () => {
     initNotifications();
     initShareModal();
     startNotificationPolling();
+
+    // 4. Init Team Management
+    initTeam(user.userId);
   }
 
   // Auto Carry-Over (Silent)

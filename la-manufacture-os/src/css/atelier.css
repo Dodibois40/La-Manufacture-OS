@@ -1,0 +1,557 @@
+/* FLOW Atelier - Style simplifie pour ecran d'atelier */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  min-height: 100vh;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
+.atelier-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.atelier-header {
+  text-align: center;
+  padding: 20px 0 40px;
+}
+
+.atelier-logo {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  margin-bottom: 8px;
+}
+
+.atelier-logo span {
+  display: inline-block;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.atelier-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Views */
+.atelier-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.atelier-view.hidden {
+  display: none;
+}
+
+/* Selection des membres */
+.atelier-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 40px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.member-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px);
+}
+
+.member-card:active {
+  transform: translateY(0);
+}
+
+.member-card .avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.member-card .name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+}
+
+.member-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 40px;
+}
+
+.member-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #ff453a;
+  padding: 40px;
+}
+
+/* Vue Taches */
+.tasks-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.back-btn svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.member-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.member-details h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.tasks-date {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.files-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.files-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.files-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Liste des taches */
+.tasks-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0;
+  overflow-y: auto;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.task-item.completed {
+  opacity: 0.5;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+}
+
+.task-check {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.task-item.completed .task-check {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.task-check svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.task-item.completed .task-check svg {
+  opacity: 1;
+}
+
+.task-content {
+  flex: 1;
+}
+
+.task-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.task-urgent {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: #ff453a;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.tasks-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 60px 20px;
+  font-size: 1.1rem;
+}
+
+/* Progress */
+.tasks-progress {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+  margin-top: auto;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+
+.progress-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Vue Fichiers */
+.files-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  margin-bottom: 16px;
+}
+
+.files-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.files-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.file-tab {
+  flex: 1;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.file-tab.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: white;
+}
+
+.files-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.file-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-icon.pdf {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.file-icon.image {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.file-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-name {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.file-meta {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.file-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.file-action-btn {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.file-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.file-action-btn.primary {
+  background: #3b82f6;
+}
+
+.file-action-btn.primary:hover {
+  background: #2563eb;
+}
+
+.files-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 60px 20px;
+}
+
+/* Toast */
+.atelier-toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(40, 40, 40, 0.95);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 1rem;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.atelier-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.atelier-toast.success {
+  background: rgba(16, 185, 129, 0.95);
+}
+
+/* Animation de completion */
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.task-item.just-completed .task-check {
+  animation: checkmark 0.4s ease;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .atelier-container {
+    padding: 16px;
+  }
+
+  .atelier-logo {
+    font-size: 2rem;
+  }
+
+  .atelier-title {
+    font-size: 1.5rem;
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .member-card {
+    padding: 20px 12px;
+  }
+
+  .member-card .avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .task-item {
+    padding: 16px;
+  }
+
+  .files-btn span {
+    display: none;
+  }
+
+  .file-actions {
+    flex-direction: column;
+  }
+}

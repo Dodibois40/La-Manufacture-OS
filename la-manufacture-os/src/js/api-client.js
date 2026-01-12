@@ -227,6 +227,89 @@ export const api = {
       return apiRequest(`/api/notifications/${id}`, { method: 'DELETE' });
     },
   },
+
+  // Team Management
+  team: {
+    async getMembers() {
+      return apiRequest('/api/team/members');
+    },
+
+    async addMember(name, avatar_color) {
+      return apiRequest('/api/team/members', {
+        method: 'POST',
+        body: JSON.stringify({ name, avatar_color }),
+      });
+    },
+
+    async updateMember(id, updates) {
+      return apiRequest(`/api/team/members/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+    },
+
+    async deleteMember(id) {
+      return apiRequest(`/api/team/members/${id}`, { method: 'DELETE' });
+    },
+
+    async getTasks(memberId, date) {
+      const params = new URLSearchParams();
+      if (memberId) params.set('member_id', memberId);
+      if (date) params.set('date', date);
+      return apiRequest(`/api/team/tasks?${params}`);
+    },
+
+    async addTask(memberId, text, date, urgent = false) {
+      return apiRequest('/api/team/tasks', {
+        method: 'POST',
+        body: JSON.stringify({
+          team_member_id: memberId,
+          text,
+          date,
+          urgent,
+        }),
+      });
+    },
+
+    async updateTask(id, updates) {
+      return apiRequest(`/api/team/tasks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+    },
+
+    async deleteTask(id) {
+      return apiRequest(`/api/team/tasks/${id}`, { method: 'DELETE' });
+    },
+
+    async getFiles(memberId) {
+      const params = memberId ? `?member_id=${memberId}` : '';
+      return apiRequest(`/api/team/files${params}`);
+    },
+
+    async uploadFile(formData) {
+      const token = tokenStorage.get();
+      const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      const response = await fetch(`${API_URL}/api/team/files`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: authHeaders,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(error.error || 'Upload failed');
+      }
+
+      return response.json();
+    },
+
+    async deleteFile(id) {
+      return apiRequest(`/api/team/files/${id}`, { method: 'DELETE' });
+    },
+  },
 };
 
 // Export mode for conditional logic

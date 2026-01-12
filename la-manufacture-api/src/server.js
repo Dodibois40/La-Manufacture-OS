@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
+import multipart from '@fastify/multipart';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -16,6 +17,8 @@ import aiRoutes from './routes/ai.js';
 import emailRoutes from './routes/email.js';
 import usersRoutes from './routes/users.js';
 import notificationsRoutes from './routes/notifications.js';
+import teamRoutes from './routes/team.js';
+import teamFilesRoutes from './routes/team-files.js';
 
 dotenv.config();
 
@@ -51,6 +54,12 @@ await fastify.register(cors, {
 });
 
 await fastify.register(cookie);
+
+await fastify.register(multipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max
+  }
+});
 
 await fastify.register(jwt, {
   secret: process.env.JWT_SECRET || 'supersecret-change-in-production',
@@ -97,6 +106,8 @@ await fastify.register(aiRoutes, { prefix: '/api/ai' });
 await fastify.register(emailRoutes, { prefix: '/api/email' });
 await fastify.register(usersRoutes, { prefix: '/api/users' });
 await fastify.register(notificationsRoutes, { prefix: '/api/notifications' });
+await fastify.register(teamRoutes, { prefix: '/api/team' });
+await fastify.register(teamFilesRoutes, { prefix: '/api/team' });
 
 // Start server
 const start = async () => {

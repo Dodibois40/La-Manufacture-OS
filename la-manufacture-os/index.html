@@ -328,6 +328,79 @@
         </div>
       </div>
 
+      <!-- Team Management Section -->
+      <div class="settings-section" id="teamSection" style="display: none;">
+        <label class="settings-label">
+          <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Mon Equipe
+        </label>
+
+        <!-- Lien atelier -->
+        <div class="team-link-section">
+          <p class="settings-hint">Lien pour l'ecran atelier :</p>
+          <div class="team-link-box">
+            <input type="text" id="atelierLink" class="settings-input" readonly>
+            <button class="btn btn-small" id="copyLinkBtn">Copier</button>
+          </div>
+        </div>
+
+        <!-- Liste des membres -->
+        <div class="team-members-section">
+          <div class="team-members-header">
+            <span>Membres</span>
+            <button class="btn btn-small btn-primary" id="addMemberBtn">+ Ajouter</button>
+          </div>
+          <div class="team-members-list" id="teamMembersList">
+            <!-- Genere dynamiquement -->
+          </div>
+        </div>
+
+        <!-- Ajouter une tache a un membre -->
+        <div class="team-task-section">
+          <div class="team-task-header">
+            <span>Assigner une tache</span>
+          </div>
+          <select id="teamMemberSelect" class="settings-input">
+            <option value="">Selectionner un membre...</option>
+          </select>
+          <input type="text" id="teamTaskText" class="settings-input" placeholder="Description de la tache...">
+          <div class="team-task-options">
+            <input type="date" id="teamTaskDate" class="settings-input">
+            <label class="team-urgent-label">
+              <input type="checkbox" id="teamTaskUrgent">
+              Urgent
+            </label>
+          </div>
+          <button class="btn btn-primary btn-full" id="addTeamTaskBtn">Assigner</button>
+        </div>
+
+        <!-- Upload de fichiers -->
+        <div class="team-files-section">
+          <div class="team-files-header">
+            <span>Documents partages</span>
+            <button class="btn btn-small" id="uploadFileBtn">+ Upload</button>
+            <input type="file" id="teamFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" class="hidden-input">
+          </div>
+          <div class="team-files-options">
+            <label class="settings-hint">
+              <input type="checkbox" id="fileGlobal" checked>
+              Global (visible par tous)
+            </label>
+            <select id="fileTargetMember" class="settings-input settings-input-small" disabled>
+              <option value="">Ou choisir un membre...</option>
+            </select>
+          </div>
+          <div class="team-files-list" id="teamFilesList">
+            <!-- Genere dynamiquement -->
+          </div>
+        </div>
+      </div>
+
       <div class="settings-section" id="logoutSection">
         <label class="settings-label">
           <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

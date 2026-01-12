@@ -955,3 +955,233 @@ textarea:focus {
   width: 12px;
   height: 12px;
 }
+
+/* ========================================
+   TEAM MANAGEMENT
+   ======================================== */
+
+.team-link-section {
+  margin-bottom: 20px;
+}
+
+.team-link-box {
+  display: flex;
+  gap: 8px;
+}
+
+.team-link-box .settings-input {
+  flex: 1;
+  font-size: 0.8rem;
+}
+
+.team-members-section,
+.team-task-section,
+.team-files-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.team-members-header,
+.team-task-header,
+.team-files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.team-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-member-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.team-member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.team-member-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.team-member-delete {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.team-member-delete:hover {
+  opacity: 1;
+}
+
+.team-member-delete svg {
+  width: 18px;
+  height: 18px;
+  color: #ff453a;
+}
+
+.team-members-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 20px;
+  font-size: 0.85rem;
+}
+
+.team-task-options {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.team-task-options .settings-input {
+  flex: 1;
+}
+
+.team-urgent-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.team-urgent-label input {
+  width: 18px;
+  height: 18px;
+}
+
+.team-files-options {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.team-files-options .settings-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.settings-input-small {
+  width: auto;
+  min-width: 150px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.team-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.team-file-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.team-file-icon.image {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.team-file-icon svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.team-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-file-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-file-meta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.team-file-delete {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.team-file-delete:hover {
+  opacity: 1;
+}
+
+.team-file-delete svg {
+  width: 18px;
+  height: 18px;
+  color: #ff453a;
+}
+
+.team-files-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 20px;
+  font-size: 0.85rem;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 0.8rem;
+}
+
+.btn-full {
+  width: 100%;
+}
