@@ -960,26 +960,52 @@ textarea:focus {
    TEAM MANAGEMENT
    ======================================== */
 
-.team-link-section {
+/* Section principale equipe */
+#teamSection {
+  margin-top: 8px;
+}
+
+#teamSection > .settings-label {
   margin-bottom: 20px;
+}
+
+/* Lien atelier - mis en evidence */
+.team-link-section {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+
+.team-link-section .settings-hint {
+  margin: 0 0 14px 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .team-link-box {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 }
 
 .team-link-box .settings-input {
   flex: 1;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
+/* Cards pour chaque sous-section */
 .team-members-section,
 .team-task-section,
 .team-files-section {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
 .team-members-header,
@@ -988,41 +1014,52 @@ textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  font-weight: 600;
+  margin-bottom: 16px;
+  font-weight: 700;
   font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.02em;
 }
 
+/* Liste des membres */
 .team-members-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .team-member-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  transition: background 0.2s;
+}
+
+.team-member-item:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .team-member-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   color: white;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .team-member-name {
   flex: 1;
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .team-member-delete {
@@ -1030,7 +1067,7 @@ textarea:focus {
   border: none;
   padding: 8px;
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.4;
   transition: opacity 0.2s;
 }
 
@@ -1046,71 +1083,97 @@ textarea:focus {
 
 .team-members-empty {
   text-align: center;
-  color: rgba(255, 255, 255, 0.4);
-  padding: 20px;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 24px 16px;
   font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+}
+
+/* Section assignation de tache */
+.team-task-section select,
+.team-task-section input[type="text"] {
+  margin-bottom: 12px;
 }
 
 .team-task-options {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
-  margin: 12px 0;
+  margin: 16px 0;
 }
 
 .team-task-options .settings-input {
   flex: 1;
+  margin-bottom: 0;
 }
 
 .team-urgent-label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .team-urgent-label input {
   width: 18px;
   height: 18px;
+  accent-color: #ff453a;
 }
 
+/* Section fichiers */
 .team-files-options {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
   flex-wrap: wrap;
 }
 
 .team-files-options .settings-hint {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
+  font-size: 0.85rem;
+}
+
+.team-files-options .settings-hint input {
+  accent-color: var(--accent);
 }
 
 .settings-input-small {
   width: auto;
-  min-width: 150px;
-  padding: 8px 12px;
+  min-width: 160px;
+  padding: 10px 14px;
   font-size: 0.85rem;
 }
 
 .team-files-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .team-file-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  transition: background 0.2s;
+}
+
+.team-file-item:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .team-file-icon {
