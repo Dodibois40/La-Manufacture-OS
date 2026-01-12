@@ -324,8 +324,14 @@ export default async function tasksRoutes(fastify) {
         targetUser: targetCheck.rows[0]
       };
     } catch (error) {
-      fastify.log.error(error);
-      return reply.status(500).send({ error: 'Sharing failed' });
+      fastify.log.error('Share error:', error);
+      // Return more detailed error for debugging
+      const errorMessage = error.message || 'Sharing failed';
+      const isTableMissing = errorMessage.includes('does not exist');
+      return reply.status(500).send({
+        error: isTableMissing ? 'Database tables not initialized. Run migrations.' : errorMessage,
+        details: error.message
+      });
     }
   });
 
