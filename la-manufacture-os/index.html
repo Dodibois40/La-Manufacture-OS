@@ -145,6 +145,15 @@
               <p class="auth-switch-minimal">Already have an account? <a href="#" id="showLogin">Sign in</a></p>
               <div class="auth-error" id="registerError"></div>
             </div>
+
+            <!-- Verification Code -->
+            <div class="auth-form-minimal hidden" id="verifyForm">
+              <p class="verify-message">Enter the verification code sent to your email</p>
+              <input type="text" id="verifyCode" placeholder="Verification code" autocomplete="one-time-code" class="input-minimal" maxlength="6">
+              <button class="btn-minimal" id="verifyBtn">Verify</button>
+              <p class="auth-switch-minimal"><a href="#" id="backToRegister">Back</a></p>
+              <div class="auth-error" id="verifyError"></div>
+            </div>
           </div>
         </div>
       </div>

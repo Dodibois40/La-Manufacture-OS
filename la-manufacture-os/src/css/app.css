@@ -874,6 +874,13 @@ nav button.active .nav-icon {
   animation: fadeInUp 0.5s ease-out;
 }
 
+.verify-message {
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;

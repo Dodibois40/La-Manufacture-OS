@@ -8,7 +8,7 @@ import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
-import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, signOut, getClerkUser } from './clerk-auth.js';
+import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, signOut, getClerkUser, verifyEmailCode } from './clerk-auth.js';
 import { initNotifications, startNotificationPolling, stopNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
@@ -180,6 +180,11 @@ const initAuthUI = () => {
   });
 
   // Register handler
+  let pendingSignUp = null;
+  const verifyForm = document.getElementById('verifyForm');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const verifyError = document.getElementById('verifyError');
+
   registerBtn?.addEventListener('click', async () => {
     const name = document.getElementById('registerName')?.value?.trim();
     const email = document.getElementById('registerEmail')?.value?.trim();
@@ -199,7 +204,10 @@ const initAuthUI = () => {
     if (result.success) {
       window.location.reload();
     } else if (result.status === 'needs_verification') {
-      if (registerError) registerError.textContent = 'Check your email for verification code';
+      pendingSignUp = result.signUp;
+      registerForm?.classList.add('hidden');
+      verifyForm?.classList.remove('hidden');
+      document.getElementById('verifyCode')?.focus();
       registerBtn.disabled = false;
       registerBtn.textContent = 'Create Account';
     } else {
@@ -209,6 +217,37 @@ const initAuthUI = () => {
     }
   });
 
+  // Verify code handler
+  verifyBtn?.addEventListener('click', async () => {
+    const code = document.getElementById('verifyCode')?.value?.trim();
+    if (!code || !pendingSignUp) {
+      if (verifyError) verifyError.textContent = 'Please enter the code';
+      return;
+    }
+
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = 'Verifying...';
+    if (verifyError) verifyError.textContent = '';
+
+    const result = await verifyEmailCode(pendingSignUp, code);
+
+    if (result.success) {
+      window.location.reload();
+    } else {
+      if (verifyError) verifyError.textContent = result.error || 'Verification failed';
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = 'Verify';
+    }
+  });
+
+  // Back to register
+  document.getElementById('backToRegister')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    verifyForm?.classList.add('hidden');
+    registerForm?.classList.remove('hidden');
+    pendingSignUp = null;
+  });
+
   // Enter key handlers
   document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') loginBtn?.click();
@@ -216,6 +255,10 @@ const initAuthUI = () => {
 
   document.getElementById('registerPassword')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') registerBtn?.click();
+  });
+
+  document.getElementById('verifyCode')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') verifyBtn?.click();
   });
 };
 
