@@ -293,6 +293,24 @@ const initApp = async () => {
   initFocusTimer();
   initSpeechToText();
   initDailyReview(state, render);
+  // Render streak widget
+  const streakWidgetEl = document.getElementById('streakWidget');
+  if (streakWidgetEl) {
+    streakWidgetEl.innerHTML = renderStreakWidget();
+  }
+
+  // Quick dump button
+  const quickDumpBtn = document.getElementById('quickDumpBtn');
+  if (quickDumpBtn) {
+    quickDumpBtn.addEventListener('click', () => {
+      openQuickDump(state, (tasks) => {
+        state.tasks.push(...tasks);
+        saveState(state);
+        render();
+      });
+    });
+  }
+
   initQuickDumpShortcut(state, (tasks) => {
     state.tasks.push(...tasks);
     saveState(state);

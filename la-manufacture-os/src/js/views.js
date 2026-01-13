@@ -2,7 +2,8 @@ import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode } from './api-client.js';
 import { openShareModal } from './share.js';
-import { recordTaskCompletion, recordPerfectDay } from './gamification.js';
+import { recordTaskCompletion, recordPerfectDay, renderStreakWidget } from './gamification.js';
+import { initSwipeGestures } from './swipe.js';
 
 // Inspirational quotes collection - 60+ citations pour ne jamais voir les memes
 const QUOTES = [
@@ -193,6 +194,12 @@ const taskRow = (t, state) => {
       celebrate();
       toast('✨ Bien joué !', 'success');
       recordTaskCompletion(task);
+      // Check for perfect day
+      const todayISO = isoLocal(new Date());
+      const todayTasks = state.tasks.filter(t => t.date === todayISO);
+      if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
+        recordPerfectDay();
+      }
     }, 450);
   });
 
@@ -588,6 +595,34 @@ export const renderDay = (state) => {
       progressBadge.className = 'badge' + (totalDone === todayTasks.length && todayTasks.length > 0 ? ' good' : '');
     }
   }
+
+  // Init swipe gestures
+  initSwipeGestures(dayList, {
+    onDone: (taskId) => {
+      const task = state.tasks.find(t => t.id === taskId);
+      if (task && !task.done) {
+        task.done = true;
+        task.updatedAt = nowISO();
+        saveState(state);
+        celebrate();
+        toast('Fait!');
+        recordTaskCompletion(task);
+        window._renderCallback?.();
+      }
+    },
+    onTomorrow: (taskId) => {
+      const task = state.tasks.find(t => t.id === taskId);
+      if (task) {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        task.date = isoLocal(d);
+        task.updatedAt = nowISO();
+        saveState(state);
+        toast('-> Demain');
+        window._renderCallback?.();
+      }
+    }
+  });
 };
 
 // Planning calendar state
