@@ -56,13 +56,13 @@ Transformer FLOW en un **second cerveau addictif** : vider sa tete, organiser, d
 
 ### P0 - Haute priorite (Addiction)
 
-#### [ ] Afficher le streak widget dans le header
+#### [x] Afficher le streak widget dans le header
 ```javascript
 // Dans app.js ou views.js, ajouter le widget streak dans le header
 // a cote du badge de progression
 ```
 
-#### [ ] Ajouter bouton Quick Dump flottant
+#### [x] Ajouter bouton Quick Dump flottant
 ```html
 <!-- Dans index.html, ajouter avant </body> -->
 <button class="quick-dump-trigger" id="quickDumpBtn">
@@ -74,7 +74,7 @@ Transformer FLOW en un **second cerveau addictif** : vider sa tete, organiser, d
 - Ajouter bouton dans la nav ou dans config
 - Ou remplacer un bouton existant
 
-#### [ ] Initialiser swipe sur la liste de taches
+#### [x] Initialiser swipe sur la liste de taches
 ```javascript
 // Dans views.js ou app.js apres render
 initSwipeGestures(document.querySelector('#dayList'), {
@@ -83,7 +83,7 @@ initSwipeGestures(document.querySelector('#dayList'), {
 });
 ```
 
-#### [ ] Detection Perfect Day
+#### [x] Detection Perfect Day
 ```javascript
 // Dans views.js, apres chaque completion, verifier si toutes les taches du jour sont faites
 const todayTasks = state.tasks.filter(t => t.date === today);
