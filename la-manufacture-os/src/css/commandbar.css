@@ -123,6 +123,30 @@
     color: #32d74b;
 }
 
+.cmd-tag.time {
+    background: rgba(175, 82, 222, 0.15);
+    border: 1px solid rgba(175, 82, 222, 0.3);
+    color: #bf5af2;
+}
+
+.cmd-tag.duration {
+    background: rgba(255, 159, 10, 0.15);
+    border: 1px solid rgba(255, 159, 10, 0.3);
+    color: #ff9f0a;
+}
+
+.cmd-tag.recurrence {
+    background: rgba(90, 200, 250, 0.15);
+    border: 1px solid rgba(90, 200, 250, 0.3);
+    color: #5ac8fa;
+}
+
+.cmd-tag.project {
+    background: rgba(255, 214, 10, 0.15);
+    border: 1px solid rgba(255, 214, 10, 0.3);
+    color: #ffd60a;
+}
+
 .cmd-tag.placeholder {
     background: transparent;
     border: none;

@@ -1,9 +1,10 @@
 // API Client - Switch between local storage and API mode
+import { getToken as getClerkToken } from './clerk-auth.js';
 
 const MODE = import.meta.env.VITE_MODE || 'local';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
-// Token storage helpers (fallback pour mobile/Safari)
+// Legacy token storage (kept for backward compatibility during migration)
 const TOKEN_KEY = 'auth_token';
 
 export const tokenStorage = {
@@ -34,12 +35,12 @@ export const tokenStorage = {
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
 
-  // Ajouter le token en header si disponible (fallback pour mobile)
-  const token = tokenStorage.get();
+  // Get Clerk token for authentication
+  const token = await getClerkToken();
   const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
 
   const defaultOptions = {
-    credentials: 'include', // Pour les cookies JWT (desktop)
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...authHeaders,
@@ -295,7 +296,7 @@ export const api = {
     },
 
     async uploadFile(formData) {
-      const token = tokenStorage.get();
+      const token = await getClerkToken();
       const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
 
       const response = await fetch(`${API_URL}/api/team/files`, {

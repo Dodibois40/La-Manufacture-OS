@@ -1,6 +1,6 @@
 import { toast } from './utils.js';
 import { loadState, saveState, initStorageUI, loadStateFromApi } from './storage.js';
-import { isApiMode } from './api-client.js';
+import { isApiMode, api } from './api-client.js';
 import { renderDay, renderWeek, initAddTask, initEditMode, initPlanningControls } from './views.js';
 import { renderInboxUI, initInboxControls, inboxCtx } from './inbox.js';
 import { renderConfig, initConfig } from './config.js';
@@ -8,11 +8,12 @@ import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
-import { initAuth, checkSession } from './auth.js';
+import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, signOut, getClerkUser } from './clerk-auth.js';
 import { initNotifications, startNotificationPolling, stopNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
 import { initGoogleCalendar } from './google-calendar.js';
+import { initDailyReview } from './daily-review.js';
 
 // Load state (local first, then sync from API)
 let state = loadState();
@@ -103,6 +104,109 @@ const hideLoader = () => {
   if (loader) loader.classList.add('hidden');
 };
 
+// Initialize custom auth UI with Clerk
+const initAuthUI = () => {
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const loginBtn = document.getElementById('loginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const showRegister = document.getElementById('showRegister');
+  const showLogin = document.getElementById('showLogin');
+  const loginError = document.getElementById('loginError');
+  const registerError = document.getElementById('registerError');
+
+  // Toggle between login and register
+  showRegister?.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm?.classList.add('hidden');
+    registerForm?.classList.remove('hidden');
+  });
+
+  showLogin?.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerForm?.classList.add('hidden');
+    loginForm?.classList.remove('hidden');
+  });
+
+  // Password visibility toggle
+  document.querySelectorAll('.password-toggle-minimal').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      if (input) {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.querySelector('.eye-open')?.classList.toggle('hidden', !isPassword);
+        btn.querySelector('.eye-closed')?.classList.toggle('hidden', isPassword);
+      }
+    });
+  });
+
+  // Login handler
+  loginBtn?.addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail')?.value?.trim();
+    const password = document.getElementById('loginPassword')?.value;
+
+    if (!email || !password) {
+      if (loginError) loginError.textContent = 'Please fill in all fields';
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Signing in...';
+    if (loginError) loginError.textContent = '';
+
+    const result = await signInWithEmail(email, password);
+
+    if (result.success) {
+      window.location.reload();
+    } else {
+      if (loginError) loginError.textContent = result.error || 'Sign in failed';
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Sign In';
+    }
+  });
+
+  // Register handler
+  registerBtn?.addEventListener('click', async () => {
+    const name = document.getElementById('registerName')?.value?.trim();
+    const email = document.getElementById('registerEmail')?.value?.trim();
+    const password = document.getElementById('registerPassword')?.value;
+
+    if (!name || !email || !password) {
+      if (registerError) registerError.textContent = 'Please fill in all fields';
+      return;
+    }
+
+    registerBtn.disabled = true;
+    registerBtn.textContent = 'Creating account...';
+    if (registerError) registerError.textContent = '';
+
+    const result = await signUpWithEmail(email, password, name);
+
+    if (result.success) {
+      window.location.reload();
+    } else if (result.status === 'needs_verification') {
+      if (registerError) registerError.textContent = 'Check your email for verification code';
+      registerBtn.disabled = false;
+      registerBtn.textContent = 'Create Account';
+    } else {
+      if (registerError) registerError.textContent = result.error || 'Sign up failed';
+      registerBtn.disabled = false;
+      registerBtn.textContent = 'Create Account';
+    }
+  });
+
+  // Enter key handlers
+  document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') loginBtn?.click();
+  });
+
+  document.getElementById('registerPassword')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') registerBtn?.click();
+  });
+};
+
 // Init app
 const initApp = async () => {
   // Fallback: enlever briefing-active apres 10s si toujours present
@@ -116,42 +220,48 @@ const initApp = async () => {
   // Storage UI
   initStorageUI();
 
-  // Init Auth UI (listeners)
-  initAuth(state, render);
-
   // API Mode Logic
   if (isApiMode) {
-    // 1. Check Session
-    const user = await checkSession();
+    // 1. Initialize Clerk
+    await initClerk();
 
-    if (!user) {
-      // Not logged in -> Show Auth Screen
+    // 2. Check if signed in
+    if (!isSignedIn()) {
+      // Not logged in -> Show custom auth view
       hideLoader();
+      initAuthUI();
       setView('auth');
       return;
     }
 
-    // 2. Logged in -> Sync Data
+    // 3. Logged in -> Sync Data from API
     toast('Synchronisation...');
-    const apiState = await loadStateFromApi();
-    if (apiState) {
-      state.tasks = apiState.tasks;
-      state.settings = apiState.settings || state.settings;
-      state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length
-        ? state.settings.owners
-        : ['Thibaud'];
-      saveState(state);
-      toast('Synchronisé ✓');
+    try {
+      // Call /me to sync local user and get userId
+      const { user } = await api.auth.me();
+      const apiState = await loadStateFromApi();
+      if (apiState) {
+        state.tasks = apiState.tasks;
+        state.settings = apiState.settings || state.settings;
+        state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length
+          ? state.settings.owners
+          : ['Thibaud'];
+        saveState(state);
+        toast('Synchronise');
+      }
+
+      // 4. Init Notifications & Share
+      initNotifications();
+      initShareModal();
+      startNotificationPolling();
+
+      // 5. Init Team Management & Google Calendar
+      initTeam(user?.id);
+      initGoogleCalendar();
+    } catch (err) {
+      console.error('Sync error:', err);
+      toast('Erreur de synchronisation');
     }
-
-    // 3. Init Notifications & Share
-    initNotifications();
-    initShareModal();
-    startNotificationPolling();
-
-    // 4. Init Team Management
-    initTeam(user.userId);
-    initGoogleCalendar();
   }
 
   // Auto Carry-Over (Silent)
@@ -178,6 +288,7 @@ const initApp = async () => {
   initMorningBriefing(state);
   initFocusTimer();
   initSpeechToText();
+  initDailyReview(state, render);
 
   // Initial render
   if (isApiMode) {

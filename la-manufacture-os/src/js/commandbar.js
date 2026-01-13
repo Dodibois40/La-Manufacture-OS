@@ -1,6 +1,6 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
-import { smartParseDate, smartParseUrgent, smartParseOwner, cleanTitle } from './parser.js';
+import { smartParseDate, smartParseUrgent, smartParseOwner, smartParseDuration, smartParseRecurrence, smartParseProject, smartParseTime, cleanTitle } from './parser.js';
 import { isApiMode } from './api-client.js';
 
 export const initCommandBar = (state, renderCallback) => {
@@ -77,9 +77,42 @@ export const initCommandBar = (state, renderCallback) => {
     const date = smartParseDate(raw, baseToday);
     const urgent = smartParseUrgent(raw);
     const owner = smartParseOwner(raw, safeOwners, defaultOwner);
+    const duration = smartParseDuration(raw);
+    const recurrence = smartParseRecurrence(raw);
+    const project = smartParseProject(raw);
+    const time = smartParseTime(raw);
     const title = cleanTitle(raw, safeOwners);
 
-    return { title, owner, urgent, date };
+    return { title, owner, urgent, date, duration, recurrence, project, time };
+  };
+
+  // Format duration for display
+  const formatDuration = (minutes) => {
+    if (!minutes) return null;
+    if (minutes >= 60) {
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return m > 0 ? `${h}h${m}` : `${h}h`;
+    }
+    return `${minutes}min`;
+  };
+
+  // Format recurrence for display
+  const formatRecurrence = (rec) => {
+    if (!rec) return null;
+    const labels = {
+      'daily': 'Quotidien',
+      'weekly': 'Hebdo',
+      'weekly_0': 'Dim.',
+      'weekly_1': 'Lun.',
+      'weekly_2': 'Mar.',
+      'weekly_3': 'Mer.',
+      'weekly_4': 'Jeu.',
+      'weekly_5': 'Ven.',
+      'weekly_6': 'Sam.',
+      'monthly': 'Mensuel'
+    };
+    return labels[rec] || rec;
   };
 
   const updatePreview = () => {
@@ -96,7 +129,11 @@ export const initCommandBar = (state, renderCallback) => {
       <span class="cmd-tag date">📅 ${meta.date === isoLocal() ? 'Aujourd\'hui' : meta.date}</span>
     `;
 
+    if (meta.time) html += `<span class="cmd-tag time">🕐 ${meta.time}</span>`;
     if (meta.urgent) html += `<span class="cmd-tag urgent">🔥 Urgent</span>`;
+    if (meta.duration) html += `<span class="cmd-tag duration">⏱️ ${formatDuration(meta.duration)}</span>`;
+    if (meta.recurrence) html += `<span class="cmd-tag recurrence">🔄 ${formatRecurrence(meta.recurrence)}</span>`;
+    if (meta.project) html += `<span class="cmd-tag project"># ${meta.project}</span>`;
 
     preview.innerHTML = html;
   };
@@ -114,7 +151,13 @@ export const initCommandBar = (state, renderCallback) => {
         urgent: meta.urgent,
         date: meta.date,
         done: false,
-        updatedAt: nowISO()
+        updatedAt: nowISO(),
+        // New fields
+        estimated_duration: meta.duration || null,
+        recurrence: meta.recurrence || null,
+        project: meta.project || null,
+        start_time: meta.time || null,
+        is_event: !!meta.time
       }, state.settings.owners[0]);
 
       try {

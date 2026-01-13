@@ -21,6 +21,33 @@ const URGENT_KEYWORDS = [
   'deadline', 'rush', 'vite', 'rapidement', 'immédiat', 'immediat'
 ];
 
+// Recurrence patterns
+const RECURRENCE_PATTERNS = {
+  'tous les jours': 'daily',
+  'chaque jour': 'daily',
+  'quotidien': 'daily',
+  'tous les lundis': 'weekly_1',
+  'tous les mardis': 'weekly_2',
+  'tous les mercredis': 'weekly_3',
+  'tous les jeudis': 'weekly_4',
+  'tous les vendredis': 'weekly_5',
+  'tous les samedis': 'weekly_6',
+  'tous les dimanches': 'weekly_0',
+  'chaque lundi': 'weekly_1',
+  'chaque mardi': 'weekly_2',
+  'chaque mercredi': 'weekly_3',
+  'chaque jeudi': 'weekly_4',
+  'chaque vendredi': 'weekly_5',
+  'chaque samedi': 'weekly_6',
+  'chaque dimanche': 'weekly_0',
+  'toutes les semaines': 'weekly',
+  'chaque semaine': 'weekly',
+  'hebdomadaire': 'weekly',
+  'tous les mois': 'monthly',
+  'chaque mois': 'monthly',
+  'mensuel': 'monthly',
+};
+
 // Smart parse: extracts date from ANYWHERE in the text (not just prefix)
 export const smartParseDate = (raw, baseToday) => {
   const s = String(raw || '').toLowerCase();
@@ -98,6 +125,82 @@ export const smartParseUrgent = (raw) => {
   return false;
 };
 
+// Smart parse: extract duration in minutes
+export const smartParseDuration = (raw) => {
+  const s = String(raw || '').toLowerCase();
+
+  // Match patterns like "30min", "30 min", "1h", "1h30", "2 heures", "45 minutes"
+  const patterns = [
+    // "1h30" or "1h30min"
+    { regex: /(\d+)\s*h\s*(\d+)\s*(?:min)?/i, calc: (m) => parseInt(m[1]) * 60 + parseInt(m[2]) },
+    // "1h" or "2 heures"
+    { regex: /(\d+)\s*(?:h|heure|heures)\b/i, calc: (m) => parseInt(m[1]) * 60 },
+    // "30min" or "45 minutes"
+    { regex: /(\d+)\s*(?:min|minute|minutes)\b/i, calc: (m) => parseInt(m[1]) },
+    // "30m" (shorthand)
+    { regex: /(\d+)\s*m\b/i, calc: (m) => parseInt(m[1]) },
+  ];
+
+  for (const { regex, calc } of patterns) {
+    const match = s.match(regex);
+    if (match) {
+      return calc(match);
+    }
+  }
+
+  return null;
+};
+
+// Smart parse: extract recurrence pattern
+export const smartParseRecurrence = (raw) => {
+  const s = String(raw || '').toLowerCase();
+
+  for (const [pattern, value] of Object.entries(RECURRENCE_PATTERNS)) {
+    if (s.includes(pattern)) {
+      return value;
+    }
+  }
+
+  return null;
+};
+
+// Smart parse: extract project/context from #hashtag
+export const smartParseProject = (raw) => {
+  const s = String(raw || '');
+
+  // Match #project or #project-name (alphanumeric + dashes)
+  const match = s.match(/#([\w-]+)/);
+  if (match) {
+    return match[1];
+  }
+
+  return null;
+};
+
+// Smart parse: extract time (for events/meetings)
+export const smartParseTime = (raw) => {
+  const s = String(raw || '');
+
+  // Match patterns like "à 14h", "14h30", "14:30", "à 9h"
+  const patterns = [
+    // "à 14h30" or "14h30"
+    { regex: /(?:à\s*)?(\d{1,2})\s*h\s*(\d{2})/i, format: (m) => `${m[1].padStart(2, '0')}:${m[2]}` },
+    // "à 14h" or "14h"
+    { regex: /(?:à\s*)?(\d{1,2})\s*h\b/i, format: (m) => `${m[1].padStart(2, '0')}:00` },
+    // "14:30"
+    { regex: /(\d{1,2}):(\d{2})/i, format: (m) => `${m[1].padStart(2, '0')}:${m[2]}` },
+  ];
+
+  for (const { regex, format } of patterns) {
+    const match = s.match(regex);
+    if (match) {
+      return format(match);
+    }
+  }
+
+  return null;
+};
+
 // Smart parse: extract owner from @mention
 export const smartParseOwner = (raw, owners, defaultOwner) => {
   const s = String(raw || '');
@@ -140,6 +243,27 @@ export const cleanTitle = (raw, owners) => {
     .replace(/\bimportant\b/gi, '')
     .replace(/\bpriorit[ée]\b/gi, '')
     .replace(/\bcritique\b/gi, '');
+
+  // Remove duration patterns
+  title = title
+    .replace(/\d+\s*h\s*\d+\s*(?:min)?\b/gi, '')
+    .replace(/\d+\s*(?:h|heure|heures)\b/gi, '')
+    .replace(/\d+\s*(?:min|minute|minutes)\b/gi, '')
+    .replace(/\b\d+\s*m\b/gi, '');
+
+  // Remove recurrence patterns
+  title = title
+    .replace(/\b(tous les|chaque|toutes les)\s+(jours?|lundis?|mardis?|mercredis?|jeudis?|vendredis?|samedis?|dimanches?|semaines?|mois)\b/gi, '')
+    .replace(/\b(quotidien|hebdomadaire|mensuel)\b/gi, '');
+
+  // Remove time patterns
+  title = title
+    .replace(/(?:à\s*)?\d{1,2}\s*h\s*\d{2}/gi, '')
+    .replace(/(?:à\s*)?\d{1,2}\s*h\b/gi, '')
+    .replace(/\d{1,2}:\d{2}/g, '');
+
+  // Remove #project tags (but keep the info for display)
+  title = title.replace(/#[\w-]+/g, '');
 
   // Remove @owner mentions
   for (const owner of owners) {

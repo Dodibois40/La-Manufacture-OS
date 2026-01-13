@@ -846,6 +846,20 @@ nav button.active .nav-icon {
   margin-bottom: 60px;
 }
 
+/* Loading state (Clerk handles auth UI) */
+.auth-loading {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
 /* Forms wrapper */
 .auth-forms-wrapper {
   width: 100%;

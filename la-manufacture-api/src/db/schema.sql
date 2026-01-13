@@ -1,14 +1,20 @@
 -- La Manufacture OS - Database Schema
 
--- Users table
+-- Users table (Clerk authentication)
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255), -- Legacy, nullable for Clerk users
+  clerk_id VARCHAR(255) UNIQUE, -- Clerk user ID
   name VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Migration: Add clerk_id column if not exists (for existing databases)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_id VARCHAR(255) UNIQUE;
+-- Migration: Make password_hash nullable (Clerk handles auth)
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 
 -- Tasks table (version cible avec statuts + délégation)
 CREATE TABLE IF NOT EXISTS tasks (
@@ -170,6 +176,7 @@ CREATE INDEX IF NOT EXISTS idx_team_files_user ON team_files(user_id);
 CREATE INDEX IF NOT EXISTS idx_team_files_member ON team_files(team_member_id);
 CREATE INDEX IF NOT EXISTS idx_google_tokens_user ON google_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_is_event ON tasks(user_id, is_event) WHERE is_event = TRUE;
+CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id) WHERE clerk_id IS NOT NULL;
 
 -- Trigger pour updated_at automatique
 CREATE OR REPLACE FUNCTION update_updated_at_column()

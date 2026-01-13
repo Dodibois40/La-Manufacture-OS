@@ -2,6 +2,7 @@ import { toast, confirmDialog } from './utils.js';
 import { saveState, defaultState } from './storage.js';
 import { inboxCtx } from './inbox.js';
 import { isApiMode, api } from './api-client.js';
+import { signOut } from './clerk-auth.js';
 
 export const renderConfig = (state) => {
   document.getElementById('owners').value = (state.settings.owners || []).join(', ');
@@ -115,22 +116,10 @@ export const initConfig = (state, renderCallback) => {
 
     if (!confirmed) return;
 
-    try {
-      await api.auth.logout();
-    } catch (e) {
-      console.error('Logout error:', e);
-    }
+    toast('Deconnexion...');
 
-    // Supprimer le token localStorage (fallback mobile)
-    const { tokenStorage } = await import('./api-client.js');
-    tokenStorage.remove();
-
-    // Set force logout flag BEFORE clearing localStorage
-    localStorage.setItem('force_logout', 'true');
-
-    toast('Déconnexion...');
-
-    // Reload to login screen
-    setTimeout(() => window.location.reload(), 500);
+    // Use Clerk signOut (will reload page)
+    await signOut();
   });
 };
+

@@ -1,8 +1,9 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
+import { clerkPlugin, getAuth } from '@clerk/fastify';
+import { createClerkClient } from '@clerk/backend';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -62,37 +63,54 @@ await fastify.register(multipart, {
   }
 });
 
-await fastify.register(jwt, {
-  secret: process.env.JWT_SECRET || 'supersecret-change-in-production',
-  sign: { expiresIn: '7d' },
-  cookie: {
-    cookieName: 'token',
-    signed: false,
-  },
+// Clerk client for user management
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY
 });
 
-// Auth decorator - supporte cookie ET header Authorization (pour mobile/Safari)
+// Register Clerk plugin
+await fastify.register(clerkPlugin, {
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
+
+// Auth decorator using Clerk
 fastify.decorate('authenticate', async function (request, reply) {
-  try {
-    // Essayer d'abord le cookie
-    await request.jwtVerify();
-  } catch (cookieErr) {
-    // Fallback: vérifier le header Authorization (Bearer token)
-    const authHeader = request.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      try {
-        const decoded = fastify.jwt.verify(token);
-        request.user = decoded;
-        return;
-      } catch (tokenErr) {
-        reply.status(401).send({ error: 'Unauthorized' });
-        return;
-      }
+  const auth = getAuth(request);
+
+  if (!auth.userId) {
+    return reply.status(401).send({ error: 'Unauthorized' });
+  }
+
+  // Get or create local user from Clerk
+  const localUser = await pool.query(
+    'SELECT id FROM users WHERE clerk_id = $1',
+    [auth.userId]
+  );
+
+  if (localUser.rows.length > 0) {
+    request.user = { userId: localUser.rows[0].id, clerkId: auth.userId };
+  } else {
+    // Auto-create local user on first auth
+    try {
+      const clerkUser = await clerkClient.users.getUser(auth.userId);
+      const email = clerkUser.emailAddresses[0]?.emailAddress || '';
+      const name = clerkUser.firstName || clerkUser.username || 'User';
+
+      const result = await pool.query(
+        'INSERT INTO users (clerk_id, email, name) VALUES ($1, $2, $3) RETURNING id',
+        [auth.userId, email, name]
+      );
+      request.user = { userId: result.rows[0].id, clerkId: auth.userId };
+    } catch (err) {
+      fastify.log.error('Error creating user from Clerk:', err);
+      return reply.status(500).send({ error: 'Failed to create user' });
     }
-    reply.status(401).send({ error: 'Unauthorized' });
   }
 });
+
+// Export clerkClient for routes
+fastify.decorate('clerkClient', clerkClient);
 
 // Health check
 fastify.get('/health', async () => {

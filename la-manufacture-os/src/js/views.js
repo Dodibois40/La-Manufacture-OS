@@ -245,8 +245,58 @@ const taskRow = (t, state) => {
   el.appendChild(c);
   el.appendChild(body);
 
-  // Context menu (hidden in edit mode)
+  // Quick Actions Bar (visible on hover)
   if (!editMode) {
+    const quickActions = document.createElement('div');
+    quickActions.className = 'task-quick-actions';
+
+    // Tomorrow action
+    const tomorrowBtn = document.createElement('button');
+    tomorrowBtn.className = 'quick-action-btn';
+    tomorrowBtn.title = 'Reporter à demain';
+    tomorrowBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+    tomorrowBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      task.date = isoLocal(d);
+      task.updatedAt = nowISO();
+      saveState(state);
+      window._renderCallback?.();
+      toast('→ Demain');
+    });
+
+    // Focus/Timer action
+    const focusBtn = document.createElement('button');
+    focusBtn.className = 'quick-action-btn focus';
+    focusBtn.title = 'Lancer le timer';
+    focusBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    focusBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      import('./focus-mode.js').then(mod => mod.startFocusMode(task, state, window._renderCallback));
+    });
+
+    // Urgent toggle action
+    const urgentBtn = document.createElement('button');
+    urgentBtn.className = 'quick-action-btn' + (task.urgent ? ' active' : '');
+    urgentBtn.title = task.urgent ? 'Enlever urgence' : 'Marquer urgent';
+    urgentBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+    urgentBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      task.urgent = !task.urgent;
+      task.updatedAt = nowISO();
+      saveState(state);
+      window._renderCallback?.();
+      toast(task.urgent ? '🔥 Urgent' : 'Urgence retirée');
+    });
+
+    quickActions.appendChild(tomorrowBtn);
+    if (!task.done) quickActions.appendChild(focusBtn);
+    quickActions.appendChild(urgentBtn);
+
+    el.appendChild(quickActions);
+
+    // Context menu (three dots)
     const more = document.createElement('div');
     more.className = 'task-more';
     more.innerHTML = '⋮';
@@ -266,6 +316,7 @@ const taskRow = (t, state) => {
       menu.innerHTML = `
         <div class="menu-item" data-action="urgent">🔥 ${task.urgent ? 'Enlever urgence' : 'Marquer urgent'}</div>
         <div class="menu-item" data-action="tomorrow">⏭️ Reporter à demain</div>
+        <div class="menu-item" data-action="next-week">📅 Semaine prochaine</div>
         ${shareOption}
         <div class="menu-item danger" data-action="delete">🗑️ Supprimer</div>
       `;
@@ -284,6 +335,14 @@ const taskRow = (t, state) => {
           task.date = isoLocal(d);
           task.updatedAt = nowISO();
           toast('Reporté à demain');
+        } else if (action === 'next-week') {
+          const d = new Date();
+          const dayOfWeek = d.getDay();
+          const daysUntilMonday = (8 - dayOfWeek) % 7 || 7;
+          d.setDate(d.getDate() + daysUntilMonday);
+          task.date = isoLocal(d);
+          task.updatedAt = nowISO();
+          toast('Reporté à lundi prochain');
         } else if (action === 'urgent') {
           task.urgent = !task.urgent;
           task.updatedAt = nowISO();
@@ -403,15 +462,25 @@ export const renderDay = (state) => {
   if (!dayList) return;
   dayList.innerHTML = '';
 
-  const tasks = state.tasks
+  // Get overdue tasks (not done, date < today)
+  const overdueTasks = state.tasks
+    .map(t => ensureTask(t, state.settings.owners[0]))
+    .filter(t => t.date < today && !t.done)
+    .sort((a, b) => (b.urgent === true) - (a.urgent === true));
+
+  // Get today's tasks
+  const todayTasks = state.tasks
     .map(t => ensureTask(t, state.settings.owners[0]))
     .filter(t => t.date === today)
     .sort((a, b) => (b.urgent === true) - (a.urgent === true) || (a.done === true) - (b.done === true));
 
+  // Combined count for edit button
+  const allTasks = [...overdueTasks, ...todayTasks];
+
   // Hide edit button if no tasks
   const editModeBtn = document.getElementById('editModeBtn');
   if (editModeBtn) {
-    editModeBtn.style.display = tasks.length > 0 ? 'inline-flex' : 'none';
+    editModeBtn.style.display = allTasks.length > 0 ? 'inline-flex' : 'none';
   }
 
   // Always show inspirational quote at the top
@@ -425,8 +494,8 @@ export const renderDay = (state) => {
   dayList.appendChild(quoteEl);
 
   // --- ZEN MODE BUTTON ---
-  // On insère le bouton Mode Zen (Focus) avant la liste si il y a des tâches
-  if (tasks.filter(t => !t.done).length > 0) {
+  const pendingTasks = allTasks.filter(t => !t.done);
+  if (pendingTasks.length > 0) {
     const focusContainer = document.createElement('div');
     focusContainer.className = 'focus-launch-container';
     focusContainer.innerHTML = `
@@ -440,8 +509,7 @@ export const renderDay = (state) => {
         </button>
      `;
     focusContainer.querySelector('#startZenMode').addEventListener('click', () => {
-      // Trigger Focus Mode
-      const firstTask = tasks.find(t => !t.done);
+      const firstTask = pendingTasks[0];
       if (firstTask) {
         import('./focus-mode.js').then(mod => mod.startFocusMode(firstTask, state, window._renderCallback));
       }
@@ -449,36 +517,74 @@ export const renderDay = (state) => {
     dayList.appendChild(focusContainer);
   }
 
-  if (tasks.length === 0) {
-    const emptyEl = document.createElement('div');
-    emptyEl.className = 'day-empty-state';
-    emptyEl.innerHTML = `<p>Aucune tâche pour aujourd'hui</p>`;
-    dayList.appendChild(emptyEl);
-  } else {
-    for (const t of tasks) dayList.appendChild(taskRow(t, state));
-  }
+  // --- OVERDUE SECTION (integrated) ---
+  if (overdueTasks.length > 0) {
+    const overdueSection = document.createElement('div');
+    overdueSection.className = 'overdue-section';
+    overdueSection.innerHTML = `
+      <div class="section-header overdue">
+        <span class="section-icon">⚠️</span>
+        <span class="section-title">En retard</span>
+        <span class="section-count">${overdueTasks.length}</span>
+      </div>
+    `;
+    dayList.appendChild(overdueSection);
 
-  // Late tasks check
-  const late = state.tasks
-    .map(t => ensureTask(t, state.settings.owners[0]))
-    .filter(t => t.date < today && !t.done);
-
-  const lateBox = document.getElementById('lateBox');
-  if (lateBox) {
-    lateBox.innerHTML = '';
-    if (late.length) {
-      const w = document.createElement('div');
-      w.className = 'warn';
-      w.innerHTML = `<span>⚠️</span> <b>${late.length} tâche(s)</b> en retard sur les jours précédents.`;
-      lateBox.appendChild(w);
+    for (const t of overdueTasks) {
+      const row = taskRow(t, state);
+      row.classList.add('overdue-task');
+      dayList.appendChild(row);
     }
   }
 
-  const done = tasks.filter(t => t.done).length;
+  // --- TODAY SECTION ---
+  if (todayTasks.length > 0 || overdueTasks.length > 0) {
+    if (overdueTasks.length > 0) {
+      // Only show header if we have overdue section above
+      const todaySection = document.createElement('div');
+      todaySection.className = 'today-section';
+      todaySection.innerHTML = `
+        <div class="section-header today">
+          <span class="section-icon">☀️</span>
+          <span class="section-title">Aujourd'hui</span>
+          <span class="section-count">${todayTasks.length}</span>
+        </div>
+      `;
+      dayList.appendChild(todaySection);
+    }
+
+    for (const t of todayTasks) {
+      dayList.appendChild(taskRow(t, state));
+    }
+  }
+
+  // Empty state
+  if (allTasks.length === 0) {
+    const emptyEl = document.createElement('div');
+    emptyEl.className = 'day-empty-state';
+    emptyEl.innerHTML = `
+      <p>Aucune tâche pour aujourd'hui</p>
+      <p class="empty-hint">Appuie sur <kbd>Ctrl</kbd> + <kbd>Space</kbd> pour ajouter</p>
+    `;
+    dayList.appendChild(emptyEl);
+  }
+
+  // Hide old lateBox (now integrated)
+  const lateBox = document.getElementById('lateBox');
+  if (lateBox) lateBox.innerHTML = '';
+
+  // Progress badge - include overdue in count
+  const totalPending = allTasks.filter(t => !t.done).length;
+  const totalDone = allTasks.filter(t => t.done).length;
   const progressBadge = document.getElementById('progressBadge');
   if (progressBadge) {
-    progressBadge.textContent = `${done}/${tasks.length} aujourd'hui`;
-    progressBadge.className = 'badge' + (done === tasks.length && tasks.length > 0 ? ' good' : '');
+    if (overdueTasks.length > 0) {
+      progressBadge.textContent = `${totalDone}/${allTasks.length} (+${overdueTasks.length} retard)`;
+      progressBadge.className = 'badge bad';
+    } else {
+      progressBadge.textContent = `${totalDone}/${todayTasks.length} aujourd'hui`;
+      progressBadge.className = 'badge' + (totalDone === todayTasks.length && todayTasks.length > 0 ? ' good' : '');
+    }
   }
 };
 
