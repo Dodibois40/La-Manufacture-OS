@@ -70,9 +70,10 @@ Transformer FLOW en un **second cerveau addictif** : vider sa tete, organiser, d
 </button>
 ```
 
-#### [ ] Vue Stats accessible depuis nav
-- Ajouter bouton dans la nav ou dans config
-- Ou remplacer un bouton existant
+#### [x] Vue Stats accessible depuis nav
+- Bouton Stats ajoute dans la nav (icone barres)
+- Vue stats avec container dedie
+- Navigation fonctionnelle
 
 #### [x] Initialiser swipe sur la liste de taches
 ```javascript

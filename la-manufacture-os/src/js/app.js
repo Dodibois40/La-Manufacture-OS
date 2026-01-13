@@ -68,7 +68,7 @@ const initDockMagnification = () => {
 };
 
 // Navigation
-const views = ['day', 'week', 'inbox', 'config', 'auth'];
+const views = ['day', 'week', 'inbox', 'config', 'stats', 'auth'];
 const setView = (name) => {
   const nav = document.querySelector('nav');
 
@@ -86,6 +86,14 @@ const setView = (name) => {
   }
 
   if (name !== 'auth') render();
+
+  // Render stats when switching to stats view
+  if (name === 'stats') {
+    const statsContainer = document.getElementById('statsContainer');
+    if (statsContainer) {
+      statsContainer.innerHTML = renderStatsView(state.tasks);
+    }
+  }
 };
 
 // Store setView globally for config.js to access
@@ -278,6 +286,7 @@ const initApp = async () => {
   document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
   document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
   document.getElementById('nav-inbox')?.addEventListener('click', () => setView('inbox'));
+  document.getElementById('nav-stats')?.addEventListener('click', () => setView('stats'));
   document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
 
   // macOS Dock Magnification Effect
