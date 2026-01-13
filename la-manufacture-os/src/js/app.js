@@ -14,6 +14,10 @@ import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
 import { initGoogleCalendar } from './google-calendar.js';
 import { initDailyReview } from './daily-review.js';
+import { recordTaskCompletion, recordPerfectDay, updateStreak, getStats, renderStreakWidget } from './gamification.js';
+import { initSwipeGestures } from './swipe.js';
+import { renderStatsView } from './stats.js';
+import { openQuickDump, initQuickDumpShortcut } from './quick-dump.js';
 
 // Load state (local first, then sync from API)
 let state = loadState();
@@ -289,6 +293,11 @@ const initApp = async () => {
   initFocusTimer();
   initSpeechToText();
   initDailyReview(state, render);
+  initQuickDumpShortcut(state, (tasks) => {
+    state.tasks.push(...tasks);
+    saveState(state);
+    render();
+  });
 
   // Initial render
   if (isApiMode) {

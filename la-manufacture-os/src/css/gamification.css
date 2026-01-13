@@ -1,0 +1,585 @@
+/* Gamification Styles - Streaks, Badges, Levels, Stats */
+
+/* ============================================
+   STREAK WIDGET
+   ============================================ */
+.streak-widget {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.streak-flame {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba(255, 69, 58, 0.15);
+  transition: all 0.3s ease;
+}
+
+.streak-flame.active {
+  background: rgba(255, 149, 0, 0.2);
+  animation: flamePulse 2s ease-in-out infinite;
+}
+
+@keyframes flamePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.streak-icon {
+  font-size: 18px;
+}
+
+.streak-count {
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+}
+
+.level-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba(10, 132, 255, 0.15);
+}
+
+.level-icon {
+  font-size: 16px;
+}
+
+.level-num {
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ============================================
+   STATS VIEW
+   ============================================ */
+.stats-view {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.stats-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.stats-card {
+  background: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.stats-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+/* Level Card */
+.level-card {
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(191, 90, 242, 0.2));
+}
+
+.level-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.level-big-icon {
+  font-size: 48px;
+}
+
+.level-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.level-name {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.level-number {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.xp-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.xp-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #0A84FF, #BF5AF2);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.xp-text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: right;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+}
+
+/* Productivity Score Circle */
+.score-circle {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+}
+
+.score-circle svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.score-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 8;
+}
+
+.score-progress {
+  fill: none;
+  stroke: url(#scoreGradient);
+  stroke: #30D158;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.5s ease;
+}
+
+.score-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 42px;
+  font-weight: 700;
+}
+
+/* Week Chart */
+.week-chart {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 120px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.day-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.bar-container {
+  flex: 1;
+  width: 100%;
+  max-width: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  background: linear-gradient(180deg, #30D158, #34C759);
+  border-radius: 4px;
+  transition: height 0.3s ease;
+  min-height: 4px;
+}
+
+.day-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 8px;
+  text-transform: capitalize;
+}
+
+.day-count {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.week-summary {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+/* Badges Grid */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.badge-item.unlocked {
+  background: rgba(48, 209, 88, 0.15);
+}
+
+.badge-item.locked {
+  opacity: 0.5;
+}
+
+.badge-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.badge-name {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ============================================
+   SWIPE GESTURES
+   ============================================ */
+.task-row {
+  position: relative;
+  overflow: visible;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.swipe-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.swipe-indicator svg {
+  width: 20px;
+  height: 20px;
+}
+
+.swipe-indicator.swipe-done {
+  color: #30D158;
+  background: rgba(48, 209, 88, 0.2);
+}
+
+.swipe-indicator.swipe-tomorrow {
+  color: #FF9F0A;
+  background: rgba(255, 159, 10, 0.2);
+}
+
+/* ============================================
+   QUICK DUMP MODAL
+   ============================================ */
+.quick-dump-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.quick-dump-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.quick-dump-modal {
+  width: 90%;
+  max-width: 500px;
+  background: rgba(28, 28, 30, 0.95);
+  backdrop-filter: blur(30px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+  transform: scale(0.95) translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.quick-dump-overlay.active .quick-dump-modal {
+  transform: scale(1) translateY(0);
+}
+
+.quick-dump-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.quick-dump-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #0A84FF, #BF5AF2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-dump-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.quick-dump-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.quick-dump-header p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.quick-dump-textarea {
+  width: 100%;
+  height: 200px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 15px;
+  color: white;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.quick-dump-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.quick-dump-textarea:focus {
+  outline: none;
+  border-color: #0A84FF;
+}
+
+.quick-dump-tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.quick-dump-tips .tip {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.quick-dump-tips .tip-item {
+  font-size: 11px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.quick-dump-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.quick-dump-btn {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.quick-dump-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.quick-dump-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.quick-dump-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.quick-dump-btn.primary {
+  background: linear-gradient(135deg, #0A84FF, #0066CC);
+  color: white;
+}
+
+.quick-dump-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.4);
+}
+
+/* ============================================
+   ENHANCED NAV WITH STATS
+   ============================================ */
+.nav-btn[data-view="stats"] {
+  background: linear-gradient(135deg, rgba(191, 90, 242, 0.2), rgba(10, 132, 255, 0.2));
+}
+
+/* Quick dump button in nav */
+.quick-dump-trigger {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0A84FF, #BF5AF2);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.4);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.quick-dump-trigger:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(10, 132, 255, 0.5);
+}
+
+.quick-dump-trigger svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .quick-dump-modal {
+    padding: 20px;
+  }
+
+  .quick-dump-textarea {
+    height: 160px;
+  }
+}

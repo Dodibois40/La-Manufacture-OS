@@ -1,0 +1,206 @@
+# FLOW - Roadmap Second Cerveau
+
+## Vision
+Transformer FLOW en un **second cerveau addictif** : vider sa tete, organiser, deleguer, suivre l'avancement. Une app tellement belle et intuitive qu'elle devient jouissive a utiliser.
+
+---
+
+## FAIT (Session du 13/01/2026)
+
+### 1. Systeme de Gamification (`gamification.js`)
+- **Streaks** : compteur de jours consecutifs avec celebration
+- **Badges** (18 au total) :
+  - Streaks : 3j, 7j, 30j
+  - Productivite : Early Bird, Night Owl, Perfect Day, Perfect Week
+  - Volume : 10, 50, 100, 500 taches
+  - Focus : 1h, 10h, 50h cumulees
+  - Team : Team Player, Leader
+  - Special : Premier pas, Speed Demon
+- **Niveaux** (1-10) : Novice -> Legende avec XP
+- **Sons** : level up, badge, perfect day
+
+### 2. Swipe Gestures (`swipe.js`)
+- Swipe droite = marquer fait
+- Swipe gauche = reporter a demain
+- Indicateur visuel pendant le swipe
+- Support tactile et souris
+
+### 3. Vue Statistiques (`stats.js`)
+- Carte niveau avec barre XP
+- Grille stats : streak, taches totales, focus, perfect days
+- Score de productivite (cercle anime)
+- Graphique semaine (barres par jour)
+- Grille des badges (debloque/verrouille)
+
+### 4. Quick Dump (`quick-dump.js`)
+- Modal "Vide ta tete" (Ctrl+Shift+N)
+- Textarea multi-lignes (1 idee = 1 tache)
+- Parsing automatique : dates, @owner, urgent, heure
+- Tips integres
+
+### 5. CSS Gamification (`gamification.css`)
+- Styles streak widget
+- Styles stats view complets
+- Styles swipe indicators
+- Styles quick dump modal
+- Responsive mobile
+
+### 6. Integration
+- Imports ajoutes dans `app.js`
+- `recordTaskCompletion()` appele dans `views.js`
+- Quick dump shortcut initialise
+
+---
+
+## A FAIRE (Prochaines sessions)
+
+### P0 - Haute priorite (Addiction)
+
+#### [ ] Afficher le streak widget dans le header
+```javascript
+// Dans app.js ou views.js, ajouter le widget streak dans le header
+// a cote du badge de progression
+```
+
+#### [ ] Ajouter bouton Quick Dump flottant
+```html
+<!-- Dans index.html, ajouter avant </body> -->
+<button class="quick-dump-trigger" id="quickDumpBtn">
+  <svg>...</svg>
+</button>
+```
+
+#### [ ] Vue Stats accessible depuis nav
+- Ajouter bouton dans la nav ou dans config
+- Ou remplacer un bouton existant
+
+#### [ ] Initialiser swipe sur la liste de taches
+```javascript
+// Dans views.js ou app.js apres render
+initSwipeGestures(document.querySelector('#dayList'), {
+  onDone: (taskId) => { /* mark done */ },
+  onTomorrow: (taskId) => { /* move to tomorrow */ }
+});
+```
+
+#### [ ] Detection Perfect Day
+```javascript
+// Dans views.js, apres chaque completion, verifier si toutes les taches du jour sont faites
+const todayTasks = state.tasks.filter(t => t.date === today);
+if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
+  recordPerfectDay();
+}
+```
+
+### P1 - Moyenne priorite (UX)
+
+#### [ ] Double-tap pour marquer fait
+- Ajouter event listener sur les taches
+
+#### [ ] Animations spring sur les taches
+- Utiliser `cubic-bezier(0.175, 0.885, 0.32, 1.275)`
+
+#### [ ] Historique des badges gagnes
+- Notification quand on gagne un badge
+- Historique visible quelque part
+
+#### [ ] Son different par type d'action
+- Task complete : son actuel
+- Badge : nouveau son
+- Level up : fanfare
+
+### P2 - Basse priorite (Polish)
+
+#### [ ] Themes personnalisables
+- Dark (actuel), Light, Sunset, Ocean
+- Stocker dans settings
+
+#### [ ] Choix du style de celebration
+- Confetti, Fireworks, Stars, None
+- Stocker dans settings
+
+#### [ ] Avatar/mascotte qui evolue
+- Afficher icone du niveau actuel
+- Animation quand on monte de niveau
+
+#### [ ] Easter eggs
+- Konami code -> confetti arc-en-ciel
+- 100 taches en un jour -> celebration speciale
+
+---
+
+## IDEES FUTURES
+
+### Organisation avancee
+- [ ] Projets avec tags couleur (#travail, #perso)
+- [ ] Vue Kanban : Inbox -> Aujourd'hui -> En cours -> Fait
+- [ ] Liens entre taches (dependances)
+- [ ] Notes attachees aux taches
+
+### Equipe
+- [ ] Vue "Mon equipe" : qui fait quoi aujourd'hui
+- [ ] Timeline d'activite en temps reel
+- [ ] Charge de travail par membre
+- [ ] Notifications push quand tache assignee faite
+
+### Intelligence
+- [ ] Suggestions basees sur l'historique
+- [ ] Auto-priorite des taches recurrentes non faites
+- [ ] "Focus time" suggere selon patterns
+- [ ] Rappels intelligents contextuels
+
+### Calendrier
+- [ ] Vue agenda integree (pas juste sync)
+- [ ] Time blocking : bloquer du temps pour une tache
+- [ ] Conflits visibles : RDV vs tache urgente
+
+---
+
+## FICHIERS CREES/MODIFIES
+
+### Nouveaux fichiers
+- `src/js/gamification.js` - Systeme de gamification complet
+- `src/js/swipe.js` - Gestures swipe sur les taches
+- `src/js/stats.js` - Vue statistiques
+- `src/js/quick-dump.js` - Capture rapide
+- `src/css/gamification.css` - Styles pour tout ca
+
+### Fichiers modifies
+- `index.html` - Import CSS gamification
+- `src/js/app.js` - Imports + init quick dump
+- `src/js/views.js` - Import gamification + appel recordTaskCompletion
+
+---
+
+## NOTES TECHNIQUES
+
+### Structure gamification state (localStorage)
+```javascript
+{
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActiveDate: "2026-01-13",
+  totalTasksCompleted: 0,
+  totalFocusMinutes: 0,
+  totalDelegated: 0,
+  perfectDays: 0,
+  earlyBirdCount: 0,
+  nightOwlCount: 0,
+  speedDemonTasks: [],
+  unlockedBadges: ["first_task", "streak_3"],
+  badgeProgress: {}
+}
+```
+
+### Raccourcis clavier
+- `Ctrl+K` / `Ctrl+Space` : Command bar
+- `Ctrl+Shift+N` : Quick dump
+
+### XP rewards
+- Task complete : 10 XP
+- Task urgent : 15 XP
+- Perfect day : 50 XP
+- Streak day : 5 XP * jours
+- Focus session : 20 XP
+- Badge unlock : 100 XP

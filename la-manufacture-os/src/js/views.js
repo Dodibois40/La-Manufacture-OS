@@ -2,6 +2,7 @@ import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode } from './api-client.js';
 import { openShareModal } from './share.js';
+import { recordTaskCompletion, recordPerfectDay } from './gamification.js';
 
 // Inspirational quotes collection - 60+ citations pour ne jamais voir les memes
 const QUOTES = [
@@ -191,6 +192,7 @@ const taskRow = (t, state) => {
       // 🎉 Célébration !
       celebrate();
       toast('✨ Bien joué !', 'success');
+      recordTaskCompletion(task);
     }, 450);
   });
 
