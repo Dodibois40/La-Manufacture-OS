@@ -110,6 +110,9 @@ export const ensureTask = (t, defaultOwner) => {
 };
 
 // Confirmation Dialog - FLOW Style (no emoji icons)
+// Alias pour triggerConfetti (utilisé par gamification.js)
+export const triggerConfetti = celebrate;
+
 export const confirmDialog = ({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', danger = false }) => {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');

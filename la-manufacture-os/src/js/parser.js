@@ -325,3 +325,20 @@ export const stripPrefix = (raw) => {
     .replace(/^(lundi|lun|mardi|mar|mercredi|mer|jeudi|jeu|vendredi|ven|samedi|sam|dimanche|dim)\s*:?\s*/i, '')
     .trim();
 };
+
+// Parse task input (used by quick-dump)
+export const parseTaskInput = (raw, owners = ['Moi']) => {
+  const today = isoLocal(new Date());
+  const defaultOwner = owners[0] || 'Moi';
+
+  return {
+    title: cleanTitle(raw, owners),
+    date: smartParseDate(raw, today),
+    urgent: smartParseUrgent(raw),
+    owner: smartParseOwner(raw, owners, defaultOwner),
+    estimated_duration: smartParseDuration(raw),
+    recurrence: smartParseRecurrence(raw),
+    project: smartParseProject(raw),
+    start_time: smartParseTime(raw),
+  };
+};
