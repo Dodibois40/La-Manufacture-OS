@@ -32,3 +32,4 @@ nul
 
 # Local Netlify folder
 .netlify
+*.env.local
