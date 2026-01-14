@@ -16,8 +16,34 @@ export const toast = (msg, type = 'default') => {
   toast._timer = window.setTimeout(() => t.classList.remove('show'), 1800);
 };
 
+// Get celebration style from settings
+const getCelebrationStyle = () => {
+  try {
+    const state = JSON.parse(localStorage.getItem('lm_os_state') || '{}');
+    return state.settings?.celebrationStyle || 'confetti';
+  } catch (e) {
+    return 'confetti';
+  }
+};
+
 // 🎉 Célébration confetti pour les tâches complétées
 export const celebrate = () => {
+  const style = getCelebrationStyle();
+
+  if (style === 'none') return;
+
+  if (style === 'fireworks') {
+    celebrateFireworks();
+  } else if (style === 'stars') {
+    celebrateStars();
+  } else {
+    celebrateConfetti();
+  }
+
+  playSound('complete');
+};
+
+const celebrateConfetti = () => {
   let container = document.getElementById('confetti-container');
   if (!container) {
     container = document.createElement('div');
@@ -39,8 +65,69 @@ export const celebrate = () => {
     container.appendChild(confetti);
   }
 
-  playSound('complete');
   setTimeout(() => container.innerHTML = '', 2500);
+};
+
+const celebrateFireworks = () => {
+  let container = document.getElementById('confetti-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'confetti-container';
+    document.body.appendChild(container);
+  }
+  container.innerHTML = '';
+
+  const colors = ['#FFD60A', '#FF9F0A', '#FF453A', '#BF5AF2'];
+
+  // Create multiple firework bursts
+  for (let burst = 0; burst < 3; burst++) {
+    setTimeout(() => {
+      const x = 20 + Math.random() * 60; // Random horizontal position
+      const y = 20 + Math.random() * 40; // Random vertical position
+
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'firework-particle';
+        particle.style.left = x + 'vw';
+        particle.style.top = y + 'vh';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+        const angle = (Math.PI * 2 * i) / 20;
+        const velocity = 100 + Math.random() * 50;
+        particle.style.setProperty('--tx', Math.cos(angle) * velocity + 'px');
+        particle.style.setProperty('--ty', Math.sin(angle) * velocity + 'px');
+
+        container.appendChild(particle);
+      }
+    }, burst * 400);
+  }
+
+  setTimeout(() => container.innerHTML = '', 2500);
+};
+
+const celebrateStars = () => {
+  let container = document.getElementById('confetti-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'confetti-container';
+    document.body.appendChild(container);
+  }
+  container.innerHTML = '';
+
+  const starCount = 30;
+
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement('div');
+    star.className = 'star-particle';
+    star.textContent = '⭐';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.top = Math.random() * 100 + 'vh';
+    star.style.animationDelay = Math.random() * 0.3 + 's';
+    star.style.fontSize = (12 + Math.random() * 20) + 'px';
+    container.appendChild(star);
+  }
+
+  setTimeout(() => container.innerHTML = '', 2000);
 };
 
 // 🔊 Sons subtils

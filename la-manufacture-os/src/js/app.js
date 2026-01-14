@@ -25,6 +25,23 @@ state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
 state.settings = state.settings && typeof state.settings === 'object' ? state.settings : { owners: ['Thibaud'] };
 state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length ? state.settings.owners : ['Thibaud'];
 
+// Theme Management
+const THEMES = ['dark', 'light', 'sunset', 'ocean'];
+
+const applyTheme = (theme) => {
+  if (!THEMES.includes(theme)) theme = 'dark';
+  document.documentElement.setAttribute('data-theme', theme === 'dark' ? '' : theme);
+  state.settings.theme = theme;
+  saveState(state);
+};
+
+const getCurrentTheme = () => {
+  return state.settings.theme || 'dark';
+};
+
+// Apply theme on load
+applyTheme(getCurrentTheme());
+
 // macOS Dock Magnification
 const initDockMagnification = () => {
   const nav = document.querySelector('nav');
@@ -334,7 +351,7 @@ const initApp = async () => {
 
   // Init modules
   initInboxControls(state, render);
-  initConfig(state, render, setView);
+  initConfig(state, render, setView, applyTheme);
   initEditMode(state, render);
   initPlanningControls(state, render);
   initCommandBar(state, render);

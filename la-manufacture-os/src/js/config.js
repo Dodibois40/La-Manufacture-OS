@@ -6,9 +6,21 @@ import { signOut } from './clerk-auth.js';
 
 export const renderConfig = (state) => {
   document.getElementById('owners').value = (state.settings.owners || []).join(', ');
+
+  // Update theme selector
+  const currentTheme = state.settings.theme || 'dark';
+  document.querySelectorAll('.theme-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === currentTheme);
+  });
+
+  // Update celebration selector
+  const currentCelebration = state.settings.celebrationStyle || 'confetti';
+  document.querySelectorAll('.celebration-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.celebration === currentCelebration);
+  });
 };
 
-export const initConfig = (state, renderCallback, setViewCallback) => {
+export const initConfig = (state, renderCallback, setViewCallback, applyThemeCallback) => {
   const applyOwners = () => {
     const owners = (document.getElementById('owners').value || '')
       .split(',')
@@ -24,6 +36,29 @@ export const initConfig = (state, renderCallback, setViewCallback) => {
 
   document.getElementById('owners').addEventListener('change', applyOwners);
   document.getElementById('owners').addEventListener('blur', applyOwners);
+
+  // Theme selector
+  document.querySelectorAll('.theme-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const theme = btn.dataset.theme;
+      if (applyThemeCallback) {
+        applyThemeCallback(theme);
+      }
+      renderConfig(state);
+      toast(`Theme ${theme} appliqué`);
+    });
+  });
+
+  // Celebration selector
+  document.querySelectorAll('.celebration-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const celebrationStyle = btn.dataset.celebration;
+      state.settings.celebrationStyle = celebrationStyle;
+      saveState(state);
+      renderConfig(state);
+      toast(`Celebration ${celebrationStyle} activée`);
+    });
+  });
 
   // Export
   document.getElementById('exportBtn').addEventListener('click', () => {

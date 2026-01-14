@@ -73,6 +73,12 @@ Transformer FLOW en un **second cerveau addictif** : vider sa tete, organiser, d
 - **Sons par type d'action** : playSound.complete pour taches
 - **Historique des badges** : notification custom + timeline dans Stats
 
+### 4. UX Polish - P2 Items
+- **Themes personnalisables** : Dark, Light, Sunset, Ocean avec CSS variables
+- **Selecteur de theme** : UI dans Config avec preview des couleurs
+- **Styles de celebration** : Confetti, Fireworks, Stars, None
+- **Selecteur de celebration** : UI dans Config avec emojis
+
 ---
 
 ## A FAIRE (Prochaines sessions)
@@ -140,11 +146,11 @@ if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
 
 ### P2 - Basse priorite (Polish)
 
-#### [ ] Themes personnalisables
+#### [x] Themes personnalisables
 - Dark (actuel), Light, Sunset, Ocean
 - Stocker dans settings
 
-#### [ ] Choix du style de celebration
+#### [x] Choix du style de celebration
 - Confetti, Fireworks, Stars, None
 - Stocker dans settings
 
@@ -193,11 +199,16 @@ if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
 - `src/js/stats.js` - Vue statistiques
 - `src/js/quick-dump.js` - Capture rapide
 - `src/css/gamification.css` - Styles pour tout ca
+- `src/css/themes.css` - Systeme de themes avec 4 variations
+- `src/js/app-callbacks.js` - Communication inter-modules
 
 ### Fichiers modifies
-- `index.html` - Import CSS gamification
-- `src/js/app.js` - Imports + init quick dump
+- `index.html` - Import CSS gamification + theme selector + celebration selector
+- `src/js/app.js` - Imports + init quick dump + theme management
 - `src/js/views.js` - Import gamification + appel recordTaskCompletion
+- `src/js/config.js` - Theme selector + celebration selector handlers
+- `src/js/utils.js` - Celebration styles (confetti, fireworks, stars)
+- `src/css/app.css` - Animations firework-particle et star-particle
 
 ---
 
