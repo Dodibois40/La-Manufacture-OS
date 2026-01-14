@@ -8,7 +8,7 @@ export const renderConfig = (state) => {
   document.getElementById('owners').value = (state.settings.owners || []).join(', ');
 };
 
-export const initConfig = (state, renderCallback) => {
+export const initConfig = (state, renderCallback, setViewCallback) => {
   const applyOwners = () => {
     const owners = (document.getElementById('owners').value || '')
       .split(',')
@@ -91,7 +91,6 @@ export const initConfig = (state, renderCallback) => {
 
   // Reset UI
   document.getElementById('resetUiBtn').addEventListener('click', () => {
-    const setViewCallback = window._setViewCallback;
     if (setViewCallback) setViewCallback('day');
     toast('UI reset');
   });

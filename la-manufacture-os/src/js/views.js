@@ -4,6 +4,7 @@ import { isApiMode } from './api-client.js';
 import { openShareModal } from './share.js';
 import { recordTaskCompletion, recordPerfectDay, renderStreakWidget } from './gamification.js';
 import { initSwipeGestures } from './swipe.js';
+import { appCallbacks } from './app-callbacks.js';
 
 // Inspirational quotes collection - 60+ citations pour ne jamais voir les memes
 const QUOTES = [
@@ -180,7 +181,7 @@ const taskRow = (t, state) => {
       task.done = false;
       task.updatedAt = nowISO();
       saveState(state);
-      window._renderCallback?.();
+      appCallbacks.render?.();
       return;
     }
 
@@ -189,7 +190,7 @@ const taskRow = (t, state) => {
       task.done = true;
       task.updatedAt = nowISO();
       saveState(state);
-      window._renderCallback?.();
+      appCallbacks.render?.();
       // 🎉 Célébration !
       celebrate();
       toast('✨ Bien joué !', 'success');
@@ -271,7 +272,7 @@ const taskRow = (t, state) => {
       task.date = isoLocal(d);
       task.updatedAt = nowISO();
       saveState(state);
-      window._renderCallback?.();
+      appCallbacks.render?.();
       toast('→ Demain');
     });
 
@@ -282,7 +283,7 @@ const taskRow = (t, state) => {
     focusBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
     focusBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      import('./focus-mode.js').then(mod => mod.startFocusMode(task, state, window._renderCallback));
+      import('./focus-mode.js').then(mod => mod.startFocusMode(task, state, appCallbacks.render));
     });
 
     // Urgent toggle action
@@ -295,7 +296,7 @@ const taskRow = (t, state) => {
       task.urgent = !task.urgent;
       task.updatedAt = nowISO();
       saveState(state);
-      window._renderCallback?.();
+      appCallbacks.render?.();
       toast(task.urgent ? '🔥 Urgent' : 'Urgence retirée');
     });
 
@@ -362,7 +363,7 @@ const taskRow = (t, state) => {
         }
 
         saveState(state);
-        window._renderCallback?.();
+        appCallbacks.render?.();
         menu.remove();
       });
 
@@ -408,7 +409,7 @@ const enterEditMode = () => {
   if (dayActions) dayActions.style.display = 'none';
 
   updateSelectedCount();
-  window._renderCallback?.();
+  appCallbacks.render?.();
 };
 
 const exitEditMode = () => {
@@ -421,7 +422,7 @@ const exitEditMode = () => {
   if (editBar) editBar.classList.remove('active');
   if (dayActions) dayActions.style.display = 'flex';
 
-  window._renderCallback?.();
+  appCallbacks.render?.();
 };
 
 export const initEditMode = (state, renderCallback) => {
@@ -520,7 +521,7 @@ export const renderDay = (state) => {
     focusContainer.querySelector('#startZenMode').addEventListener('click', () => {
       const firstTask = pendingTasks[0];
       if (firstTask) {
-        import('./focus-mode.js').then(mod => mod.startFocusMode(firstTask, state, window._renderCallback));
+        import('./focus-mode.js').then(mod => mod.startFocusMode(firstTask, state, appCallbacks.render));
       }
     });
     dayList.appendChild(focusContainer);
@@ -578,10 +579,6 @@ export const renderDay = (state) => {
     dayList.appendChild(emptyEl);
   }
 
-  // Hide old lateBox (now integrated)
-  const lateBox = document.getElementById('lateBox');
-  if (lateBox) lateBox.innerHTML = '';
-
   // Progress badge - include overdue in count
   const totalPending = allTasks.filter(t => !t.done).length;
   const totalDone = allTasks.filter(t => t.done).length;
@@ -607,7 +604,7 @@ export const renderDay = (state) => {
         celebrate();
         toast('Fait!');
         recordTaskCompletion(task);
-        window._renderCallback?.();
+        appCallbacks.render?.();
       }
     },
     onTomorrow: (taskId) => {
@@ -619,7 +616,7 @@ export const renderDay = (state) => {
         task.updatedAt = nowISO();
         saveState(state);
         toast('-> Demain');
-        window._renderCallback?.();
+        appCallbacks.render?.();
       }
     }
   });
@@ -803,6 +800,3 @@ export const initPlanningControls = (state, renderCallback) => {
   }
 };
 
-export const initAddTask = (state, renderCallback) => {
-  // handled by commandbar.js global redirect
-};

@@ -1,27 +1,26 @@
 import { toast } from './utils.js';
 import { loadState, saveState, initStorageUI, loadStateFromApi } from './storage.js';
 import { isApiMode, api } from './api-client.js';
-import { renderDay, renderWeek, initAddTask, initEditMode, initPlanningControls } from './views.js';
+import { appCallbacks } from './app-callbacks.js';
+import { renderDay, renderWeek, initEditMode, initPlanningControls } from './views.js';
 import { renderInboxUI, initInboxControls, inboxCtx } from './inbox.js';
 import { renderConfig, initConfig } from './config.js';
 import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
-import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, signOut, getClerkUser, verifyEmailCode } from './clerk-auth.js';
-import { initNotifications, startNotificationPolling, stopNotificationPolling } from './notifications.js';
+import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCode } from './clerk-auth.js';
+import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
 import { initGoogleCalendar } from './google-calendar.js';
 import { initDailyReview } from './daily-review.js';
-import { recordTaskCompletion, recordPerfectDay, updateStreak, getStats, renderStreakWidget } from './gamification.js';
-import { initSwipeGestures } from './swipe.js';
+import { renderStreakWidget } from './gamification.js';
 import { renderStatsView } from './stats.js';
 import { openQuickDump, initQuickDumpShortcut } from './quick-dump.js';
 
 // Load state (local first, then sync from API)
 let state = loadState();
-window._debugState = state; // Expose for debugging
 state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
 state.settings = state.settings && typeof state.settings === 'object' ? state.settings : { owners: ['Thibaud'] };
 state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length ? state.settings.owners : ['Thibaud'];
@@ -69,7 +68,7 @@ const initDockMagnification = () => {
 
 // Navigation
 const views = ['day', 'week', 'inbox', 'config', 'stats', 'auth'];
-const setView = (name) => {
+export const setView = (name) => {
   const nav = document.querySelector('nav');
 
   if (name === 'auth') {
@@ -96,19 +95,17 @@ const setView = (name) => {
   }
 };
 
-// Store setView globally for config.js to access
-window._setViewCallback = setView;
-
 // Master render
-const render = () => {
+export const render = () => {
   renderDay(state);
   renderWeek(state);
   renderInboxUI(state);
   renderConfig(state);
 };
 
-// Store render globally for views.js to access
-window._renderCallback = render;
+// Register callbacks for other modules
+appCallbacks.render = render;
+appCallbacks.setView = setView;
 
 // Hide app loader
 const hideLoader = () => {
@@ -264,12 +261,12 @@ const initAuthUI = () => {
 
 // Init app
 const initApp = async () => {
-  // Fallback: enlever briefing-active apres 10s si toujours present
+  // Fallback: remove briefing-active after 10s if still present
   setTimeout(() => {
     document.body.classList.remove('briefing-active');
   }, 10000);
 
-  // Fallback: cacher le loader apres 8s max
+  // Fallback: hide loader after 8s max
   setTimeout(hideLoader, 8000);
 
   // Storage UI
@@ -337,7 +334,7 @@ const initApp = async () => {
 
   // Init modules
   initInboxControls(state, render);
-  initConfig(state, render);
+  initConfig(state, render, setView);
   initEditMode(state, render);
   initPlanningControls(state, render);
   initCommandBar(state, render);
