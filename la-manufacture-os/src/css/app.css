@@ -1367,50 +1367,6 @@ nav button.active .nav-icon {
   }
 }
 
-/* Firework particles */
-.firework-particle {
-  position: fixed;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: firework-explode 1s ease-out forwards;
-  z-index: 99999;
-}
-
-@keyframes firework-explode {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--tx), var(--ty)) scale(0);
-    opacity: 0;
-  }
-}
-
-/* Star particles */
-.star-particle {
-  position: fixed;
-  pointer-events: none;
-  animation: star-twinkle 1.5s ease-out forwards;
-  z-index: 99999;
-}
-
-@keyframes star-twinkle {
-  0% {
-    opacity: 0;
-    transform: scale(0) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2) rotate(180deg);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0) rotate(360deg);
-  }
-}
 
 /* Toast amélioré */
 .toast {

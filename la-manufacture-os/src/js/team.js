@@ -219,15 +219,26 @@ async function deleteFile(id) {
 // ============================================
 
 export async function initTeam(userId) {
-  if (!isApiMode) return;
+  console.log('[Team] initTeam called', { isApiMode, userId });
+
+  if (!isApiMode) {
+    console.log('[Team] Not in API mode, skipping');
+    return;
+  }
 
   currentUserId = userId;
 
   const teamSection = document.getElementById('teamSection');
-  if (!teamSection) return;
+  console.log('[Team] teamSection element:', teamSection);
+
+  if (!teamSection) {
+    console.warn('[Team] teamSection not found in DOM');
+    return;
+  }
 
   // Show team section
   teamSection.style.display = 'block';
+  console.log('[Team] Team section displayed');
 
   // Set atelier link
   const atelierLink = document.getElementById('atelierLink');
