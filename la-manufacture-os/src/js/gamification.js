@@ -75,6 +75,7 @@ const defaultState = () => ({
   speedDemonTasks: [],
   unlockedBadges: [],
   badgeProgress: {},
+  badgeHistory: [], // { badgeId, timestamp, name, icon }
 });
 
 // Load gamification state
@@ -189,13 +190,23 @@ export const unlockBadge = (badgeId) => {
   if (!badge) return false;
 
   state.unlockedBadges.push(badgeId);
+
+  // Add to history
+  if (!state.badgeHistory) state.badgeHistory = [];
+  state.badgeHistory.push({
+    badgeId,
+    timestamp: new Date().toISOString(),
+    name: badge.name,
+    icon: badge.icon
+  });
+
   saveGamification(state);
 
-  // Celebrate!
+  // Celebrate with custom badge notification!
   setTimeout(() => {
     triggerConfetti();
     playSound.badge();
-    toast(`${badge.icon} Badge debloque: ${badge.name}!`);
+    showBadgeNotification(badge);
   }, 200);
 
   addXP(XP_REWARDS.badge_unlock, 'badge');
@@ -449,4 +460,31 @@ playSound.complete = () => {
     osc.start();
     osc.stop(ctx.currentTime + 0.3);
   } catch (e) {}
+};
+
+// Show badge unlock notification
+const showBadgeNotification = (badge) => {
+  const notification = document.createElement('div');
+  notification.className = 'badge-notification';
+  notification.innerHTML = `
+    <div class="badge-notification-content">
+      <div class="badge-notification-icon">${badge.icon}</div>
+      <div class="badge-notification-text">
+        <div class="badge-notification-title">Badge Unlocked!</div>
+        <div class="badge-notification-name">${badge.name}</div>
+        <div class="badge-notification-desc">${badge.description}</div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Animate in
+  setTimeout(() => notification.classList.add('show'), 10);
+
+  // Remove after 5s
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 5000);
 };

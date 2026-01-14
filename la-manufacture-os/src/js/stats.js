@@ -145,6 +145,9 @@ export const renderStatsView = (tasks) => {
           ${renderBadgesSection()}
         </div>
       </div>
+
+      <!-- Badge History -->
+      ${renderBadgeTimeline()}
     </div>
   `;
 };
@@ -163,4 +166,61 @@ const renderBadgesSection = () => {
       </div>
     `;
   }).join('');
+};
+
+// Render badge timeline
+const renderBadgeTimeline = () => {
+  const state = loadGamification();
+  const history = state.badgeHistory || [];
+
+  if (history.length === 0) {
+    return '';
+  }
+
+  // Sort by timestamp (newest first)
+  const sorted = [...history].sort((a, b) =>
+    new Date(b.timestamp) - new Date(a.timestamp)
+  );
+
+  // Show only last 10
+  const recent = sorted.slice(0, 10);
+
+  return `
+    <div class="stats-card badge-timeline-card">
+      <h3>Recent Badges (${history.length} total)</h3>
+      <div class="badge-timeline">
+        ${recent.map(entry => {
+          const date = new Date(entry.timestamp);
+          const relativeTime = getRelativeTime(date);
+
+          return `
+            <div class="timeline-item">
+              <div class="timeline-icon">${entry.icon}</div>
+              <div class="timeline-content">
+                <div class="timeline-name">${entry.name}</div>
+                <div class="timeline-time">${relativeTime}</div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+};
+
+// Get relative time string
+const getRelativeTime = (date) => {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return 'A l\'instant';
+  if (diffMin < 60) return `Il y a ${diffMin}min`;
+  if (diffHour < 24) return `Il y a ${diffHour}h`;
+  if (diffDay === 1) return 'Hier';
+  if (diffDay < 7) return `Il y a ${diffDay}j`;
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 };

@@ -71,6 +71,7 @@ Transformer FLOW en un **second cerveau addictif** : vider sa tete, organiser, d
 - **Double-tap pour marquer fait** : event dblclick sur les taches
 - **Animations spring** : cubic-bezier spring sur entree + hover/active
 - **Sons par type d'action** : playSound.complete pour taches
+- **Historique des badges** : notification custom + timeline dans Stats
 
 ---
 
@@ -126,9 +127,10 @@ if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
 - Transitions spring sur hover/active
 - Effet de rebond subtil
 
-#### [ ] Historique des badges gagnes
-- Notification quand on gagne un badge
-- Historique visible quelque part
+#### [x] Historique des badges gagnes
+- Notification custom glassmorphisme avec animation spring
+- Timeline dans vue Stats avec badges recents
+- Historique complet avec timestamps et temps relatifs
 
 #### [x] Son different par type d'action
 - Task complete : son "ding" leger (E5 -> G5)
