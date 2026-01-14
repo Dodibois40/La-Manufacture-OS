@@ -2,7 +2,7 @@ import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode } from './api-client.js';
 import { openShareModal } from './share.js';
-import { recordTaskCompletion, recordPerfectDay, renderStreakWidget } from './gamification.js';
+import { recordTaskCompletion, recordPerfectDay, renderStreakWidget, playSound } from './gamification.js';
 import { initSwipeGestures } from './swipe.js';
 import { appCallbacks } from './app-callbacks.js';
 
@@ -167,6 +167,35 @@ const taskRow = (t, state) => {
         el.classList.add('selected');
       }
       updateSelectedCount();
+    });
+  } else {
+    // Double-tap/double-click to mark as done
+    el.addEventListener('dblclick', (e) => {
+      if (task.done) return; // Already done
+
+      // Mark as done with animation
+      const checkbox = el.querySelector('.check');
+      if (checkbox) {
+        checkbox.classList.add('animating');
+      }
+
+      setTimeout(() => {
+        task.done = true;
+        task.updatedAt = nowISO();
+        saveState(state);
+        appCallbacks.render?.();
+        playSound.complete();
+        celebrate();
+        toast('✨ Bien joué !', 'success');
+        recordTaskCompletion(task);
+
+        // Check for perfect day
+        const todayISO = isoLocal(new Date());
+        const todayTasks = state.tasks.filter(t => t.date === todayISO);
+        if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
+          recordPerfectDay();
+        }
+      }, 450);
     });
   }
 
@@ -601,6 +630,7 @@ export const renderDay = (state) => {
         task.done = true;
         task.updatedAt = nowISO();
         saveState(state);
+        playSound.complete();
         celebrate();
         toast('Fait!');
         recordTaskCompletion(task);

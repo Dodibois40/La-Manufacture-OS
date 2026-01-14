@@ -52,6 +52,28 @@ Transformer FLOW en un **second cerveau addictif** : vider sa tete, organiser, d
 
 ---
 
+## FAIT (Session du 14/01/2026)
+
+### 1. Verification Email Clerk
+- Formulaire de verification avec input code
+- Gestion du workflow sign-up complet
+- Deployed to production
+
+### 2. Code Cleanup Production
+- Supprime `window._` global callbacks
+- Cree `app-callbacks.js` pour communication inter-modules
+- Supprime imports inutilises (initAddTask, signOut, etc.)
+- Traduit commentaires francais en anglais
+- Supprime code mort (initAddTask stub, lateBox, auth.js)
+- 217 lignes supprimees
+
+### 3. UX Polish - P1 Items
+- **Double-tap pour marquer fait** : event dblclick sur les taches
+- **Animations spring** : cubic-bezier spring sur entree + hover/active
+- **Sons par type d'action** : playSound.complete pour taches
+
+---
+
 ## A FAIRE (Prochaines sessions)
 
 ### P0 - Haute priorite (Addiction)
@@ -95,20 +117,24 @@ if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
 
 ### P1 - Moyenne priorite (UX)
 
-#### [ ] Double-tap pour marquer fait
-- Ajouter event listener sur les taches
+#### [x] Double-tap pour marquer fait
+- Event listener `dblclick` ajoute sur les taches
+- Marque la tache comme faite avec animation
 
-#### [ ] Animations spring sur les taches
-- Utiliser `cubic-bezier(0.175, 0.885, 0.32, 1.275)`
+#### [x] Animations spring sur les taches
+- Animation d'entree : `cubic-bezier(0.175, 0.885, 0.32, 1.275)` avec scale
+- Transitions spring sur hover/active
+- Effet de rebond subtil
 
 #### [ ] Historique des badges gagnes
 - Notification quand on gagne un badge
 - Historique visible quelque part
 
-#### [ ] Son different par type d'action
-- Task complete : son actuel
-- Badge : nouveau son
-- Level up : fanfare
+#### [x] Son different par type d'action
+- Task complete : son "ding" leger (E5 -> G5)
+- Badge : son existant (montee d'accord)
+- Level up : fanfare existante (4 notes)
+- Perfect day : cascade existante (5 notes)
 
 ### P2 - Basse priorite (Polish)
 

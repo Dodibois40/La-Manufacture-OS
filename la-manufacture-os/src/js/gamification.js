@@ -1,5 +1,5 @@
 // Gamification System - Streaks, Badges, Levels
-import { isoLocal, toast, playSound, triggerConfetti } from './utils.js';
+import { isoLocal, toast, triggerConfetti } from './utils.js';
 
 const STORAGE_KEY = 'lm_os_gamification';
 
@@ -129,7 +129,7 @@ export const addXP = (amount, reason = '') => {
   if (newLevel.level > oldLevel.level) {
     setTimeout(() => {
       triggerConfetti();
-      playSound('levelup');
+      playSound.levelup();
       toast(`🎉 Niveau ${newLevel.level} - ${newLevel.name}!`);
     }, 300);
   }
@@ -194,7 +194,7 @@ export const unlockBadge = (badgeId) => {
   // Celebrate!
   setTimeout(() => {
     triggerConfetti();
-    playSound('badge');
+    playSound.badge();
     toast(`${badge.icon} Badge debloque: ${badge.name}!`);
   }, 200);
 
@@ -282,7 +282,7 @@ export const recordPerfectDay = () => {
   setTimeout(() => {
     triggerConfetti();
     triggerConfetti();
-    playSound('perfect');
+    playSound.perfect();
     toast('🌟 Perfect Day! Toutes tes taches sont faites!');
   }, 500);
 };
@@ -378,6 +378,8 @@ export const renderBadgesGrid = () => {
 };
 
 // Play special sounds
+export const playSound = {};
+
 playSound.levelup = () => {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -428,5 +430,23 @@ playSound.perfect = () => {
       osc.start(ctx.currentTime + i * 0.08);
       osc.stop(ctx.currentTime + i * 0.08 + 0.2);
     });
+  } catch (e) {}
+};
+
+playSound.complete = () => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    // Simple upward "ding" sound
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.08); // G5
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
   } catch (e) {}
 };
