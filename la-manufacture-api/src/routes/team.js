@@ -47,66 +47,89 @@ export default async function teamRoutes(fastify) {
   fastify.patch('/members/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
     const { id } = request.params;
+    const memberId = parseInt(id, 10);
     const { name, avatar_color, active } = request.body;
+
+    if (isNaN(memberId)) {
+      return reply.status(400).send({ error: 'ID invalide' });
+    }
 
     // Verifier que le membre appartient a l'utilisateur
     const check = await query(
       'SELECT id FROM team_members WHERE id = $1 AND user_id = $2',
-      [id, userId]
+      [memberId, userId]
     );
 
     if (check.rows.length === 0) {
-      return reply.status(404).send({ error: 'Membre non trouve' });
+      return reply.status(404).send({ error: 'Membre non trouve ou acces refuse' });
     }
 
-    const updates = [];
-    const values = [];
-    let paramIndex = 1;
+    try {
+      const updates = [];
+      const values = [];
+      let paramIndex = 1;
 
-    if (name !== undefined) {
-      updates.push(`name = $${paramIndex++}`);
-      values.push(name.trim());
+      if (name !== undefined) {
+        updates.push(`name = $${paramIndex++}`);
+        values.push(name.trim());
+      }
+      if (avatar_color !== undefined) {
+        updates.push(`avatar_color = $${paramIndex++}`);
+        values.push(avatar_color);
+      }
+      if (active !== undefined) {
+        updates.push(`active = $${paramIndex++}`);
+        values.push(active);
+      }
+
+      if (updates.length === 0) {
+        return reply.status(400).send({ error: 'Rien a modifier' });
+      }
+
+      values.push(memberId, userId);
+
+      const result = await query(
+        `UPDATE team_members SET ${updates.join(', ')}
+         WHERE id = $${paramIndex++} AND user_id = $${paramIndex}
+         RETURNING id, name, avatar_color, active, created_at`,
+        values
+      );
+
+      return { member: result.rows[0] };
+    } catch (error) {
+      reply.log.error(error);
+      return reply.status(500).send({ error: 'Erreur lors de la mise a jour du membre', details: error.message });
     }
-    if (avatar_color !== undefined) {
-      updates.push(`avatar_color = $${paramIndex++}`);
-      values.push(avatar_color);
-    }
-    if (active !== undefined) {
-      updates.push(`active = $${paramIndex++}`);
-      values.push(active);
-    }
-
-    if (updates.length === 0) {
-      return reply.status(400).send({ error: 'Rien a modifier' });
-    }
-
-    values.push(id, userId);
-
-    const result = await query(
-      `UPDATE team_members SET ${updates.join(', ')}
-       WHERE id = $${paramIndex++} AND user_id = $${paramIndex}
-       RETURNING id, name, avatar_color, active, created_at`,
-      values
-    );
-
-    return { member: result.rows[0] };
   });
 
   // DELETE /api/team/members/:id - Supprimer un membre
   fastify.delete('/members/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
     const { id } = request.params;
+    const memberId = parseInt(id, 10);
+    console.log(`[Team] Delete attempt: member ${memberId} by user ${userId}`);
 
-    const result = await query(
-      'DELETE FROM team_members WHERE id = $1 AND user_id = $2 RETURNING id',
-      [id, userId]
-    );
-
-    if (result.rows.length === 0) {
-      return reply.status(404).send({ error: 'Membre non trouve' });
+    if (isNaN(memberId)) {
+      reply.log.error(`Delete member: invalid ID provided: ${id}`);
+      return reply.status(400).send({ error: 'ID de membre invalide' });
     }
 
-    return { success: true };
+    try {
+      const result = await query(
+        'DELETE FROM team_members WHERE id = $1 AND user_id = $2 RETURNING id',
+        [memberId, userId]
+      );
+
+      if (result.rows.length === 0) {
+        reply.log.warn(`Delete member: member ${memberId} not found for user ${userId}`);
+        return reply.status(404).send({ error: 'Membre non trouve (deja supprime ou acces refuse)' });
+      }
+
+      return { success: true };
+    } catch (error) {
+      reply.log.error(error);
+      return reply.status(500).send({ error: 'Erreur lors de la suppression du membre', details: error.message });
+    }
   });
 
   // ============================================
@@ -274,10 +297,15 @@ export default async function teamRoutes(fastify) {
   fastify.delete('/tasks/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
     const { id } = request.params;
+    const taskId = parseInt(id, 10);
+
+    if (isNaN(taskId)) {
+      return reply.status(400).send({ error: 'ID de tache invalide' });
+    }
 
     const result = await query(
       'DELETE FROM team_tasks WHERE id = $1 AND user_id = $2 RETURNING id',
-      [id, userId]
+      [taskId, userId]
     );
 
     if (result.rows.length === 0) {

@@ -176,6 +176,7 @@ async function deleteMember(id) {
   if (!confirm('Supprimer ce membre ? Ses taches seront aussi supprimees.')) return;
 
   try {
+    console.log(`Suppression du membre ${id}...`);
     await api.team.deleteMember(id);
     teamMembers = teamMembers.filter(m => String(m.id) !== String(id));
     renderMembers();
@@ -183,7 +184,7 @@ async function deleteMember(id) {
     toast('Membre supprime');
   } catch (error) {
     console.error('Error deleting member:', error);
-    toast('Erreur: ' + error.message);
+    toast('Erreur: ' + error.message, 'error');
   }
 }
 

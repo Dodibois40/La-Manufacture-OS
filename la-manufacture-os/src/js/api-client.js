@@ -44,20 +44,32 @@ async function apiRequest(endpoint, options = {}) {
   const token = await getClerkToken();
   const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
 
+  const headers = {
+    ...authHeaders,
+    ...options.headers,
+  };
+
+  // Ne mettre Content-Type que s'il y a un body ou si ce n'est pas un DELETE
+  if (options.body || (options.method && options.method !== 'DELETE' && options.method !== 'GET')) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const defaultOptions = {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders,
-      ...options.headers,
-    },
+    headers
   };
 
   const response = await fetch(url, { ...defaultOptions, ...options });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || `API Error: ${response.status}`);
+    let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+    try {
+      const errorJson = await response.json();
+      errorMessage = errorJson.error || errorJson.message || errorMessage;
+    } catch (_) {
+      // Not JSON or empty body
+    }
+    throw new Error(errorMessage);
   }
 
   return response.json();
