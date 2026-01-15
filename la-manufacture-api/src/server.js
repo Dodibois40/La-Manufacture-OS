@@ -94,17 +94,49 @@ fastify.decorate('authenticate', async function (request, reply) {
     // Auto-create local user on first auth
     try {
       const clerkUser = await clerkClient.users.getUser(auth.userId);
-      const email = clerkUser.emailAddresses[0]?.emailAddress || '';
+      const email = clerkUser.emailAddresses[0]?.emailAddress;
       const name = clerkUser.firstName || clerkUser.username || 'User';
+
+      // Validate email
+      if (!email) {
+        fastify.log.error('Clerk user has no email address:', { userId: auth.userId, clerkUser });
+        return reply.status(400).send({ error: 'User must have an email address' });
+      }
+
+      fastify.log.info('Creating user from Clerk:', { clerkId: auth.userId, email, name });
 
       const result = await pool.query(
         'INSERT INTO users (clerk_id, email, name) VALUES ($1, $2, $3) RETURNING id',
         [auth.userId, email, name]
       );
       request.user = { userId: result.rows[0].id, clerkId: auth.userId };
+
+      fastify.log.info('User created successfully:', { userId: result.rows[0].id, clerkId: auth.userId });
     } catch (err) {
-      fastify.log.error('Error creating user from Clerk:', err);
-      return reply.status(500).send({ error: 'Failed to create user' });
+      fastify.log.error('Error creating user from Clerk:', {
+        message: err.message,
+        code: err.code,
+        detail: err.detail,
+        constraint: err.constraint,
+        clerkId: auth.userId
+      });
+
+      // If user already exists (duplicate key), try to find and use existing user
+      if (err.code === '23505') { // Unique violation
+        fastify.log.info('User already exists, attempting to find existing user');
+        const existingUser = await pool.query(
+          'SELECT id FROM users WHERE clerk_id = $1 OR email = (SELECT email FROM users WHERE clerk_id = $1)',
+          [auth.userId]
+        );
+
+        if (existingUser.rows.length > 0) {
+          request.user = { userId: existingUser.rows[0].id, clerkId: auth.userId };
+          fastify.log.info('Found existing user:', { userId: existingUser.rows[0].id });
+          return;
+        }
+      }
+
+      return reply.status(500).send({ error: 'Failed to create user', details: err.message });
     }
   }
 });
