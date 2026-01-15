@@ -299,7 +299,7 @@ const taskRow = (t, state) => {
                 task.google_event_id = googleEventId;
               }
               toast('✅ Synchronisé avec Google Calendar');
-              renderCallback();
+              if (appCallbacks.render) appCallbacks.render();
             }
           } catch (error) {
             console.error('Sync error:', error);
