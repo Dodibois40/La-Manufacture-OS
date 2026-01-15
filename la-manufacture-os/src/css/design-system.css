@@ -244,6 +244,12 @@
   cursor: pointer;
 }
 
+.select option {
+  background: var(--bg-card);
+  color: var(--text-main);
+  padding: 12px;
+}
+
 /* Input Group */
 .input-group {
   margin-bottom: 20px;
