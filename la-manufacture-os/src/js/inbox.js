@@ -183,7 +183,7 @@ export const initInboxControls = (state, renderCallback) => {
   if (assignSel) {
     assignSel.addEventListener('change', (e) => {
       // Empty string means "Moi" (manager's own task), otherwise it's a member ID
-      inboxCtx.assignedMemberId = e.target.value ? parseInt(e.target.value) : null;
+      inboxCtx.assignedMemberId = e.target.value || null;
     });
   }
 

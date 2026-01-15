@@ -63,7 +63,7 @@ function renderMembers() {
     list.querySelectorAll('.team-member-delete').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const id = parseInt(btn.dataset.id);
+        const id = btn.dataset.id;
         await deleteMember(id);
       });
     });
@@ -128,7 +128,7 @@ function renderFiles() {
   list.querySelectorAll('.team-file-delete').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.dataset.id);
+      const id = btn.dataset.id;
       await deleteFile(id);
     });
   });
@@ -177,7 +177,7 @@ async function deleteMember(id) {
 
   try {
     await api.team.deleteMember(id);
-    teamMembers = teamMembers.filter(m => m.id !== id);
+    teamMembers = teamMembers.filter(m => String(m.id) !== String(id));
     renderMembers();
     notifyMembersChange();
     toast('Membre supprime');
@@ -222,7 +222,7 @@ async function deleteFile(id) {
 
   try {
     await api.team.deleteFile(id);
-    teamFiles = teamFiles.filter(f => f.id !== id);
+    teamFiles = teamFiles.filter(f => String(f.id) !== String(id));
     renderFiles();
     toast('Fichier supprime');
   } catch (error) {
@@ -295,7 +295,7 @@ export async function initTeam(userId) {
       return;
     }
 
-    const success = await addTask(parseInt(memberId), text.trim(), date, urgent);
+    const success = await addTask(memberId, text.trim(), date, urgent);
     if (success) {
       document.getElementById('teamTaskText').value = '';
       document.getElementById('teamTaskUrgent').checked = false;

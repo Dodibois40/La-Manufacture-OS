@@ -125,7 +125,9 @@ function renderMembers(members) {
   // Event listeners
   grid.querySelectorAll('.member-card').forEach(card => {
     card.addEventListener('click', () => {
-      selectMember(parseInt(card.dataset.id), members.find(m => m.id === parseInt(card.dataset.id)));
+      const id = card.dataset.id;
+      const member = members.find(m => String(m.id) === String(id));
+      if (member) selectMember(id, member);
     });
   });
 }
@@ -163,8 +165,8 @@ function renderTasks(tasks) {
   // Event listeners
   list.querySelectorAll('.task-item').forEach(item => {
     item.addEventListener('click', async () => {
-      const taskId = parseInt(item.dataset.id);
-      const task = currentTasks.find(t => t.id === taskId);
+      const taskId = item.dataset.id;
+      const task = currentTasks.find(t => String(t.id) === String(taskId));
       if (task) {
         await handleTaskToggle(taskId, !task.done, item);
       }
@@ -298,9 +300,9 @@ async function showFiles() {
 }
 
 // Fonction globale pour imprimer
-window.printFile = function(fileId) {
+window.printFile = function (fileId) {
   const printWindow = window.open(`${API_URL}/api/team/files/${fileId}/view`, '_blank');
-  printWindow.onload = function() {
+  printWindow.onload = function () {
     printWindow.print();
   };
 };
