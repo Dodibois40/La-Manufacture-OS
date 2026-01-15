@@ -1,5 +1,5 @@
 import { api, isApiMode } from './api-client.js';
-import { isLoggedIn } from './clerk-auth.js';
+import { isSignedIn } from './clerk-auth.js';
 
 // Toast notification helper
 function toast(message, type = 'info') {
@@ -59,7 +59,7 @@ let files = [];
 
 async function loadMembers() {
   try {
-    if (!isApiMode || !isLoggedIn()) return;
+    if (!isApiMode || !isSignedIn()) return;
 
     const response = await api.team.getMembers();
     members = response.members || [];
@@ -152,7 +152,7 @@ window.deleteMember = async (memberId) => {
 
 async function loadProjects() {
   try {
-    if (!isApiMode || !isLoggedIn()) return;
+    if (!isApiMode || !isSignedIn()) return;
 
     const response = await api.projects.getAll();
     projects = response.projects || [];
@@ -300,7 +300,7 @@ window.deleteProject = async (projectId) => {
 
 async function loadFiles() {
   try {
-    if (!isApiMode || !isLoggedIn()) return;
+    if (!isApiMode || !isSignedIn()) return;
 
     const response = await api.team.getFiles();
     files = response.files || [];
@@ -339,7 +339,7 @@ function renderFiles() {
           </div>
         </div>
         <div class="file-actions">
-          <button class="btn btn-secondary btn-sm" onclick="downloadFile('${file.filename}', '${file.original_name}')">
+          <button class="btn btn-secondary btn-sm" onclick="downloadFile('${file.filename}')">
             Télécharger
           </button>
           <button class="btn btn-danger btn-sm" onclick="deleteFile('${file.id}')">
@@ -375,7 +375,7 @@ document.getElementById('uploadDocBtn').addEventListener('click', () => {
 });
 
 // Download file
-window.downloadFile = (filename, originalName) => {
+window.downloadFile = (filename) => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
   window.open(`${API_URL}/api/team/files/${filename}/download`, '_blank');
 };
@@ -399,7 +399,7 @@ window.deleteFile = async (fileId) => {
 // ==========================================
 
 async function init() {
-  if (!isApiMode || !isLoggedIn()) {
+  if (!isApiMode || !isSignedIn()) {
     toast('Vous devez être connecté pour accéder à cette page', 'warning');
     setTimeout(() => {
       window.location.href = '/';
