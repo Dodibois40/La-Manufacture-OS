@@ -133,11 +133,14 @@ export function isGoogleConnected() {
 
 // Sync a task/event to Google Calendar
 export async function syncTaskToGoogle(task) {
+  console.log('syncTaskToGoogle called for task:', task);
   if (!googleConnected || !task.is_event) {
+    console.log('Sync skipped: googleConnected=', googleConnected, 'is_event=', task.is_event);
     return null;
   }
 
   try {
+    console.log('Sending sync request to API...');
     const result = await api.google.syncEvent(
       task.id,
       task.text,
@@ -147,7 +150,7 @@ export async function syncTaskToGoogle(task) {
       task.location,
       task.google_event_id
     );
-
+    console.log('Sync API response:', result);
     return result.googleEventId;
   } catch (error) {
     console.error('Google sync error:', error);
