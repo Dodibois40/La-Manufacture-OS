@@ -7,9 +7,8 @@ export default async function projectsRoutes(fastify) {
     const { status } = request.query;
 
     let sql = `
-      SELECT p.*, m.name as assigned_to_name, m.avatar_color
+      SELECT p.*
       FROM projects p
-      LEFT JOIN team_members m ON p.assigned_to = m.id
       WHERE p.user_id = $1
     `;
     const params = [userId];
@@ -23,7 +22,24 @@ export default async function projectsRoutes(fastify) {
     sql += ' ORDER BY p.created_at DESC';
 
     const result = await query(sql, params);
-    return { projects: result.rows };
+
+    // Pour chaque projet, recuperer les membres assignes
+    const projects = await Promise.all(result.rows.map(async (project) => {
+      const membersResult = await query(
+        `SELECT tm.id, tm.name, tm.avatar_color
+         FROM project_members pm
+         JOIN team_members tm ON pm.team_member_id = tm.id
+         WHERE pm.project_id = $1
+         ORDER BY tm.name ASC`,
+        [project.id]
+      );
+      return {
+        ...project,
+        assigned_members: membersResult.rows
+      };
+    }));
+
+    return { projects };
   });
 
   // GET /api/projects/:id - Details d'un projet avec ses taches et fichiers
@@ -33,10 +49,7 @@ export default async function projectsRoutes(fastify) {
 
     // Recuperer le projet
     const projectResult = await query(
-      `SELECT p.*, m.name as assigned_to_name, m.avatar_color
-       FROM projects p
-       LEFT JOIN team_members m ON p.assigned_to = m.id
-       WHERE p.id = $1 AND p.user_id = $2`,
+      `SELECT * FROM projects WHERE id = $1 AND user_id = $2`,
       [id, userId]
     );
 
@@ -45,6 +58,16 @@ export default async function projectsRoutes(fastify) {
     }
 
     const project = projectResult.rows[0];
+
+    // Recuperer les membres assignes
+    const membersResult = await query(
+      `SELECT tm.id, tm.name, tm.avatar_color
+       FROM project_members pm
+       JOIN team_members tm ON pm.team_member_id = tm.id
+       WHERE pm.project_id = $1
+       ORDER BY tm.name ASC`,
+      [id]
+    );
 
     // Recuperer les taches liees au projet
     const tasksResult = await query(
@@ -65,7 +88,10 @@ export default async function projectsRoutes(fastify) {
     );
 
     return {
-      project,
+      project: {
+        ...project,
+        assigned_members: membersResult.rows
+      },
       tasks: tasksResult.rows,
       files: filesResult.rows
     };
@@ -74,39 +100,76 @@ export default async function projectsRoutes(fastify) {
   // POST /api/projects - Creer un projet
   fastify.post('/', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
-    const { name, description, assigned_to, deadline } = request.body;
+    const { name, description, member_ids, deadline } = request.body;
 
     if (!name || name.trim().length === 0) {
       return reply.status(400).send({ error: 'Le nom du projet est requis' });
     }
 
-    // Si assigned_to est fourni, verifier que le membre appartient a l'utilisateur
-    if (assigned_to) {
+    // Si member_ids est fourni, verifier que les membres appartiennent a l'utilisateur
+    if (member_ids && Array.isArray(member_ids) && member_ids.length > 0) {
       const memberCheck = await query(
-        'SELECT id FROM team_members WHERE id = $1 AND user_id = $2',
-        [assigned_to, userId]
+        `SELECT id FROM team_members
+         WHERE id = ANY($1::int[]) AND user_id = $2`,
+        [member_ids, userId]
       );
 
-      if (memberCheck.rows.length === 0) {
-        return reply.status(404).send({ error: 'Membre non trouve' });
+      if (memberCheck.rows.length !== member_ids.length) {
+        return reply.status(404).send({ error: 'Un ou plusieurs membres non trouves' });
       }
     }
 
-    const result = await query(
-      `INSERT INTO projects (user_id, name, description, assigned_to, deadline)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
-      [userId, name.trim(), description?.trim() || null, assigned_to || null, deadline || null]
-    );
+    try {
+      // Creer le projet
+      const result = await query(
+        `INSERT INTO projects (user_id, name, description, deadline)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
+        [userId, name.trim(), description?.trim() || null, deadline || null]
+      );
 
-    return { project: result.rows[0] };
+      const project = result.rows[0];
+
+      // Assigner les membres
+      if (member_ids && Array.isArray(member_ids) && member_ids.length > 0) {
+        const insertValues = member_ids.map((memberId, index) =>
+          `($1, $${index + 2})`
+        ).join(', ');
+
+        await query(
+          `INSERT INTO project_members (project_id, team_member_id)
+           VALUES ${insertValues}`,
+          [project.id, ...member_ids]
+        );
+      }
+
+      // Recuperer le projet avec les membres assignes
+      const membersResult = await query(
+        `SELECT tm.id, tm.name, tm.avatar_color
+         FROM project_members pm
+         JOIN team_members tm ON pm.team_member_id = tm.id
+         WHERE pm.project_id = $1
+         ORDER BY tm.name ASC`,
+        [project.id]
+      );
+
+      return {
+        project: {
+          ...project,
+          assigned_members: membersResult.rows
+        }
+      };
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ error: 'Erreur lors de la creation du projet', details: error.message });
+    }
   });
 
   // PATCH /api/projects/:id - Modifier un projet
   fastify.patch('/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
     const { id } = request.params;
-    const { name, description, assigned_to, deadline, status } = request.body;
+    const { name, description, member_ids, deadline, status } = request.body;
 
     // Verifier que le projet appartient a l'utilisateur
     const check = await query(
@@ -118,15 +181,16 @@ export default async function projectsRoutes(fastify) {
       return reply.status(404).send({ error: 'Projet non trouve ou acces refuse' });
     }
 
-    // Si assigned_to est fourni, verifier que le membre appartient a l'utilisateur
-    if (assigned_to !== undefined && assigned_to !== null) {
+    // Si member_ids est fourni, verifier que les membres appartiennent a l'utilisateur
+    if (member_ids !== undefined && Array.isArray(member_ids) && member_ids.length > 0) {
       const memberCheck = await query(
-        'SELECT id FROM team_members WHERE id = $1 AND user_id = $2',
-        [assigned_to, userId]
+        `SELECT id FROM team_members
+         WHERE id = ANY($1::int[]) AND user_id = $2`,
+        [member_ids, userId]
       );
 
-      if (memberCheck.rows.length === 0) {
-        return reply.status(404).send({ error: 'Membre non trouve' });
+      if (memberCheck.rows.length !== member_ids.length) {
+        return reply.status(404).send({ error: 'Un ou plusieurs membres non trouves' });
       }
     }
 
@@ -143,10 +207,6 @@ export default async function projectsRoutes(fastify) {
         updates.push(`description = $${paramIndex++}`);
         values.push(description?.trim() || null);
       }
-      if (assigned_to !== undefined) {
-        updates.push(`assigned_to = $${paramIndex++}`);
-        values.push(assigned_to);
-      }
       if (deadline !== undefined) {
         updates.push(`deadline = $${paramIndex++}`);
         values.push(deadline);
@@ -156,20 +216,60 @@ export default async function projectsRoutes(fastify) {
         values.push(status);
       }
 
-      if (updates.length === 0) {
-        return reply.status(400).send({ error: 'Rien a modifier' });
+      // Mettre a jour le projet si necessaire
+      if (updates.length > 0) {
+        values.push(id, userId);
+
+        await query(
+          `UPDATE projects SET ${updates.join(', ')}
+           WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
+          values
+        );
       }
 
-      values.push(id, userId);
+      // Mettre a jour les membres assignes si fourni
+      if (member_ids !== undefined) {
+        // Supprimer les anciennes assignations
+        await query(
+          'DELETE FROM project_members WHERE project_id = $1',
+          [id]
+        );
 
-      const result = await query(
-        `UPDATE projects SET ${updates.join(', ')}
-         WHERE id = $${paramIndex++} AND user_id = $${paramIndex}
-         RETURNING *`,
-        values
+        // Ajouter les nouvelles assignations
+        if (Array.isArray(member_ids) && member_ids.length > 0) {
+          const insertValues = member_ids.map((memberId, index) =>
+            `($1, $${index + 2})`
+          ).join(', ');
+
+          await query(
+            `INSERT INTO project_members (project_id, team_member_id)
+             VALUES ${insertValues}`,
+            [id, ...member_ids]
+          );
+        }
+      }
+
+      // Recuperer le projet mis a jour avec les membres assignes
+      const projectResult = await query(
+        'SELECT * FROM projects WHERE id = $1 AND user_id = $2',
+        [id, userId]
       );
 
-      return { project: result.rows[0] };
+      const membersResult = await query(
+        `SELECT tm.id, tm.name, tm.avatar_color
+         FROM project_members pm
+         JOIN team_members tm ON pm.team_member_id = tm.id
+         WHERE pm.project_id = $1
+         ORDER BY tm.name ASC`,
+        [id]
+      );
+
+      return {
+        project: {
+          ...projectResult.rows[0],
+          assigned_members: membersResult.rows
+        }
+      };
     } catch (error) {
       reply.log.error(error);
       return reply.status(500).send({ error: 'Erreur lors de la mise a jour du projet', details: error.message });

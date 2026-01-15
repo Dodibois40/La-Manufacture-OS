@@ -347,10 +347,10 @@ export const api = {
       return apiRequest(`/api/projects/${id}`);
     },
 
-    async create(name, description, assigned_to, deadline) {
+    async create(name, description, member_ids, deadline) {
       return apiRequest('/api/projects', {
         method: 'POST',
-        body: JSON.stringify({ name, description, assigned_to, deadline }),
+        body: JSON.stringify({ name, description, member_ids, deadline }),
       });
     },
 

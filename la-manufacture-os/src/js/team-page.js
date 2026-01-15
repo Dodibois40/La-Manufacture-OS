@@ -181,13 +181,19 @@ function renderProjects() {
     const statusBadge = project.status === 'completed' ? 'badge-success' :
                         project.status === 'archived' ? 'badge-neutral' : 'badge-primary';
 
+    // Format assigned members
+    const assignedMembers = project.assigned_members || [];
+    const membersText = assignedMembers.length > 0
+      ? assignedMembers.map(m => m.name).join(', ')
+      : 'Non assigné';
+
     return `
       <div class="team-card">
         <div class="team-card-header">
           <div class="team-card-info">
             <div class="team-card-name">${project.name}</div>
             <div class="team-card-meta">
-              ${project.assigned_to_name ? `Assigné à ${project.assigned_to_name}` : 'Non assigné'}
+              ${assignedMembers.length > 0 ? '👥 ' : ''}${membersText}
             </div>
           </div>
           <span class="badge ${statusBadge}">${project.status}</span>
@@ -211,20 +217,48 @@ function renderProjects() {
   }).join('');
 }
 
+// Helper function to populate member checkboxes
+function populateMemberCheckboxes(selectedMemberIds = []) {
+  const container = document.getElementById('projectMembersList');
+
+  if (members.length === 0) {
+    container.innerHTML = '<div class="checkbox-list-empty">Aucun membre disponible</div>';
+    return;
+  }
+
+  container.innerHTML = members.map(member => `
+    <div class="checkbox-item">
+      <input
+        type="checkbox"
+        id="member-${member.id}"
+        value="${member.id}"
+        ${selectedMemberIds.includes(member.id) ? 'checked' : ''}
+      >
+      <div class="avatar" style="background: ${member.avatar_color};">
+        ${member.name.charAt(0).toUpperCase()}
+      </div>
+      <label for="member-${member.id}">${member.name}</label>
+    </div>
+  `).join('');
+}
+
+// Helper function to get selected member IDs
+function getSelectedMemberIds() {
+  const checkboxes = document.querySelectorAll('#projectMembersList input[type="checkbox"]:checked');
+  return Array.from(checkboxes).map(cb => parseInt(cb.value));
+}
+
 // Add project
 document.getElementById('addProjectBtn').addEventListener('click', async () => {
   document.getElementById('projectModalTitle').textContent = 'Créer un projet';
   document.getElementById('projectId').value = '';
   document.getElementById('projectName').value = '';
   document.getElementById('projectDescription').value = '';
-  document.getElementById('projectAssignedTo').value = '';
   document.getElementById('projectDeadline').value = '';
   document.getElementById('saveProjectBtn').textContent = 'Créer';
 
-  // Populate members dropdown
-  const select = document.getElementById('projectAssignedTo');
-  select.innerHTML = '<option value="">Non assigné</option>' +
-    members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  // Populate member checkboxes (none selected)
+  populateMemberCheckboxes([]);
 
   openModal('projectModal');
 });
@@ -233,7 +267,7 @@ document.getElementById('saveProjectBtn').addEventListener('click', async () => 
   const id = document.getElementById('projectId').value;
   const name = document.getElementById('projectName').value.trim();
   const description = document.getElementById('projectDescription').value.trim();
-  const assigned_to = document.getElementById('projectAssignedTo').value || null;
+  const member_ids = getSelectedMemberIds();
   const deadline = document.getElementById('projectDeadline').value || null;
 
   if (!name) {
@@ -244,11 +278,11 @@ document.getElementById('saveProjectBtn').addEventListener('click', async () => 
   try {
     if (id) {
       // Update
-      await api.projects.update(id, { name, description, assigned_to, deadline });
+      await api.projects.update(id, { name, description, member_ids, deadline });
       toast('Projet modifié', 'success');
     } else {
       // Create
-      await api.projects.create(name, description, assigned_to, deadline);
+      await api.projects.create(name, description, member_ids, deadline);
       toast('Projet créé', 'success');
     }
     closeModal('projectModal');
@@ -271,10 +305,9 @@ window.editProject = async (projectId) => {
   document.getElementById('projectDeadline').value = project.deadline || '';
   document.getElementById('saveProjectBtn').textContent = 'Modifier';
 
-  // Populate members dropdown
-  const select = document.getElementById('projectAssignedTo');
-  select.innerHTML = '<option value="">Non assigné</option>' +
-    members.map(m => `<option value="${m.id}" ${m.id == project.assigned_to ? 'selected' : ''}>${m.name}</option>`).join('');
+  // Populate member checkboxes with selected members
+  const selectedMemberIds = (project.assigned_members || []).map(m => m.id);
+  populateMemberCheckboxes(selectedMemberIds);
 
   openModal('projectModal');
 };

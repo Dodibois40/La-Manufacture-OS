@@ -143,11 +143,20 @@ CREATE TABLE IF NOT EXISTS projects (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- le manager
   name TEXT NOT NULL,
   description TEXT,
-  assigned_to INTEGER REFERENCES team_members(id) ON DELETE SET NULL, -- membre assigne au projet
+  assigned_to INTEGER REFERENCES team_members(id) ON DELETE SET NULL, -- DEPRECATED: utiliser project_members
   deadline DATE,
   status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'archived')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Project members (assignation multiple de membres aux projets)
+CREATE TABLE IF NOT EXISTS project_members (
+  id SERIAL PRIMARY KEY,
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  team_member_id INTEGER NOT NULL REFERENCES team_members(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(project_id, team_member_id)
 );
 
 -- Ajouter project_id aux tasks
@@ -200,6 +209,8 @@ CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id, status);
 CREATE INDEX IF NOT EXISTS idx_projects_assigned ON projects(assigned_to);
 CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id) WHERE project_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_team_files_project ON team_files(project_id) WHERE project_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_project_members_project ON project_members(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_members_member ON project_members(team_member_id);
 
 -- Trigger pour updated_at automatique
 CREATE OR REPLACE FUNCTION update_updated_at_column()
