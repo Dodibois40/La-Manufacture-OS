@@ -2,7 +2,12 @@
 import { getToken as getClerkToken } from './clerk-auth.js';
 
 const MODE = import.meta.env.VITE_MODE || 'local';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+const DEFAULT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+// If we are on a different host (like a local IP), try to use the same host for the API if not explicitly set
+const API_URL = import.meta.env.VITE_API_URL ||
+  (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? `http://${window.location.hostname}:3333`
+    : 'http://localhost:3333');
 
 // Legacy token storage (kept for backward compatibility during migration)
 const TOKEN_KEY = 'auth_token';

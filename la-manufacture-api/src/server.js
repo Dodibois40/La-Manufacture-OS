@@ -49,10 +49,18 @@ const fastify = Fastify({
 });
 
 // Register plugins
-const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').trim();
+const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(url => url.trim());
 await fastify.register(cors, {
-  origin: frontendUrl,
+  origin: (origin, cb) => {
+    // In development, allow any localhost or local IP origin
+    if (!origin || /localhost|127\.0\.0\.1|192\.168\./.test(origin) || frontendUrl.includes(origin)) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error("Not allowed by CORS"), false);
+  },
   credentials: true,
+  methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
 });
 
 await fastify.register(cookie);
