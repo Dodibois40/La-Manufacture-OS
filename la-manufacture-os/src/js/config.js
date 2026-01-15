@@ -9,50 +9,58 @@ export const renderConfig = (state) => {
 
 export const initConfig = (state, renderCallback, setViewCallback) => {
 
-  // Export
-  document.getElementById('exportBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'wave-os-export.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    toast('Export OK');
-  });
+  // Export (optional - removed from UI)
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wave-os-export.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('Export OK');
+    });
+  }
 
-  // Import
-  document.getElementById('importBtn').addEventListener('click', () => {
-    document.getElementById('importFile').click();
-  });
+  // Import (optional - removed from UI)
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
 
-  document.getElementById('importFile').addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+  if (importBtn && importFile) {
+    importBtn.addEventListener('click', () => {
+      importFile.click();
+    });
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const payload = JSON.parse(reader.result);
-        if (payload && Array.isArray(payload.tasks) && payload.settings) {
-          state.tasks = payload.tasks;
-          state.settings = payload.settings;
-          state.meta = payload.meta || state.meta;
-          saveState(state);
-          renderCallback();
-          toast('Import OK');
-        } else {
-          toast('Import: format invalide');
+    importFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(reader.result);
+          if (payload && Array.isArray(payload.tasks) && payload.settings) {
+            state.tasks = payload.tasks;
+            state.settings = payload.settings;
+            state.meta = payload.meta || state.meta;
+            saveState(state);
+            renderCallback();
+            toast('Import OK');
+          } else {
+            toast('Import: format invalide');
+          }
+        } catch (_) {
+          toast('Import: JSON invalide');
         }
-      } catch (_) {
-        toast('Import: JSON invalide');
-      }
-      e.target.value = '';
-    };
-    reader.readAsText(file);
-  });
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    });
+  }
 
   // Wipe - avec confirmation FLOW style
   document.getElementById('wipeBtn').addEventListener('click', async () => {
