@@ -21,6 +21,48 @@ function getOAuth2Client() {
 const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
 
 export default async function googleCalendarRoutes(fastify) {
+  // Helper to get an authenticated client
+  async function getAuthClient(userId) {
+    const client = getOAuth2Client();
+    // Clone or use a new instance to avoid singleton state issues
+    const newClient = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+
+    const tokenResult = await query(
+      'SELECT access_token, refresh_token, token_expiry FROM google_tokens WHERE user_id = $1',
+      [userId]
+    );
+
+    if (tokenResult.rows.length === 0) {
+      throw new Error('Google Calendar not connected');
+    }
+
+    const { access_token, refresh_token, token_expiry } = tokenResult.rows[0];
+
+    newClient.setCredentials({
+      access_token,
+      refresh_token,
+      expiry_date: new Date(token_expiry).getTime()
+    });
+
+    // Refresh if needed
+    if (new Date(token_expiry) < new Date()) {
+      fastify.log.info({ userId }, 'Refreshing Google access token...');
+      const { credentials } = await newClient.refreshAccessToken();
+      await query(
+        `UPDATE google_tokens SET access_token = $1, token_expiry = $2, updated_at = CURRENT_TIMESTAMP WHERE user_id = $3`,
+        [credentials.access_token, new Date(credentials.expiry_date), userId]
+      );
+      newClient.setCredentials(credentials);
+      fastify.log.info({ userId }, 'Google access token refreshed');
+    }
+
+    return newClient;
+  }
+
   // Get OAuth2 URL for authorization
   fastify.get('/auth-url', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
@@ -133,48 +175,20 @@ export default async function googleCalendarRoutes(fastify) {
     }
 
     try {
-      // Get user tokens
-      const tokenResult = await query(
-        'SELECT access_token, refresh_token, token_expiry, calendar_id FROM google_tokens WHERE user_id = $1',
-        [userId]
-      );
+      const client = await getAuthClient(userId);
+      const calendar = google.calendar({ version: 'v3', auth: client });
 
-      if (tokenResult.rows.length === 0) {
-        fastify.log.warn({ userId }, 'Google Calendar not connected for user');
-        return reply.status(400).send({ error: 'Google Calendar not connected' });
-      }
+      // Get calendar_id
+      const userResult = await query('SELECT calendar_id FROM google_tokens WHERE user_id = $1', [userId]);
+      const calendar_id = userResult.rows[0]?.calendar_id || 'primary';
 
-      fastify.log.info({ userId }, 'Found Google tokens for user');
-
-      const { access_token, refresh_token, token_expiry, calendar_id } = tokenResult.rows[0];
-
-      // Set credentials
-      const client = getOAuth2Client();
-      client.setCredentials({
-        access_token,
-        refresh_token,
-        expiry_date: new Date(token_expiry).getTime()
-      });
-
-      // Refresh token if needed
-      if (new Date(token_expiry) < new Date()) {
-        const { credentials } = await oauth2Client.refreshAccessToken();
-        await query(
-          `UPDATE google_tokens SET access_token = $1, token_expiry = $2, updated_at = CURRENT_TIMESTAMP WHERE user_id = $3`,
-          [credentials.access_token, new Date(credentials.expiry_date), userId]
-        );
-        oauth2Client.setCredentials(credentials);
-      }
-
-      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
-      // Ensure date is only YYYY-MM-DD (remove any T00:00:00.000Z)
+      // Ensure date is only YYYY-MM-DD
       const cleanDate = typeof date === 'string' ? date.split('T')[0] : new Date(date).toISOString().split('T')[0];
 
-      // Format times to HH:MM if they have seconds or are irregular
+      // Format times to HH:MM
       const formatTime = (t) => {
         if (!t) return null;
-        const match = t.match(/^(\d{1,2}):(\d{2})/);
+        const match = t.match(/^(\d{1,2})[:h](\d{2})/i); // Matches HH:MM or HHhMM
         return match ? `${match[1].padStart(2, '0')}:${match[2]}` : null;
       };
 
@@ -182,12 +196,13 @@ export default async function googleCalendarRoutes(fastify) {
       const endHM = formatTime(endTime) || startHM;
 
       if (!startHM) {
-        return reply.status(400).send({ error: 'Invalid startTime format. Expected HH:MM or HH:MM:SS' });
+        return reply.status(400).send({ error: `Invalid startTime format: "${startTime}". Expected HH:MM` });
       }
 
       // Build event object
       const event = {
         summary: title,
+        description: 'Synchronisé depuis FLOW',
         location: location || undefined,
         start: {
           dateTime: `${cleanDate}T${startHM}:00`,
@@ -199,7 +214,7 @@ export default async function googleCalendarRoutes(fastify) {
         },
       };
 
-      // If start and end are same, add 30 mins for safety if no end time was provided
+      // Ensure end is after start (at least 30 mins)
       if (startHM === endHM && !endTime) {
         const [h, m] = startHM.split(':').map(Number);
         const endD = new Date(2000, 0, 1, h, m + 30);
@@ -207,20 +222,30 @@ export default async function googleCalendarRoutes(fastify) {
         event.end.dateTime = `${cleanDate}T${endHM_fixed}:00`;
       }
 
-      fastify.log.info(`Syncing event to Google: ${event.summary} on ${event.start.dateTime}`);
+      fastify.log.info({ summary: event.summary, start: event.start.dateTime }, 'Syncing to Google');
 
       let result;
       if (googleEventId) {
-        // Update existing event
-        result = await calendar.events.update({
-          calendarId: calendar_id || 'primary',
-          eventId: googleEventId,
-          resource: event,
-        });
+        try {
+          result = await calendar.events.update({
+            calendarId: calendar_id,
+            eventId: googleEventId,
+            resource: event,
+          });
+        } catch (updateError) {
+          if (updateError.code === 404) {
+            // Event was deleted on Google, recreate it
+            result = await calendar.events.insert({
+              calendarId: calendar_id,
+              resource: event,
+            });
+          } else {
+            throw updateError;
+          }
+        }
       } else {
-        // Create new event
         result = await calendar.events.insert({
-          calendarId: calendar_id || 'primary',
+          calendarId: calendar_id,
           resource: event,
         });
       }
@@ -233,8 +258,12 @@ export default async function googleCalendarRoutes(fastify) {
         htmlLink: result.data.htmlLink
       };
     } catch (error) {
-      fastify.log.error('Google Calendar sync error:', error);
-      return reply.status(500).send({ error: 'Calendar sync failed', details: error.message });
+      fastify.log.error(error, 'Google Calendar sync error');
+      return reply.status(500).send({
+        error: 'Calendar sync failed',
+        details: error.message,
+        code: error.code
+      });
     }
   });
 
@@ -244,41 +273,15 @@ export default async function googleCalendarRoutes(fastify) {
     const { googleEventId } = request.params;
 
     try {
-      // Get user tokens
-      const tokenResult = await query(
-        'SELECT access_token, refresh_token, token_expiry, calendar_id FROM google_tokens WHERE user_id = $1',
-        [userId]
-      );
-
-      if (tokenResult.rows.length === 0) {
-        return reply.status(400).send({ error: 'Google Calendar not connected' });
-      }
-
-      const { access_token, refresh_token, token_expiry, calendar_id } = tokenResult.rows[0];
-
-      const client = getOAuth2Client();
-      client.setCredentials({
-        access_token,
-        refresh_token,
-        expiry_date: new Date(token_expiry).getTime()
-      });
-
-      // Refresh if needed
-      if (new Date(token_expiry) < new Date()) {
-        fastify.log.info('Refreshing Google access token...');
-        const { credentials } = await client.refreshAccessToken();
-        await query(
-          `UPDATE google_tokens SET access_token = $1, token_expiry = $2, updated_at = CURRENT_TIMESTAMP WHERE user_id = $3`,
-          [credentials.access_token, new Date(credentials.expiry_date), userId]
-        );
-        client.setCredentials(credentials);
-        fastify.log.info('Google access token refreshed');
-      }
-
+      const client = await getAuthClient(userId);
       const calendar = google.calendar({ version: 'v3', auth: client });
 
+      // Get calendar_id
+      const userResult = await query('SELECT calendar_id FROM google_tokens WHERE user_id = $1', [userId]);
+      const calendar_id = userResult.rows[0]?.calendar_id || 'primary';
+
       await calendar.events.delete({
-        calendarId: calendar_id || 'primary',
+        calendarId: calendar_id,
         eventId: googleEventId,
       });
 
@@ -288,7 +291,7 @@ export default async function googleCalendarRoutes(fastify) {
       if (error.code === 404) {
         return { success: true };
       }
-      fastify.log.error('Google Calendar delete error:', error);
+      fastify.log.error(error, 'Google Calendar delete error');
       return reply.status(500).send({ error: 'Delete failed', details: error.message });
     }
   });
