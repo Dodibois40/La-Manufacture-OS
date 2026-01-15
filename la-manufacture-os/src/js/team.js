@@ -331,11 +331,24 @@ export async function initTeam(userId) {
   });
 
   // Toggle file target member select
-  fileGlobal?.addEventListener('change', () => {
-    if (fileTargetMember) {
+  const syncFileTargetState = () => {
+    if (fileTargetMember && fileGlobal) {
       fileTargetMember.disabled = fileGlobal.checked;
+      console.log('Syncing file target state:', fileGlobal.checked);
+    }
+  };
+
+  fileGlobal?.addEventListener('change', syncFileTargetState);
+
+  // Help user if they click disabled select
+  fileTargetMember?.addEventListener('mousedown', (e) => {
+    if (fileTargetMember.disabled) {
+      toast("Décoche 'Global' pour choisir un membre", "info");
     }
   });
+
+  // Initial sync
+  syncFileTargetState();
 
   // Load data
   await Promise.all([loadMembers(), loadFiles()]);
