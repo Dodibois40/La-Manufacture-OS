@@ -1,6 +1,6 @@
 import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
-import { isApiMode } from './api-client.js';
+import { isApiMode, api } from './api-client.js';
 import { openShareModal } from './share.js';
 import { recordTaskCompletion, recordPerfectDay, renderStreakWidget, playSound } from './gamification.js';
 import { initSwipeGestures } from './swipe.js';
@@ -278,6 +278,37 @@ const taskRow = (t, state) => {
     eventBadge.className = 'task-event-badge';
     eventBadge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>RDV`;
     tx.appendChild(eventBadge);
+
+    // Add Google Calendar sync button if connected
+    if (isGoogleConnected()) {
+      const syncBtn = document.createElement('button');
+      syncBtn.className = 'google-sync-btn';
+      syncBtn.title = task.google_event_id ? 'Synchronisé avec Google Calendar' : 'Cliquez pour synchroniser avec Google Calendar';
+      syncBtn.innerHTML = task.google_event_id
+        ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01" fill="none" stroke="currentColor" stroke-width="2"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+      syncBtn.style.opacity = task.google_event_id ? '0.5' : '1';
+      syncBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!task.google_event_id) {
+          try {
+            const googleEventId = await syncTaskToGoogle(task);
+            if (googleEventId) {
+              if (isApiMode && isLoggedIn()) {
+                await api.tasks.update(task.id, { google_event_id: googleEventId });
+                task.google_event_id = googleEventId;
+              }
+              toast('✅ Synchronisé avec Google Calendar');
+              renderCallback();
+            }
+          } catch (error) {
+            console.error('Sync error:', error);
+            toast('❌ Erreur de synchronisation');
+          }
+        }
+      });
+      tx.appendChild(syncBtn);
+    }
   }
 
   const meta = document.createElement('div');

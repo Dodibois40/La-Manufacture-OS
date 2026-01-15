@@ -1371,6 +1371,32 @@ textarea:focus {
   height: 12px;
 }
 
+.google-sync-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 6px;
+  padding: 0;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #60a5fa;
+}
+
+.google-sync-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  transform: scale(1.1);
+}
+
+.google-sync-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 .task-event-time {
   display: inline-flex;
   align-items: center;

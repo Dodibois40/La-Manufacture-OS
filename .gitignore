@@ -25,6 +25,7 @@ Thumbs.db
 
 # Claude
 .claude/
+tmpclaude-*
 
 # Temp
 your-project/

@@ -7,6 +7,16 @@ let googleConnected = false;
 export async function initGoogleCalendar() {
   if (!isApiMode) return;
 
+  // Always check status at startup to update googleConnected variable
+  try {
+    const status = await api.google.getStatus();
+    googleConnected = status.connected;
+    console.log('Google Calendar status:', googleConnected ? 'connected' : 'not connected');
+  } catch (error) {
+    console.warn('Could not check Google Calendar status:', error);
+    googleConnected = false;
+  }
+
   const section = document.getElementById('googleCalendarSection');
   if (!section) return;
 
