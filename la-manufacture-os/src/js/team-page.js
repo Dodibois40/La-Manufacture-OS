@@ -1,5 +1,5 @@
 import { api, isApiMode } from './api-client.js';
-import { isSignedIn } from './clerk-auth.js';
+import { initClerk, isSignedIn } from './clerk-auth.js';
 
 // Toast notification helper
 function toast(message, type = 'info') {
@@ -399,6 +399,9 @@ window.deleteFile = async (fileId) => {
 // ==========================================
 
 async function init() {
+  // Initialize Clerk first
+  await initClerk();
+
   if (!isApiMode || !isSignedIn()) {
     toast('Vous devez être connecté pour accéder à cette page', 'warning');
     setTimeout(() => {
