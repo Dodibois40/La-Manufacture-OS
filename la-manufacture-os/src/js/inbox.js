@@ -309,7 +309,7 @@ export const initInboxControls = (state, renderCallback) => {
           }
 
           const newTask = ensureTask({
-            text: eventData.isEvent && eventData.title ? eventData.title : taskText,
+            text: (eventData.isEvent && eventData.title) ? eventData.title : taskText,
             owner: null, // No longer using owner field
             urgent: finalUrgent,
             date: finalDate,
@@ -328,15 +328,19 @@ export const initInboxControls = (state, renderCallback) => {
               state.tasks.push(apiTask);
 
               // Sync to Google Calendar if event and connected
-              if (apiTask.is_event && isGoogleConnected()) {
-                try {
-                  const googleEventId = await syncTaskToGoogle(apiTask);
-                  if (googleEventId) {
-                    await api.tasks.update(apiTask.id, { google_event_id: googleEventId });
-                    apiTask.google_event_id = googleEventId;
+              if (apiTask.is_event) {
+                if (isGoogleConnected()) {
+                  try {
+                    const googleEventId = await syncTaskToGoogle(apiTask);
+                    if (googleEventId) {
+                      await api.tasks.update(apiTask.id, { google_event_id: googleEventId });
+                      apiTask.google_event_id = googleEventId;
+                    }
+                  } catch (syncError) {
+                    console.warn('Google sync failed:', syncError);
                   }
-                } catch (syncError) {
-                  console.warn('Google sync failed:', syncError);
+                } else {
+                  toast('RDV créé, mais Google Calendar non connecté', 'info');
                 }
               }
             } else {

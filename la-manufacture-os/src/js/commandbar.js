@@ -167,15 +167,19 @@ export const initCommandBar = (state, renderCallback) => {
           state.tasks.push(created);
 
           // Sync to Google Calendar if event and connected
-          if (created.is_event && isGoogleConnected()) {
-            try {
-              const googleEventId = await syncTaskToGoogle(created);
-              if (googleEventId) {
-                await api.tasks.update(created.id, { google_event_id: googleEventId });
-                created.google_event_id = googleEventId;
+          if (created.is_event) {
+            if (isGoogleConnected()) {
+              try {
+                const googleEventId = await syncTaskToGoogle(created);
+                if (googleEventId) {
+                  await api.tasks.update(created.id, { google_event_id: googleEventId });
+                  created.google_event_id = googleEventId;
+                }
+              } catch (syncError) {
+                console.warn('Google sync failed:', syncError);
               }
-            } catch (syncError) {
-              console.warn('Google sync failed:', syncError);
+            } else {
+              toast('RDV créé, mais Google Calendar non connecté', 'info');
             }
           }
         } else {

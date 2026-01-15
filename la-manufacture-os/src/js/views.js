@@ -328,8 +328,12 @@ const taskRow = (t, state) => {
         try {
           await taskApi.update(task.id, { date: newDate });
           // Re-sync to Google if it's an event
-          if (task.is_event && isGoogleConnected()) {
-            await syncTaskToGoogle(task);
+          if (task.is_event) {
+            if (isGoogleConnected()) {
+              await syncTaskToGoogle(task);
+            } else {
+              toast('Mis à jour, mais Google non connecté', 'info');
+            }
           }
         } catch (e) {
           console.error('API update failed:', e);
@@ -432,7 +436,10 @@ const taskRow = (t, state) => {
           task.updatedAt = nowISO();
           if (isApiMode && isLoggedIn()) {
             await taskApi.update(task.id, { date: newDate });
-            if (task.is_event && isGoogleConnected()) await syncTaskToGoogle(task);
+            if (task.is_event) {
+              if (isGoogleConnected()) await syncTaskToGoogle(task);
+              else toast('Google non connecté', 'info');
+            }
           }
           toast('Reporté à demain');
         } else if (action === 'next-week') {
@@ -445,7 +452,10 @@ const taskRow = (t, state) => {
           task.updatedAt = nowISO();
           if (isApiMode && isLoggedIn()) {
             await taskApi.update(task.id, { date: newDate });
-            if (task.is_event && isGoogleConnected()) await syncTaskToGoogle(task);
+            if (task.is_event) {
+              if (isGoogleConnected()) await syncTaskToGoogle(task);
+              else toast('Google non connecté', 'info');
+            }
           }
           toast('Reporté à lundi prochain');
         } else if (action === 'urgent') {

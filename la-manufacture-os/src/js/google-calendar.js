@@ -41,6 +41,13 @@ async function updateGoogleStatus() {
     const status = await api.google.getStatus();
     googleConnected = status.connected;
 
+    const badge = document.getElementById('googleBadge');
+    if (badge) {
+      badge.classList.toggle('hidden', !googleConnected);
+      badge.classList.add('good');
+      badge.title = googleConnected ? 'Google Calendar connecté' : '';
+    }
+
     if (status.connected) {
       const connectedDate = new Date(status.connectedAt).toLocaleDateString('fr-FR');
       statusContainer.innerHTML = `
