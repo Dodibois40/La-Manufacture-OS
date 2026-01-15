@@ -146,19 +146,41 @@ export default async function googleCalendarRoutes(fastify) {
 
       const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+      // Format times to HH:MM if they have seconds or are irregular
+      const formatTime = (t) => {
+        if (!t) return null;
+        const match = t.match(/^(\d{1,2}):(\d{2})/);
+        return match ? `${match[1].padStart(2, '0')}:${match[2]}` : null;
+      };
+
+      const startHM = formatTime(startTime);
+      const endHM = formatTime(endTime) || startHM;
+
+      if (!startHM) {
+        return reply.status(400).send({ error: 'Invalid startTime format. Expected HH:MM or HH:MM:SS' });
+      }
+
       // Build event object
       const event = {
         summary: title,
         location: location || undefined,
         start: {
-          dateTime: `${date}T${startTime}:00`,
+          dateTime: `${date}T${startHM}:00`,
           timeZone: 'Europe/Paris',
         },
         end: {
-          dateTime: `${date}T${endTime || startTime}:00`,
+          dateTime: `${date}T${endHM}:00`,
           timeZone: 'Europe/Paris',
         },
       };
+
+      // If start and end are same, add 30 mins for safety if no end time was provided
+      if (startHM === endHM && !endTime) {
+        const [h, m] = startHM.split(':').map(Number);
+        const endD = new Date(2000, 0, 1, h, m + 30);
+        const endHM_fixed = `${String(endD.getHours()).padStart(2, '0')}:${String(endD.getMinutes()).padStart(2, '0')}`;
+        event.end.dateTime = `${date}T${endHM_fixed}:00`;
+      }
 
       let result;
       if (googleEventId) {
