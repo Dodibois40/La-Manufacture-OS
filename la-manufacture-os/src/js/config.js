@@ -1,29 +1,13 @@
 import { toast, confirmDialog } from './utils.js';
 import { saveState, defaultState } from './storage.js';
-import { inboxCtx } from './inbox.js';
 import { isApiMode, api } from './api-client.js';
 import { signOut } from './clerk-auth.js';
 
 export const renderConfig = (state) => {
-  document.getElementById('owners').value = (state.settings.owners || []).join(', ');
+  // Configuration rendering - no owners to display anymore
 };
 
 export const initConfig = (state, renderCallback, setViewCallback) => {
-  const applyOwners = () => {
-    const owners = (document.getElementById('owners').value || '')
-      .split(',')
-      .map(x => x.trim())
-      .filter(Boolean);
-
-    state.settings.owners = owners.length ? owners : ['Thibaud'];
-    inboxCtx.owner = state.settings.owners[0];
-    saveState(state);
-    renderCallback();
-    toast('Responsables enregistrés');
-  };
-
-  document.getElementById('owners').addEventListener('change', applyOwners);
-  document.getElementById('owners').addEventListener('blur', applyOwners);
 
   // Export
   document.getElementById('exportBtn').addEventListener('click', () => {
@@ -55,7 +39,6 @@ export const initConfig = (state, renderCallback, setViewCallback) => {
         if (payload && Array.isArray(payload.tasks) && payload.settings) {
           state.tasks = payload.tasks;
           state.settings = payload.settings;
-          state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length ? state.settings.owners : ['Thibaud'];
           state.meta = payload.meta || state.meta;
           saveState(state);
           renderCallback();

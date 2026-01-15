@@ -1,29 +1,29 @@
 import { isoLocal, nowISO } from './utils.js';
 
 export const initMorningBriefing = (state) => {
-    // Check if first launch of the day
-    const today = isoLocal();
-    let lastLaunch = null;
-    try {
-        lastLaunch = localStorage.getItem('last_briefing');
-    } catch (e) {
-        // localStorage indisponible (nav privee iOS)
-    }
+  // Check if first launch of the day
+  const today = isoLocal();
+  let lastLaunch = null;
+  try {
+    lastLaunch = localStorage.getItem('last_briefing');
+  } catch (e) {
+    // localStorage indisponible (nav privee iOS)
+  }
 
-    // If already seen today, skip (unless debug force)
-    if (lastLaunch === today && !window.location.search.includes('forceBrief')) return;
+  // If already seen today, skip (unless debug force)
+  if (lastLaunch === today && !window.location.search.includes('forceBrief')) return;
 
-    const user = state.settings.owners[0] || 'Thibaud';
+  const user = 'Moi';
 
-    // Stats calculation
-    const tasks = state.tasks || [];
-    const todayCount = tasks.filter(t => !t.done && t.date === today).length;
-    const urgentCount = tasks.filter(t => !t.done && t.urgent).length;
-    const completedToday = tasks.filter(t => t.done && t.date === today).length;
-    const totalToday = todayCount + completedToday;
-    const progress = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
+  // Stats calculation
+  const tasks = state.tasks || [];
+  const todayCount = tasks.filter(t => !t.done && t.date === today).length;
+  const urgentCount = tasks.filter(t => !t.done && t.urgent).length;
+  const completedToday = tasks.filter(t => t.done && t.date === today).length;
+  const totalToday = todayCount + completedToday;
+  const progress = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
-    const html = `
+  const html = `
     <div id="briefOverlay" class="brief-overlay-spacex">
       <div class="stars"></div>
       <div class="planet-container">
@@ -52,68 +52,68 @@ export const initMorningBriefing = (state) => {
     </div>
   `;
 
-    // Hide main content while briefing is shown
-    document.body.classList.add('briefing-active');
+  // Hide main content while briefing is shown
+  document.body.classList.add('briefing-active');
 
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    document.body.appendChild(div.firstElementChild);
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div.firstElementChild);
 
-    document.getElementById('startDayBtn').addEventListener('click', () => {
-        const el = document.getElementById('briefOverlay');
-        const btn = document.getElementById('startDayBtn');
+  document.getElementById('startDayBtn').addEventListener('click', () => {
+    const el = document.getElementById('briefOverlay');
+    const btn = document.getElementById('startDayBtn');
 
-        // Feedback immédiat
-        btn.style.transform = 'scale(0.95)';
+    // Feedback immédiat
+    btn.style.transform = 'scale(0.95)';
 
-        // Zoom into planet effect
-        el.classList.add('launching');
+    // Zoom into planet effect
+    el.classList.add('launching');
 
-        // Show main content
-        document.body.classList.remove('briefing-active');
+    // Show main content
+    document.body.classList.remove('briefing-active');
 
-        // Disparition
-        setTimeout(() => {
-            el.classList.add('hidden');
-            try {
-                localStorage.setItem('last_briefing', today);
-            } catch (e) {}
-        }, 600);
+    // Disparition
+    setTimeout(() => {
+      el.classList.add('hidden');
+      try {
+        localStorage.setItem('last_briefing', today);
+      } catch (e) { }
+    }, 600);
 
-        // Cleanup
-        setTimeout(() => el.remove(), 1000);
-    });
+    // Cleanup
+    setTimeout(() => el.remove(), 1000);
+  });
 };
 
 // Simple global Focus Timer
 export const initFocusTimer = () => {
-    const div = document.createElement('div');
-    div.id = 'focusTimer';
-    div.className = 'focus-timer';
-    div.innerHTML = '25:00';
-    document.body.appendChild(div);
+  const div = document.createElement('div');
+  div.id = 'focusTimer';
+  div.className = 'focus-timer';
+  div.innerHTML = '25:00';
+  document.body.appendChild(div);
 
-    let interval = null;
-    let seconds = 25 * 60;
+  let interval = null;
+  let seconds = 25 * 60;
 
-    window.startFocus = () => {
-        const el = document.getElementById('focusTimer');
-        el.classList.add('active');
-        seconds = 25 * 60;
+  window.startFocus = () => {
+    const el = document.getElementById('focusTimer');
+    el.classList.add('active');
+    seconds = 25 * 60;
 
-        if (interval) clearInterval(interval);
+    if (interval) clearInterval(interval);
 
-        interval = setInterval(() => {
-            seconds--;
-            if (seconds <= 0) {
-                clearInterval(interval);
-                alert("Focus terminé ! Pause.");
-                el.classList.remove('active');
-            }
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
-            el.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
-            document.title = `(${m}:${s < 10 ? '0' : ''}${s}) La Manufacture`;
-        }, 1000);
-    };
+    interval = setInterval(() => {
+      seconds--;
+      if (seconds <= 0) {
+        clearInterval(interval);
+        alert("Focus terminé ! Pause.");
+        el.classList.remove('active');
+      }
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      el.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+      document.title = `(${m}:${s < 10 ? '0' : ''}${s}) La Manufacture`;
+    }, 1000);
+  };
 };

@@ -69,19 +69,18 @@ export const initCommandBar = (state, renderCallback) => {
     if (!raw) return null;
 
     const baseToday = isoLocal();
-    const owners = (state.settings.owners || []).map(x => String(x || '').trim()).filter(Boolean);
-    const safeOwners = owners.length ? owners : ['Thibaud'];
-    const defaultOwner = safeOwners[0];
+    const defaultOwner = 'Moi';
+    const owners = [defaultOwner];
 
     // Use unified smart parsing
     const date = smartParseDate(raw, baseToday);
     const urgent = smartParseUrgent(raw);
-    const owner = smartParseOwner(raw, safeOwners, defaultOwner);
+    const owner = smartParseOwner(raw, owners, defaultOwner);
     const duration = smartParseDuration(raw);
     const recurrence = smartParseRecurrence(raw);
     const project = smartParseProject(raw);
     const time = smartParseTime(raw);
-    const title = cleanTitle(raw, safeOwners);
+    const title = cleanTitle(raw, owners);
 
     return { title, owner, urgent, date, duration, recurrence, project, time };
   };
@@ -158,7 +157,7 @@ export const initCommandBar = (state, renderCallback) => {
         project: meta.project || null,
         start_time: meta.time || null,
         is_event: !!meta.time
-      }, state.settings.owners[0]);
+      }, 'Moi');
 
       try {
         // Sync to API if in API mode

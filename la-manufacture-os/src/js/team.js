@@ -5,6 +5,20 @@ import { toast } from './utils.js';
 let teamMembers = [];
 let teamFiles = [];
 let currentUserId = null;
+let onMembersChangeCallbacks = [];
+
+// Export team members for other modules (inbox)
+export const getTeamMembers = () => teamMembers;
+
+// Register callback when members list changes
+export const onTeamMembersChange = (callback) => {
+  onMembersChangeCallbacks.push(callback);
+};
+
+// Notify all callbacks
+const notifyMembersChange = () => {
+  onMembersChangeCallbacks.forEach(cb => cb(teamMembers));
+};
 
 // Helpers
 function getInitials(name) {
@@ -129,6 +143,7 @@ async function loadMembers() {
     const response = await api.team.getMembers();
     teamMembers = response.members || [];
     renderMembers();
+    notifyMembersChange();
   } catch (error) {
     console.error('Error loading team members:', error);
   }
@@ -149,6 +164,7 @@ async function addMember(name) {
     const response = await api.team.addMember(name);
     teamMembers.push(response.member);
     renderMembers();
+    notifyMembersChange();
     toast('Membre ajoute');
   } catch (error) {
     console.error('Error adding member:', error);
@@ -163,6 +179,7 @@ async function deleteMember(id) {
     await api.team.deleteMember(id);
     teamMembers = teamMembers.filter(m => m.id !== id);
     renderMembers();
+    notifyMembersChange();
     toast('Membre supprime');
   } catch (error) {
     console.error('Error deleting member:', error);

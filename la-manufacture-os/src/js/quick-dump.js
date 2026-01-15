@@ -77,11 +77,10 @@ export const openQuickDump = (state, onTasksAdded) => {
     const lines = text.split('\n').filter(l => l.trim());
     const tasks = [];
     const today = isoLocal(new Date());
-    const owners = state.settings?.owners || ['Moi'];
-    const defaultOwner = owners[0];
+    const defaultOwner = 'Moi';
 
     for (const line of lines) {
-      const parsed = parseTaskInput(line.trim(), owners);
+      const parsed = parseTaskInput(line.trim(), [defaultOwner]);
 
       const task = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),

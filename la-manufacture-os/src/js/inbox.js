@@ -2,6 +2,7 @@ import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode, api } from './api-client.js';
 import { isGoogleConnected, syncTaskToGoogle } from './google-calendar.js';
+import { getTeamMembers, onTeamMembersChange } from './team.js';
 
 // Clé API Anthropic pour Claude Opus 4.5
 const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
@@ -9,7 +10,7 @@ const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
 export const inboxCtx = {
   dateISO: null, // null = auto-detect, otherwise manual override
   urgent: false,
-  owner: 'Thibaud',
+  assignedMemberId: null, // null = self (manager), otherwise team member ID
   isProcessing: false,
 };
 
@@ -137,21 +138,30 @@ export const setInboxDate = (iso) => {
 };
 
 export const renderInboxUI = (state) => {
-  const ownerSel = document.getElementById('inboxOwner');
-  if (!ownerSel) return;
+  const assignSel = document.getElementById('inboxOwner');
+  if (!assignSel) return;
 
-  const owners = (state.settings.owners || []).map(x => String(x || '').trim()).filter(Boolean);
-  const safeOwners = owners.length ? owners : ['Thibaud'];
+  // Get team members from team module
+  const members = getTeamMembers();
 
-  ownerSel.innerHTML = '';
-  for (const o of safeOwners) {
+  assignSel.innerHTML = '';
+
+  // First option: Moi (manager's own tasks)
+  const selfOpt = document.createElement('option');
+  selfOpt.value = '';
+  selfOpt.textContent = 'Moi';
+  assignSel.appendChild(selfOpt);
+
+  // Add team members
+  for (const member of members) {
     const opt = document.createElement('option');
-    opt.value = o;
-    opt.textContent = o;
-    ownerSel.appendChild(opt);
+    opt.value = member.id;
+    opt.textContent = member.name;
+    assignSel.appendChild(opt);
   }
-  if (!safeOwners.includes(inboxCtx.owner)) inboxCtx.owner = safeOwners[0];
-  ownerSel.value = inboxCtx.owner;
+
+  // Set current value
+  assignSel.value = inboxCtx.assignedMemberId || '';
 
   setInboxDate(inboxCtx.dateISO);
 
@@ -164,10 +174,16 @@ export const renderInboxUI = (state) => {
 export const initInboxControls = (state, renderCallback) => {
   renderInboxUI(state);
 
-  const ownerSel = document.getElementById('inboxOwner');
-  if (ownerSel) {
-    ownerSel.addEventListener('change', (e) => {
-      inboxCtx.owner = e.target.value;
+  // Subscribe to team members changes to update dropdown
+  onTeamMembersChange(() => {
+    renderInboxUI(state);
+  });
+
+  const assignSel = document.getElementById('inboxOwner');
+  if (assignSel) {
+    assignSel.addEventListener('change', (e) => {
+      // Empty string means "Moi" (manager's own task), otherwise it's a member ID
+      inboxCtx.assignedMemberId = e.target.value ? parseInt(e.target.value) : null;
     });
   }
 
@@ -229,9 +245,9 @@ export const initInboxControls = (state, renderCallback) => {
       if (inboxCtx.isProcessing) return;
 
       const baseToday = isoLocal();
-      const owners = (state.settings.owners || []).map(x => String(x || '').trim()).filter(Boolean);
-      const safeOwners = owners.length ? owners : ['Thibaud'];
-      const defaultOwner = safeOwners.includes(inboxCtx.owner) ? inboxCtx.owner : safeOwners[0];
+
+      // Get assigned member ID (null = manager's own task)
+      const assignedMemberId = inboxCtx.assignedMemberId;
 
       // Activer le mode processing
       inboxCtx.isProcessing = true;
@@ -254,7 +270,7 @@ export const initInboxControls = (state, renderCallback) => {
         // Fallback local si pas de clé ou erreur
         if (!result) {
           const finalDate = inboxCtx.dateISO !== null ? inboxCtx.dateISO : baseToday;
-          result = parseLocally(text, defaultOwner, finalDate, inboxCtx.urgent);
+          result = parseLocally(text, null, finalDate, inboxCtx.urgent);
         }
 
         // Créer les tâches
@@ -267,9 +283,21 @@ export const initInboxControls = (state, renderCallback) => {
           const finalDate = inboxCtx.dateISO !== null ? inboxCtx.dateISO : (task.date || baseToday);
           // Si urgent manuel activé, forcer urgent
           const finalUrgent = inboxCtx.urgent || task.urgent || false;
-          // Owner: celui détecté par Claude ou le défaut
-          const finalOwner = task.owner || defaultOwner;
 
+          // If a team member is selected, assign to them via team API
+          if (assignedMemberId && isApiMode && isLoggedIn()) {
+            try {
+              await api.team.addTask(assignedMemberId, taskText, finalDate, finalUrgent);
+              created++;
+              continue; // Skip normal task creation
+            } catch (error) {
+              console.error('Error assigning to team member:', error);
+              toast('Erreur assignation: ' + error.message);
+              continue;
+            }
+          }
+
+          // Otherwise create as manager's own task
           // Detect if this is an event/RDV (has a specific time)
           let eventData = { is_event: false };
           if (isApiMode && isLoggedIn()) {
@@ -282,7 +310,7 @@ export const initInboxControls = (state, renderCallback) => {
 
           const newTask = ensureTask({
             text: eventData.isEvent && eventData.title ? eventData.title : taskText,
-            owner: finalOwner,
+            owner: null, // No longer using owner field
             urgent: finalUrgent,
             date: finalDate,
             done: false,
@@ -292,7 +320,7 @@ export const initInboxControls = (state, renderCallback) => {
             start_time: eventData.startTime || null,
             end_time: eventData.endTime || null,
             location: eventData.location || null,
-          }, defaultOwner);
+          });
 
           try {
             if (isApiMode && isLoggedIn()) {

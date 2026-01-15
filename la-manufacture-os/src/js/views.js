@@ -147,7 +147,7 @@ let editMode = false;
 let selectedTasks = new Set();
 
 const taskRow = (t, state) => {
-  const task = ensureTask(t, state.settings.owners[0]);
+  const task = ensureTask(t, 'Moi');
   const el = document.createElement('div');
   el.className = 'task' + (task.done ? ' completed' : '');
   el.dataset.taskId = task.id;
@@ -503,13 +503,13 @@ export const renderDay = (state) => {
 
   // Get overdue tasks (not done, date < today)
   const overdueTasks = state.tasks
-    .map(t => ensureTask(t, state.settings.owners[0]))
+    .map(t => ensureTask(t, 'Moi'))
     .filter(t => t.date < today && !t.done)
     .sort((a, b) => (b.urgent === true) - (a.urgent === true));
 
   // Get today's tasks
   const todayTasks = state.tasks
-    .map(t => ensureTask(t, state.settings.owners[0]))
+    .map(t => ensureTask(t, 'Moi'))
     .filter(t => t.date === today)
     .sort((a, b) => (b.urgent === true) - (a.urgent === true) || (a.done === true) - (b.done === true));
 
@@ -672,7 +672,7 @@ const renderCalendar = (state) => {
 
   // Update title
   const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
   titleEl.textContent = `${months[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
 
   grid.innerHTML = '';
@@ -772,7 +772,7 @@ const renderDayDetail = (state) => {
   addBtn.style.display = 'inline-flex';
 
   const tasks = state.tasks
-    .map(t => ensureTask(t, state.settings.owners[0]))
+    .map(t => ensureTask(t, 'Moi'))
     .filter(t => t.date === selectedDate);
 
   listEl.innerHTML = '';

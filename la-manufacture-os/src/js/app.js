@@ -21,8 +21,7 @@ import { openQuickDump, initQuickDumpShortcut } from './quick-dump.js';
 // Load state (local first, then sync from API)
 let state = loadState();
 state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
-state.settings = state.settings && typeof state.settings === 'object' ? state.settings : { owners: ['Thibaud'] };
-state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length ? state.settings.owners : ['Thibaud'];
+state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
 
 // macOS Dock Magnification
 const initDockMagnification = () => {
@@ -286,9 +285,6 @@ const initApp = async () => {
       if (apiState) {
         state.tasks = apiState.tasks;
         state.settings = apiState.settings || state.settings;
-        state.settings.owners = Array.isArray(state.settings.owners) && state.settings.owners.length
-          ? state.settings.owners
-          : ['Thibaud'];
         saveState(state);
         toast('Synchronise');
       }
@@ -310,8 +306,6 @@ const initApp = async () => {
   // Auto Carry-Over (Silent)
   runAutoCarryOver(state);
 
-  // Init inbox context
-  inboxCtx.owner = state.settings.owners[0] || 'Thibaud';
 
   // Navigation listeners
   document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));

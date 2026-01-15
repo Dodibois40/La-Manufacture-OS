@@ -8,9 +8,7 @@ export const okStorage = storageOK();
 
 export const defaultState = () => ({
   tasks: [],
-  settings: {
-    owners: ['Thibaud'],
-  },
+  settings: {},
   meta: {
     updatedAt: nowISO(),
     rev: 0,
@@ -33,7 +31,7 @@ export const loadAuth = () => {
       authToken = auth.token;
       return auth;
     }
-  } catch (_) {}
+  } catch (_) { }
   return null;
 };
 
@@ -80,7 +78,7 @@ export const authApi = {
   async logout() {
     try {
       await api.auth.logout();
-    } catch (_) {}
+    } catch (_) { }
     clearAuth();
   },
 
@@ -91,7 +89,7 @@ export const authApi = {
         currentUser = result.user;
         return true;
       }
-    } catch (_) {}
+    } catch (_) { }
     clearAuth();
     return false;
   }
@@ -112,7 +110,7 @@ export const loadState = () => {
         state.settings = cached.settings || state.settings;
         state.meta = cached.meta || state.meta;
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
   return state;
@@ -153,7 +151,7 @@ const saveStateLocal = (state) => {
   if (okStorage) {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(state));
-    } catch (_) {}
+    } catch (_) { }
   }
 };
 
