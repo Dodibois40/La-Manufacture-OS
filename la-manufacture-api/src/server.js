@@ -20,6 +20,7 @@ import usersRoutes from './routes/users.js';
 import notificationsRoutes from './routes/notifications.js';
 import teamRoutes from './routes/team.js';
 import teamFilesRoutes from './routes/team-files.js';
+import projectsRoutes from './routes/projects.js';
 import googleCalendarRoutes from './routes/google-calendar.js';
 
 dotenv.config();
@@ -157,6 +158,7 @@ await fastify.register(usersRoutes, { prefix: '/api/users' });
 await fastify.register(notificationsRoutes, { prefix: '/api/notifications' });
 await fastify.register(teamRoutes, { prefix: '/api/team' });
 await fastify.register(teamFilesRoutes, { prefix: '/api/team' });
+await fastify.register(projectsRoutes, { prefix: '/api/projects' });
 await fastify.register(googleCalendarRoutes, { prefix: '/api/google' });
 
 // Start server

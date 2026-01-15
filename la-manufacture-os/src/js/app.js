@@ -310,6 +310,9 @@ const initApp = async () => {
   document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
   document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
   document.getElementById('nav-inbox')?.addEventListener('click', () => setView('inbox'));
+  document.getElementById('nav-team')?.addEventListener('click', () => {
+    window.location.href = '/team.html';
+  });
   document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
 
   // macOS Dock Magnification Effect

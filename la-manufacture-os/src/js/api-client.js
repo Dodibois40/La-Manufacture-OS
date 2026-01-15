@@ -336,6 +336,36 @@ export const api = {
     },
   },
 
+  // Projects
+  projects: {
+    async getAll(status) {
+      const params = status ? `?status=${status}` : '';
+      return apiRequest(`/api/projects${params}`);
+    },
+
+    async getById(id) {
+      return apiRequest(`/api/projects/${id}`);
+    },
+
+    async create(name, description, assigned_to, deadline) {
+      return apiRequest('/api/projects', {
+        method: 'POST',
+        body: JSON.stringify({ name, description, assigned_to, deadline }),
+      });
+    },
+
+    async update(id, updates) {
+      return apiRequest(`/api/projects/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+    },
+
+    async delete(id) {
+      return apiRequest(`/api/projects/${id}`, { method: 'DELETE' });
+    },
+  },
+
   // Google Calendar
   google: {
     async getAuthUrl() {

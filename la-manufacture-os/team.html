@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Équipe - FLOW</title>
+  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
+
+  <!-- CSS imports -->
+  <link rel="stylesheet" href="/src/css/variables.css">
+  <link rel="stylesheet" href="/src/css/reset.css">
+  <link rel="stylesheet" href="/src/css/design-system.css">
+  <link rel="stylesheet" href="/src/css/components.css">
+  <link rel="stylesheet" href="/src/css/app.css">
+
+  <style>
+    body {
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      padding: 0;
+      margin: 0;
+    }
+
+    .team-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .team-header {
+      margin-bottom: 32px;
+    }
+
+    .team-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #0A84FF, #30D158);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .team-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-sec);
+    }
+
+    .tabs {
+      margin-bottom: 32px;
+    }
+
+    .tab-content {
+      min-height: 400px;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .content-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .member-card, .project-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(var(--glass-blur));
+      border: var(--glass-border);
+      border-radius: var(--radius-l);
+      padding: 20px;
+      transition: all 0.3s var(--ease-smooth);
+      cursor: pointer;
+    }
+
+    .member-card:hover, .project-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .member-info, .project-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .project-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .project-description {
+      color: var(--text-sec);
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+
+    .project-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-sec);
+    }
+
+    .file-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .file-item {
+      background: var(--bg-card);
+      backdrop-filter: blur(var(--glass-blur));
+      border: var(--glass-border);
+      border-radius: var(--radius-m);
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s var(--ease-smooth);
+    }
+
+    .file-item:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .file-icon {
+      font-size: 1.5rem;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .file-meta {
+      font-size: 0.85rem;
+      color: var(--text-sec);
+      margin-top: 4px;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 24px;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="team-container">
+    <a href="/" class="back-link">
+      ← Retour à FLOW
+    </a>
+
+    <div class="team-header">
+      <h1 class="team-title">👥 Équipe</h1>
+      <p class="team-subtitle">Gérez vos membres, projets et documents</p>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button class="tab active" data-tab="membres">Membres</button>
+      <button class="tab" data-tab="projets">Projets</button>
+      <button class="tab" data-tab="documents">Documents</button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Membres Tab -->
+      <div class="tab-pane active" id="membres">
+        <div class="content-header">
+          <h2 class="content-title">Membres de l'équipe</h2>
+          <button class="btn btn-primary" id="addMemberBtn">+ Ajouter un membre</button>
+        </div>
+        <div class="grid" id="membersGrid">
+          <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <div class="empty-state-title">Aucun membre</div>
+            <div class="empty-state-message">Ajoutez votre premier membre d'équipe</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projets Tab -->
+      <div class="tab-pane" id="projets">
+        <div class="content-header">
+          <h2 class="content-title">Projets</h2>
+          <button class="btn btn-primary" id="addProjectBtn">+ Créer un projet</button>
+        </div>
+        <div class="grid" id="projectsGrid">
+          <div class="empty-state">
+            <div class="empty-state-icon">📁</div>
+            <div class="empty-state-title">Aucun projet</div>
+            <div class="empty-state-message">Créez votre premier projet pour commencer</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents Tab -->
+      <div class="tab-pane" id="documents">
+        <div class="content-header">
+          <h2 class="content-title">Documents partagés</h2>
+          <button class="btn btn-primary" id="uploadDocBtn">+ Télécharger un document</button>
+        </div>
+        <ul class="file-list" id="filesList">
+          <li class="empty-state">
+            <div class="empty-state-icon">📄</div>
+            <div class="empty-state-title">Aucun document</div>
+            <div class="empty-state-message">Téléchargez votre premier document</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Member -->
+  <div class="modal-overlay" id="addMemberModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Ajouter un membre</h2>
+        <button class="modal-close" onclick="closeModal('addMemberModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label class="input-label">Nom du membre</label>
+          <input type="text" class="input" id="memberName" placeholder="Ex: Nicolas">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addMemberModal')">Annuler</button>
+        <button class="btn btn-primary" id="saveMemberBtn">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Project -->
+  <div class="modal-overlay" id="projectModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="projectModalTitle">Créer un projet</h2>
+        <button class="modal-close" onclick="closeModal('projectModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="projectId">
+        <div class="input-group">
+          <label class="input-label">Nom du projet</label>
+          <input type="text" class="input" id="projectName" placeholder="Ex: Fabrication ligne Nord">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Description</label>
+          <textarea class="input textarea" id="projectDescription" placeholder="Décrivez le projet..."></textarea>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Assigné à</label>
+          <select class="input select" id="projectAssignedTo">
+            <option value="">Non assigné</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Date limite</label>
+          <input type="date" class="input" id="projectDeadline">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('projectModal')">Annuler</button>
+        <button class="btn btn-primary" id="saveProjectBtn">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/src/js/team-page.js"></script>
+</body>
+</html>

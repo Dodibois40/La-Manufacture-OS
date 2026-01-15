@@ -137,6 +137,25 @@ CREATE TABLE IF NOT EXISTS team_files (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Projects (projets avec taches et documents)
+CREATE TABLE IF NOT EXISTS projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- le manager
+  name TEXT NOT NULL,
+  description TEXT,
+  assigned_to INTEGER REFERENCES team_members(id) ON DELETE SET NULL, -- membre assigne au projet
+  deadline DATE,
+  status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'archived')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Ajouter project_id aux tasks
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS project_id UUID REFERENCES projects(id) ON DELETE SET NULL;
+
+-- Ajouter project_id aux team_files
+ALTER TABLE team_files ADD COLUMN IF NOT EXISTS project_id UUID REFERENCES projects(id) ON DELETE SET NULL;
+
 -- Google Calendar tokens (OAuth2 pour sync calendrier)
 CREATE TABLE IF NOT EXISTS google_tokens (
   id SERIAL PRIMARY KEY,
@@ -177,6 +196,10 @@ CREATE INDEX IF NOT EXISTS idx_team_files_member ON team_files(team_member_id);
 CREATE INDEX IF NOT EXISTS idx_google_tokens_user ON google_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_is_event ON tasks(user_id, is_event) WHERE is_event = TRUE;
 CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id) WHERE clerk_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_projects_assigned ON projects(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id) WHERE project_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_team_files_project ON team_files(project_id) WHERE project_id IS NOT NULL;
 
 -- Trigger pour updated_at automatique
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -213,4 +236,9 @@ CREATE TRIGGER update_team_tasks_updated_at BEFORE UPDATE ON team_tasks
 DROP TRIGGER IF EXISTS update_google_tokens_updated_at ON google_tokens;
 
 CREATE TRIGGER update_google_tokens_updated_at BEFORE UPDATE ON google_tokens
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
+
+CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

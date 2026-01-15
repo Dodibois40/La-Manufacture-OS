@@ -288,39 +288,6 @@
         <label class="settings-label">
           <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-          Données
-        </label>
-        <div class="btn-group">
-          <button class="btn btn-secondary" id="exportBtn">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <span>Exporter</span>
-          </button>
-          <button class="btn btn-secondary" id="importBtn">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span>Importer</span>
-          </button>
-          <input type="file" id="importFile" accept=".json" class="hidden-input">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <label class="settings-label">
-          <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6" />
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             <line x1="10" y1="11" x2="10" y2="17" />
@@ -335,80 +302,6 @@
           <button class="btn btn-secondary" id="resetUiBtn">
             <span>Reset UI</span>
           </button>
-        </div>
-      </div>
-
-      <!-- Team Management Section -->
-      <div class="settings-section" id="teamSection" style="display: none;">
-        <label class="settings-label">
-          <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-          Mon Equipe
-        </label>
-
-        <!-- Lien atelier -->
-        <div class="team-link-section">
-          <p class="settings-hint">Lien pour l'ecran atelier :</p>
-          <div class="team-link-box">
-            <input type="text" id="atelierLink" class="settings-input" readonly>
-            <button class="btn btn-small" id="copyLinkBtn">Copier</button>
-          </div>
-        </div>
-
-        <!-- Liste des membres -->
-        <div class="team-members-section">
-          <div class="team-members-header">
-            <span>Membres</span>
-            <button class="btn btn-small btn-primary" id="addMemberBtn">+ Ajouter</button>
-          </div>
-          <div class="team-members-list" id="teamMembersList">
-            <!-- Genere dynamiquement -->
-          </div>
-        </div>
-
-        <!-- Ajouter une tache a un membre -->
-        <div class="team-task-section">
-          <div class="team-task-header">
-            <span>Assigner une tache</span>
-          </div>
-          <select id="teamMemberSelect" class="settings-input">
-            <option value="">Selectionner un membre...</option>
-          </select>
-          <input type="text" id="teamTaskText" class="settings-input" placeholder="Description de la tache...">
-          <div class="team-task-options">
-            <input type="date" id="teamTaskDate" class="settings-input">
-            <label class="team-urgent-label">
-              <input type="checkbox" id="teamTaskUrgent">
-              Urgent
-            </label>
-          </div>
-          <button class="btn btn-primary btn-full" id="addTeamTaskBtn">Assigner</button>
-        </div>
-
-        <!-- Upload de fichiers -->
-        <div class="team-files-section">
-          <div class="team-files-header">
-            <span>Documents partages</span>
-            <button class="btn btn-small" id="uploadFileBtn">+ Upload</button>
-            <input type="file" id="teamFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" class="hidden-input">
-          </div>
-          <div class="team-files-options">
-            <label class="settings-hint">
-              <input type="checkbox" id="fileGlobal" checked>
-              Global (visible par tous)
-            </label>
-            <select id="fileTargetMember" class="settings-input settings-input-small" disabled>
-              <option value="">Ou choisir un membre...</option>
-            </select>
-          </div>
-          <div class="team-files-list" id="teamFilesList">
-            <!-- Genere dynamiquement -->
-          </div>
         </div>
       </div>
 
@@ -474,6 +367,15 @@
         <path d="M12 5v14M5 12h14" />
       </svg>
       <span class="nav-label">Add</span>
+    </button>
+    <button id="nav-team">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+      <span class="nav-label">Team</span>
     </button>
     <button id="nav-config">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
