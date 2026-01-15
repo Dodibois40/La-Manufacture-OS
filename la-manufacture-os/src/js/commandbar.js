@@ -1,7 +1,8 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { smartParseDate, smartParseUrgent, smartParseOwner, smartParseDuration, smartParseRecurrence, smartParseProject, smartParseTime, cleanTitle } from './parser.js';
-import { isApiMode } from './api-client.js';
+import { isApiMode, api } from './api-client.js';
+import { isGoogleConnected, syncTaskToGoogle } from './google-calendar.js';
 
 export const initCommandBar = (state, renderCallback) => {
   // Create Modal HTML with iOS style
@@ -164,6 +165,19 @@ export const initCommandBar = (state, renderCallback) => {
         if (isApiMode && isLoggedIn()) {
           const created = await taskApi.create(newTask);
           state.tasks.push(created);
+
+          // Sync to Google Calendar if event and connected
+          if (created.is_event && isGoogleConnected()) {
+            try {
+              const googleEventId = await syncTaskToGoogle(created);
+              if (googleEventId) {
+                await api.tasks.update(created.id, { google_event_id: googleEventId });
+                created.google_event_id = googleEventId;
+              }
+            } catch (syncError) {
+              console.warn('Google sync failed:', syncError);
+            }
+          }
         } else {
           state.tasks.push(newTask);
         }

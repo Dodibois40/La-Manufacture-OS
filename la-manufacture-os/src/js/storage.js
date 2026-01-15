@@ -129,7 +129,7 @@ export const loadStateFromApi = async () => {
     ]);
 
     const state = defaultState();
-    state.tasks = Array.isArray(tasksResult) ? tasksResult : [];
+    state.tasks = Array.isArray(tasksResult.tasks) ? tasksResult.tasks : (Array.isArray(tasksResult) ? tasksResult : []);
     if (settingsResult) {
       state.settings = { ...state.settings, ...settingsResult };
     }
@@ -168,7 +168,7 @@ export const taskApi = {
     }
     try {
       const result = await api.tasks.create(task);
-      return result;
+      return result.task || result;
     } catch (error) {
       console.error('Failed to create task:', error);
       throw error;

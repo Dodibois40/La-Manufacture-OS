@@ -5,6 +5,7 @@ import { openShareModal } from './share.js';
 import { recordTaskCompletion, recordPerfectDay, renderStreakWidget, playSound } from './gamification.js';
 import { initSwipeGestures } from './swipe.js';
 import { appCallbacks } from './app-callbacks.js';
+import { isGoogleConnected, syncTaskToGoogle, deleteGoogleEvent } from './google-calendar.js';
 
 // Inspirational quotes collection - 60+ citations pour ne jamais voir les memes
 const QUOTES = [
@@ -206,18 +207,19 @@ const taskRow = (t, state) => {
     e.stopPropagation();
     if (editMode) return; // Disable in edit mode
 
-    if (task.done) {
-      task.done = false;
-      task.updatedAt = nowISO();
-      saveState(state);
-      appCallbacks.render?.();
-      return;
-    }
-
     c.classList.add('animating');
-    setTimeout(() => {
+    setTimeout(async () => {
       task.done = true;
       task.updatedAt = nowISO();
+
+      if (isApiMode && isLoggedIn()) {
+        try {
+          await taskApi.update(task.id, { done: true });
+        } catch (e) {
+          console.error('API update failed:', e);
+        }
+      }
+
       saveState(state);
       appCallbacks.render?.();
       // 🎉 Célébration !
@@ -232,6 +234,26 @@ const taskRow = (t, state) => {
       }
     }, 450);
   });
+
+  // Handle uncheck separately to be clearer
+  if (task.done) {
+    c.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      task.done = false;
+      task.updatedAt = nowISO();
+
+      if (isApiMode && isLoggedIn()) {
+        try {
+          await taskApi.update(task.id, { done: false });
+        } catch (e) {
+          console.error('API update failed:', e);
+        }
+      }
+
+      saveState(state);
+      appCallbacks.render?.();
+    });
+  }
 
   const body = document.createElement('div');
   body.className = 'task-body';
@@ -294,12 +316,26 @@ const taskRow = (t, state) => {
     tomorrowBtn.className = 'quick-action-btn';
     tomorrowBtn.title = 'Reporter à demain';
     tomorrowBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-    tomorrowBtn.addEventListener('click', (e) => {
+    tomorrowBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const d = new Date();
       d.setDate(d.getDate() + 1);
-      task.date = isoLocal(d);
+      const newDate = isoLocal(d);
+      task.date = newDate;
       task.updatedAt = nowISO();
+
+      if (isApiMode && isLoggedIn()) {
+        try {
+          await taskApi.update(task.id, { date: newDate });
+          // Re-sync to Google if it's an event
+          if (task.is_event && isGoogleConnected()) {
+            await syncTaskToGoogle(task);
+          }
+        } catch (e) {
+          console.error('API update failed:', e);
+        }
+      }
+
       saveState(state);
       appCallbacks.render?.();
       toast('→ Demain');
@@ -320,10 +356,20 @@ const taskRow = (t, state) => {
     urgentBtn.className = 'quick-action-btn' + (task.urgent ? ' active' : '');
     urgentBtn.title = task.urgent ? 'Enlever urgence' : 'Marquer urgent';
     urgentBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
-    urgentBtn.addEventListener('click', (e) => {
+    urgentBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      task.urgent = !task.urgent;
+      const newUrgent = !task.urgent;
+      task.urgent = newUrgent;
       task.updatedAt = nowISO();
+
+      if (isApiMode && isLoggedIn()) {
+        try {
+          await taskApi.update(task.id, { urgent: newUrgent });
+        } catch (e) {
+          console.error('API update failed:', e);
+        }
+      }
+
       saveState(state);
       appCallbacks.render?.();
       toast(task.urgent ? '🔥 Urgent' : 'Urgence retirée');
@@ -360,31 +406,55 @@ const taskRow = (t, state) => {
         <div class="menu-item danger" data-action="delete">🗑️ Supprimer</div>
       `;
 
-      menu.addEventListener('click', (me) => {
+      menu.addEventListener('click', async (me) => {
         const target = me.target.closest('.menu-item');
         if (!target) return;
         const action = target.dataset.action;
 
         if (action === 'delete') {
+          if (isApiMode && isLoggedIn()) {
+            try {
+              await taskApi.delete(task.id);
+              if (task.google_event_id) {
+                await deleteGoogleEvent(task.google_event_id);
+              }
+            } catch (e) {
+              console.error('API delete failed:', e);
+            }
+          }
           state.tasks = state.tasks.filter(item => item.id !== task.id);
           toast('Tâche supprimée');
         } else if (action === 'tomorrow') {
           const d = new Date();
           d.setDate(d.getDate() + 1);
-          task.date = isoLocal(d);
+          const newDate = isoLocal(d);
+          task.date = newDate;
           task.updatedAt = nowISO();
+          if (isApiMode && isLoggedIn()) {
+            await taskApi.update(task.id, { date: newDate });
+            if (task.is_event && isGoogleConnected()) await syncTaskToGoogle(task);
+          }
           toast('Reporté à demain');
         } else if (action === 'next-week') {
           const d = new Date();
           const dayOfWeek = d.getDay();
           const daysUntilMonday = (8 - dayOfWeek) % 7 || 7;
           d.setDate(d.getDate() + daysUntilMonday);
-          task.date = isoLocal(d);
+          const newDate = isoLocal(d);
+          task.date = newDate;
           task.updatedAt = nowISO();
+          if (isApiMode && isLoggedIn()) {
+            await taskApi.update(task.id, { date: newDate });
+            if (task.is_event && isGoogleConnected()) await syncTaskToGoogle(task);
+          }
           toast('Reporté à lundi prochain');
         } else if (action === 'urgent') {
-          task.urgent = !task.urgent;
+          const newUrgent = !task.urgent;
+          task.urgent = newUrgent;
           task.updatedAt = nowISO();
+          if (isApiMode && isLoggedIn()) {
+            await taskApi.update(task.id, { urgent: newUrgent });
+          }
         } else if (action === 'share') {
           openShareModal(task.id, task.text);
           menu.remove();

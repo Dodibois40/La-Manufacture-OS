@@ -13,7 +13,7 @@ import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCod
 import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
-import { initGoogleCalendar } from './google-calendar.js';
+import { initGoogleCalendar, isGoogleConnected, syncTaskToGoogle } from './google-calendar.js';
 import { initDailyReview } from './daily-review.js';
 import { openQuickDump, initQuickDumpShortcut } from './quick-dump.js';
 
@@ -295,7 +295,7 @@ const initApp = async () => {
 
       // 5. Init Team Management & Google Calendar
       initTeam(user?.id);
-      initGoogleCalendar();
+      await initGoogleCalendar();
     } catch (err) {
       console.error('Sync error:', err);
       toast('Erreur de synchronisation');
@@ -327,22 +327,45 @@ const initApp = async () => {
   initDailyReview(state, render);
   // Render streak widget
   // Quick dump button
+  const handleTasksAdded = async (tasks) => {
+    if (isApiMode && isLoggedIn()) {
+      for (const t of tasks) {
+        try {
+          const apiTask = await taskApi.create(t);
+          state.tasks.push(apiTask);
+
+          // Sync to Google Calendar if event and connected
+          if (apiTask.is_event && isGoogleConnected()) {
+            try {
+              const googleEventId = await syncTaskToGoogle(apiTask);
+              if (googleEventId) {
+                await api.tasks.update(apiTask.id, { google_event_id: googleEventId });
+                apiTask.google_event_id = googleEventId;
+              }
+            } catch (syncError) {
+              console.warn('Google sync failed:', syncError);
+            }
+          }
+        } catch (e) {
+          console.error('Error adding task from Quick Dump:', e);
+          state.tasks.push(t); // Fallback
+        }
+      }
+    } else {
+      state.tasks.push(...tasks);
+    }
+    saveState(state);
+    render();
+  };
+
   const quickDumpBtn = document.getElementById('quickDumpBtn');
   if (quickDumpBtn) {
     quickDumpBtn.addEventListener('click', () => {
-      openQuickDump(state, (tasks) => {
-        state.tasks.push(...tasks);
-        saveState(state);
-        render();
-      });
+      openQuickDump(state, handleTasksAdded);
     });
   }
 
-  initQuickDumpShortcut(state, (tasks) => {
-    state.tasks.push(...tasks);
-    saveState(state);
-    render();
-  });
+  initQuickDumpShortcut(state, handleTasksAdded);
 
   // Initial render
   if (isApiMode) {
