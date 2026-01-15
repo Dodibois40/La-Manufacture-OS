@@ -14,271 +14,141 @@
   <link rel="stylesheet" href="/src/css/design-system.css">
   <link rel="stylesheet" href="/src/css/components.css">
   <link rel="stylesheet" href="/src/css/app.css">
-
-  <style>
-    body {
-      background: var(--bg-app);
-      color: var(--text-main);
-      font-family: var(--font-stack);
-      padding: 0;
-      margin: 0;
-    }
-
-    .team-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-
-    .team-header {
-      margin-bottom: 32px;
-    }
-
-    .team-title {
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #0A84FF, #30D158);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .team-subtitle {
-      font-size: 1.1rem;
-      color: var(--text-sec);
-    }
-
-    .tabs {
-      margin-bottom: 32px;
-    }
-
-    .tab-content {
-      min-height: 400px;
-    }
-
-    .tab-pane {
-      display: none;
-    }
-
-    .tab-pane.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .content-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .content-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .member-card, .project-card {
-      background: var(--bg-card);
-      backdrop-filter: blur(var(--glass-blur));
-      border: var(--glass-border);
-      border-radius: var(--radius-l);
-      padding: 20px;
-      transition: all 0.3s var(--ease-smooth);
-      cursor: pointer;
-    }
-
-    .member-card:hover, .project-card:hover {
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    .member-info, .project-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .project-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-
-    .project-name {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 8px;
-    }
-
-    .project-description {
-      color: var(--text-sec);
-      font-size: 0.9rem;
-      margin-bottom: 12px;
-    }
-
-    .project-meta {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      font-size: 0.85rem;
-      color: var(--text-sec);
-    }
-
-    .file-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .file-item {
-      background: var(--bg-card);
-      backdrop-filter: blur(var(--glass-blur));
-      border: var(--glass-border);
-      border-radius: var(--radius-m);
-      padding: 16px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.2s var(--ease-smooth);
-    }
-
-    .file-item:hover {
-      background: var(--bg-card-hover);
-    }
-
-    .file-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-    }
-
-    .file-icon {
-      font-size: 1.5rem;
-    }
-
-    .file-name {
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .file-meta {
-      font-size: 0.85rem;
-      color: var(--text-sec);
-      margin-top: 4px;
-    }
-
-    .file-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-      margin-bottom: 24px;
-      transition: opacity 0.2s;
-    }
-
-    .back-link:hover {
-      opacity: 0.8;
-    }
-  </style>
+  <link rel="stylesheet" href="/src/css/team.css">
 </head>
 
 <body>
-  <div class="team-container">
-    <a href="/" class="back-link">
-      ← Retour à FLOW
-    </a>
-
-    <div class="team-header">
-      <h1 class="team-title">👥 Équipe</h1>
-      <p class="team-subtitle">Gérez vos membres, projets et documents</p>
-    </div>
-
-    <!-- Tabs Navigation -->
-    <div class="tabs">
-      <button class="tab active" data-tab="membres">Membres</button>
-      <button class="tab" data-tab="projets">Projets</button>
-      <button class="tab" data-tab="documents">Documents</button>
-    </div>
-
-    <!-- Tab Content -->
-    <div class="tab-content">
-      <!-- Membres Tab -->
-      <div class="tab-pane active" id="membres">
-        <div class="content-header">
-          <h2 class="content-title">Membres de l'équipe</h2>
-          <button class="btn btn-primary" id="addMemberBtn">+ Ajouter un membre</button>
+  <div class="container" id="app">
+    <header>
+      <div class="brand">
+        <div class="header-logo">
+          <span class="header-logo-letter">F</span>
+          <span class="header-logo-letter">L</span>
+          <span class="header-logo-letter">O</span>
+          <span class="header-logo-letter">W</span>
         </div>
-        <div class="grid" id="membersGrid">
-          <div class="empty-state">
-            <div class="empty-state-icon">👥</div>
-            <div class="empty-state-title">Aucun membre</div>
-            <div class="empty-state-message">Ajoutez votre premier membre d'équipe</div>
-          </div>
+      </div>
+      <div class="topStatus">
+        <span class="badge">ÉQUIPE</span>
+      </div>
+    </header>
+
+    <!-- Team Management View -->
+    <div class="view active">
+      <div class="view-header">
+        <h2 class="settings-title">ÉQUIPE</h2>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="tabs-wrapper">
+        <div class="tabs">
+          <button class="tab active" data-tab="membres">Membres</button>
+          <button class="tab" data-tab="projets">Projets</button>
+          <button class="tab" data-tab="documents">Documents</button>
         </div>
       </div>
 
-      <!-- Projets Tab -->
-      <div class="tab-pane" id="projets">
-        <div class="content-header">
-          <h2 class="content-title">Projets</h2>
-          <button class="btn btn-primary" id="addProjectBtn">+ Créer un projet</button>
-        </div>
-        <div class="grid" id="projectsGrid">
-          <div class="empty-state">
-            <div class="empty-state-icon">📁</div>
-            <div class="empty-state-title">Aucun projet</div>
-            <div class="empty-state-message">Créez votre premier projet pour commencer</div>
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Membres Tab -->
+        <div class="tab-pane active" id="membres">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <label class="settings-label">
+                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Membres de l'équipe
+              </label>
+              <button class="btn btn-primary" id="addMemberBtn">+ Ajouter</button>
+            </div>
+            <div class="team-grid" id="membersGrid">
+              <!-- Généré dynamiquement -->
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Documents Tab -->
-      <div class="tab-pane" id="documents">
-        <div class="content-header">
-          <h2 class="content-title">Documents partagés</h2>
-          <button class="btn btn-primary" id="uploadDocBtn">+ Télécharger un document</button>
+        <!-- Projets Tab -->
+        <div class="tab-pane" id="projets">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <label class="settings-label">
+                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                </svg>
+                Projets
+              </label>
+              <button class="btn btn-primary" id="addProjectBtn">+ Créer</button>
+            </div>
+            <div class="team-grid" id="projectsGrid">
+              <!-- Généré dynamiquement -->
+            </div>
+          </div>
         </div>
-        <ul class="file-list" id="filesList">
-          <li class="empty-state">
-            <div class="empty-state-icon">📄</div>
-            <div class="empty-state-title">Aucun document</div>
-            <div class="empty-state-message">Téléchargez votre premier document</div>
-          </li>
-        </ul>
+
+        <!-- Documents Tab -->
+        <div class="tab-pane" id="documents">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <label class="settings-label">
+                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                  <polyline points="13 2 13 9 20 9" />
+                </svg>
+                Documents partagés
+              </label>
+              <button class="btn btn-primary" id="uploadDocBtn">+ Upload</button>
+            </div>
+            <div class="files-list" id="filesList">
+              <!-- Généré dynamiquement -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Navigation Dock -->
+  <nav>
+    <button id="nav-day">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+      </svg>
+      <span class="nav-label">Today</span>
+    </button>
+    <button id="nav-week">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M3 10h18M8 2v4M16 2v4" />
+      </svg>
+      <span class="nav-label">Plan</span>
+    </button>
+    <button id="nav-inbox">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      <span class="nav-label">Add</span>
+    </button>
+    <button class="active" id="nav-team">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+      <span class="nav-label">Team</span>
+    </button>
+    <button id="nav-config">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <span class="nav-label">Menu</span>
+    </button>
+  </nav>
 
   <!-- Modal: Add Member -->
   <div class="modal-overlay" id="addMemberModal">

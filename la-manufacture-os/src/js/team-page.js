@@ -85,21 +85,21 @@ function renderMembers() {
   }
 
   grid.innerHTML = members.map(member => `
-    <div class="member-card" onclick="openMemberDetails('${member.id}')">
-      <div class="member-info">
-        <div class="avatar avatar-md" style="background: ${member.avatar_color};">
+    <div class="team-card">
+      <div class="team-card-header">
+        <div class="avatar" style="background: ${member.avatar_color};">
           ${member.name.charAt(0).toUpperCase()}
         </div>
-        <div>
-          <div style="font-weight: 600; color: var(--text-main);">${member.name}</div>
-          <div style="font-size: 0.85rem; color: var(--text-sec);">Membre actif</div>
+        <div class="team-card-info">
+          <div class="team-card-name">${member.name}</div>
+          <div class="team-card-meta">Membre actif</div>
         </div>
       </div>
-      <div style="display: flex; gap: 8px; margin-top: 12px;">
-        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); editMember('${member.id}')">
+      <div class="team-card-actions">
+        <button class="btn btn-secondary btn-sm" onclick="editMember('${member.id}')">
           Modifier
         </button>
-        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMember('${member.id}')">
+        <button class="btn btn-danger btn-sm" onclick="deleteMember('${member.id}')">
           Supprimer
         </button>
       </div>
@@ -182,28 +182,27 @@ function renderProjects() {
                         project.status === 'archived' ? 'badge-neutral' : 'badge-primary';
 
     return `
-      <div class="project-card" onclick="openProjectDetails('${project.id}')">
-        <div class="project-header">
-          <div class="project-name">${project.name}</div>
+      <div class="team-card">
+        <div class="team-card-header">
+          <div class="team-card-info">
+            <div class="team-card-name">${project.name}</div>
+            <div class="team-card-meta">
+              ${project.assigned_to_name ? `Assigné à ${project.assigned_to_name}` : 'Non assigné'}
+            </div>
+          </div>
           <span class="badge ${statusBadge}">${project.status}</span>
         </div>
-        ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
-        <div class="project-meta">
-          ${project.assigned_to_name ? `
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div class="avatar avatar-sm" style="background: ${project.avatar_color};">
-                ${project.assigned_to_name.charAt(0).toUpperCase()}
-              </div>
-              <span>${project.assigned_to_name}</span>
-            </div>
-          ` : '<span>Non assigné</span>'}
-          ${project.deadline ? `<span>📅 ${new Date(project.deadline).toLocaleDateString('fr-FR')}</span>` : ''}
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 16px;">
-          <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); editProject('${project.id}')">
+        ${project.description ? `<div class="team-card-desc">${project.description}</div>` : ''}
+        ${project.deadline ? `
+          <div class="team-card-meta" style="margin-top: 8px;">
+            📅 ${new Date(project.deadline).toLocaleDateString('fr-FR')}
+          </div>
+        ` : ''}
+        <div class="team-card-actions">
+          <button class="btn btn-secondary btn-sm" onclick="editProject('${project.id}')">
             Modifier
           </button>
-          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProject('${project.id}')">
+          <button class="btn btn-danger btn-sm" onclick="deleteProject('${project.id}')">
             Supprimer
           </button>
         </div>
@@ -316,11 +315,11 @@ function renderFiles() {
 
   if (files.length === 0) {
     list.innerHTML = `
-      <li class="empty-state">
+      <div class="empty-state">
         <div class="empty-state-icon">📄</div>
         <div class="empty-state-title">Aucun document</div>
         <div class="empty-state-message">Téléchargez votre premier document</div>
-      </li>
+      </div>
     `;
     return;
   }
@@ -330,15 +329,15 @@ function renderFiles() {
     const date = new Date(file.created_at).toLocaleDateString('fr-FR');
 
     return `
-      <li class="file-item">
-        <div class="file-info">
+      <div class="team-file-item">
+        <div class="team-file-info">
           <div class="file-icon">📄</div>
-          <div style="flex: 1;">
-            <div class="file-name">${file.original_name}</div>
-            <div class="file-meta">${size} • ${date}</div>
+          <div>
+            <div class="team-file-name">${file.original_name}</div>
+            <div class="team-file-meta">${size} • ${date}</div>
           </div>
         </div>
-        <div class="file-actions">
+        <div class="team-file-actions">
           <button class="btn btn-secondary btn-sm" onclick="downloadFile('${file.filename}')">
             Télécharger
           </button>
@@ -346,7 +345,7 @@ function renderFiles() {
             Supprimer
           </button>
         </div>
-      </li>
+      </div>
     `;
   }).join('');
 }
@@ -393,6 +392,26 @@ window.deleteFile = async (fileId) => {
     toast('Erreur lors de la suppression', 'danger');
   }
 };
+
+// ==========================================
+// NAVIGATION
+// ==========================================
+
+document.getElementById('nav-day')?.addEventListener('click', () => {
+  window.location.href = '/';
+});
+
+document.getElementById('nav-week')?.addEventListener('click', () => {
+  window.location.href = '/';
+});
+
+document.getElementById('nav-inbox')?.addEventListener('click', () => {
+  window.location.href = '/';
+});
+
+document.getElementById('nav-config')?.addEventListener('click', () => {
+  window.location.href = '/';
+});
 
 // ==========================================
 // INITIALIZATION
