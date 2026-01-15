@@ -15,7 +15,6 @@ import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
 import { initGoogleCalendar } from './google-calendar.js';
 import { initDailyReview } from './daily-review.js';
-import { renderStreakWidget } from './gamification.js';
 import { openQuickDump, initQuickDumpShortcut } from './quick-dump.js';
 
 // Load state (local first, then sync from API)
@@ -327,11 +326,6 @@ const initApp = async () => {
   initSpeechToText();
   initDailyReview(state, render);
   // Render streak widget
-  const streakWidgetEl = document.getElementById('streakWidget');
-  if (streakWidgetEl) {
-    streakWidgetEl.innerHTML = renderStreakWidget();
-  }
-
   // Quick dump button
   const quickDumpBtn = document.getElementById('quickDumpBtn');
   if (quickDumpBtn) {
