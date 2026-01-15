@@ -114,6 +114,12 @@ export default async function googleCalendarRoutes(fastify) {
       return reply.status(400).send({ error: 'Missing required fields' });
     }
 
+    // Check configuration
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      fastify.log.error('Google Calendar configuration missing in environment variables');
+      return reply.status(500).send({ error: 'Google Calendar not configured on server' });
+    }
+
     try {
       // Get user tokens
       const tokenResult = await query(
@@ -146,6 +152,9 @@ export default async function googleCalendarRoutes(fastify) {
 
       const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+      // Ensure date is only YYYY-MM-DD (remove any T00:00:00.000Z)
+      const cleanDate = typeof date === 'string' ? date.split('T')[0] : new Date(date).toISOString().split('T')[0];
+
       // Format times to HH:MM if they have seconds or are irregular
       const formatTime = (t) => {
         if (!t) return null;
@@ -165,11 +174,11 @@ export default async function googleCalendarRoutes(fastify) {
         summary: title,
         location: location || undefined,
         start: {
-          dateTime: `${date}T${startHM}:00`,
+          dateTime: `${cleanDate}T${startHM}:00`,
           timeZone: 'Europe/Paris',
         },
         end: {
-          dateTime: `${date}T${endHM}:00`,
+          dateTime: `${cleanDate}T${endHM}:00`,
           timeZone: 'Europe/Paris',
         },
       };
@@ -179,8 +188,10 @@ export default async function googleCalendarRoutes(fastify) {
         const [h, m] = startHM.split(':').map(Number);
         const endD = new Date(2000, 0, 1, h, m + 30);
         const endHM_fixed = `${String(endD.getHours()).padStart(2, '0')}:${String(endD.getMinutes()).padStart(2, '0')}`;
-        event.end.dateTime = `${date}T${endHM_fixed}:00`;
+        event.end.dateTime = `${cleanDate}T${endHM_fixed}:00`;
       }
+
+      fastify.log.info(`Syncing event to Google: ${event.summary} on ${event.start.dateTime}`);
 
       let result;
       if (googleEventId) {
