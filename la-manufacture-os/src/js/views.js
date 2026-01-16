@@ -136,12 +136,20 @@ const startQuoteRotation = () => {
       quoteEl.classList.remove('fade-in');
       void quoteEl.offsetWidth; // Trigger reflow
       quoteEl.classList.add('fade-in');
+    } else {
+      // If element not found (view changed), stop rotation
+      stopQuoteRotation();
     }
   }, 2 * 60 * 1000); // Every 2 minutes
 };
 
-// Initialize rotation on first call
-startQuoteRotation();
+// Stop quote rotation and cleanup interval
+export const stopQuoteRotation = () => {
+  if (quoteInterval) {
+    clearInterval(quoteInterval);
+    quoteInterval = null;
+  }
+};
 
 // Edit mode state
 let editMode = false;
@@ -761,6 +769,9 @@ export const renderDay = (state) => {
       }
     }
   });
+
+  // Start quote rotation only when day view is active
+  startQuoteRotation();
 };
 
 // Planning calendar state

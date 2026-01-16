@@ -2,6 +2,9 @@ import { api, isApiMode } from './api-client.js';
 
 let notificationCount = 0;
 let pollInterval = null;
+let pollIntervalDuration = 60000; // Start at 60 seconds instead of 30
+const MAX_POLL_INTERVAL = 5 * 60 * 1000; // Max 5 minutes
+const MIN_POLL_INTERVAL = 60000; // Min 1 minute
 
 // Format relative time
 const timeAgo = (date) => {
@@ -67,19 +70,54 @@ export const loadNotifications = async () => {
       api.notifications.getAll()
     ]);
 
+    const previousCount = notificationCount;
     updateBadge(countResult.count);
     renderNotifications(notifResult.notifications);
+
+    // If there are new notifications, reset to faster polling
+    if (countResult.count > previousCount) {
+      pollIntervalDuration = MIN_POLL_INTERVAL;
+      restartPolling();
+    } else {
+      // Increase polling interval (backoff) when no new notifications
+      pollIntervalDuration = Math.min(pollIntervalDuration * 1.5, MAX_POLL_INTERVAL);
+    }
   } catch (e) {
     console.error('Failed to load notifications:', e);
+    // Backoff on error
+    pollIntervalDuration = Math.min(pollIntervalDuration * 2, MAX_POLL_INTERVAL);
   }
 };
 
-// Start polling (every 30s)
+// Restart polling with current interval
+const restartPolling = () => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+  if (document.visibilityState === 'visible') {
+    pollInterval = setInterval(loadNotifications, pollIntervalDuration);
+  }
+};
+
+// Start polling with adaptive interval
 export const startNotificationPolling = () => {
   if (pollInterval) return;
 
   loadNotifications();
-  pollInterval = setInterval(loadNotifications, 30000);
+  pollInterval = setInterval(loadNotifications, pollIntervalDuration);
+
+  // Pause polling when tab is hidden, resume when visible
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      stopNotificationPolling();
+    } else {
+      // Reset to faster polling when tab becomes visible
+      pollIntervalDuration = MIN_POLL_INTERVAL;
+      startNotificationPolling();
+      loadNotifications(); // Load immediately
+    }
+  });
 };
 
 export const stopNotificationPolling = () => {

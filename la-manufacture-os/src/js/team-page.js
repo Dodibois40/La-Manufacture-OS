@@ -34,19 +34,28 @@ function closeModal(modalId) {
 
 window.closeModal = closeModal;
 
-// Tab switching
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    const targetTab = tab.dataset.tab;
+// Tab switching using event delegation for better performance
+const tabsContainer = document.querySelector('.tabs');
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const tabPanes = Array.from(document.querySelectorAll('.tab-pane'));
 
-    // Update active states
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+if (tabsContainer) {
+  tabsContainer.addEventListener('click', (e) => {
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+
+    const targetTab = tab.dataset.tab;
+    const targetPane = document.getElementById(targetTab);
+    if (!targetPane) return;
+
+    // Update active states using cached DOM references
+    tabs.forEach(t => t.classList.remove('active'));
+    tabPanes.forEach(p => p.classList.remove('active'));
 
     tab.classList.add('active');
-    document.getElementById(targetTab).classList.add('active');
+    targetPane.classList.add('active');
   });
-});
+}
 
 // State
 let members = [];

@@ -4,7 +4,7 @@ export default async function tasksRoutes(fastify) {
   // Get all tasks for user (owned + shared with user)
   fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
     const { userId } = request.user;
-    const { date, status } = request.query;
+    const { date, status, limit = 200, offset = 0 } = request.query;
 
     // Query that includes both owned tasks and shared tasks
     let baseQuery = `
@@ -48,8 +48,52 @@ export default async function tasksRoutes(fastify) {
 
     baseQuery += ' ORDER BY date DESC, urgent DESC, created_at DESC';
 
+    // Add pagination
+    baseQuery += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(parseInt(limit, 10), parseInt(offset, 10));
+
     const result = await query(baseQuery, params);
-    return { tasks: result.rows };
+
+    // Get total count for pagination metadata
+    let countQuery = `
+      WITH all_tasks AS (
+        SELECT t.id
+        FROM tasks t
+        WHERE t.user_id = $1
+        UNION ALL
+        SELECT t.id
+        FROM tasks t
+        JOIN task_sharing ts ON t.id = ts.task_id
+        WHERE ts.shared_with_user_id = $1
+      )
+      SELECT COUNT(*) as total FROM all_tasks WHERE 1=1
+    `;
+
+    const countParams = [userId];
+    if (date) {
+      countQuery = countQuery.replace('WHERE 1=1', 'JOIN tasks t2 ON all_tasks.id = t2.id WHERE t2.date = $2');
+      countParams.push(date);
+    }
+    if (status && !date) {
+      countQuery = countQuery.replace('WHERE 1=1', 'JOIN tasks t2 ON all_tasks.id = t2.id WHERE t2.status = $2');
+      countParams.push(status);
+    } else if (status && date) {
+      countQuery = countQuery.replace('WHERE t2.date = $2', 'WHERE t2.date = $2 AND t2.status = $3');
+      countParams.push(status);
+    }
+
+    const countResult = await query(countQuery, countParams);
+    const total = parseInt(countResult.rows[0].total, 10);
+
+    return {
+      tasks: result.rows,
+      pagination: {
+        total,
+        limit: parseInt(limit, 10),
+        offset: parseInt(offset, 10),
+        hasMore: offset + result.rows.length < total
+      }
+    };
   });
 
   // Get tasks for today
@@ -103,20 +147,50 @@ export default async function tasksRoutes(fastify) {
           [today, userId]
         );
 
-        // Log activity
-        for (const task of lateTasks.rows) {
+        // Log activity with batch INSERT
+        if (lateTasks.rows.length > 0) {
+          const activityValues = lateTasks.rows.map((task, idx) => {
+            const baseIdx = idx * 4;
+            return `($${baseIdx + 1}, $${baseIdx + 2}, $${baseIdx + 3}, $${baseIdx + 4})`;
+          }).join(', ');
+
+          const activityParams = lateTasks.rows.flatMap(task => [
+            userId,
+            task.id,
+            'carried_over',
+            JSON.stringify({ mode: 'move', from: task.date, to: today })
+          ]);
+
           await query(
-            'INSERT INTO activity_log (user_id, task_id, action, metadata) VALUES ($1, $2, $3, $4)',
-            [userId, task.id, 'carried_over', { mode: 'move', from: task.date, to: today }]
+            `INSERT INTO activity_log (user_id, task_id, action, metadata) VALUES ${activityValues}`,
+            activityParams
           );
         }
       } else if (mode === 'duplicate') {
-        // Duplicate tasks
-        for (const task of lateTasks.rows) {
+        // Duplicate tasks with batch INSERT
+        if (lateTasks.rows.length > 0) {
+          const taskValues = lateTasks.rows.map((task, idx) => {
+            const baseIdx = idx * 10;
+            return `($${baseIdx + 1}, $${baseIdx + 2}, $${baseIdx + 3}, $${baseIdx + 4}, $${baseIdx + 5}, $${baseIdx + 6}, $${baseIdx + 7}, $${baseIdx + 8}, $${baseIdx + 9}, $${baseIdx + 10})`;
+          }).join(', ');
+
+          const taskParams = lateTasks.rows.flatMap(task => [
+            userId,
+            task.text,
+            today,
+            task.date,
+            task.owner,
+            task.assignee,
+            'open',
+            task.urgent,
+            false,
+            0
+          ]);
+
           await query(
             `INSERT INTO tasks (user_id, text, date, original_date, owner, assignee, status, urgent, done, time_spent)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-            [userId, task.text, today, task.date, task.owner, task.assignee, 'open', task.urgent, false, 0]
+             VALUES ${taskValues}`,
+            taskParams
           );
         }
       }

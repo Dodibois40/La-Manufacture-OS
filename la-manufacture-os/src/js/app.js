@@ -65,6 +65,8 @@ const initDockMagnification = () => {
 
 // Navigation
 const views = ['day', 'week', 'inbox', 'config', 'auth'];
+let currentView = 'day';
+
 export const setView = (name) => {
   const nav = document.querySelector('nav');
 
@@ -81,15 +83,28 @@ export const setView = (name) => {
     if (nb) nb.classList.toggle('active', v === name);
   }
 
-  if (name !== 'auth') render();
+  currentView = name;
+  if (name !== 'auth') render(name);
 };
 
-// Master render
-export const render = () => {
-  renderDay(state);
-  renderWeek(state);
-  renderInboxUI(state);
-  renderConfig(state);
+// Master render - now only renders the active view for performance
+export const render = (viewName = currentView) => {
+  // Only render the currently active view to avoid unnecessary DOM operations
+  switch (viewName) {
+    case 'day':
+      renderDay(state);
+      break;
+    case 'week':
+      renderWeek(state);
+      break;
+    case 'inbox':
+      renderInboxUI(state);
+      break;
+    case 'config':
+      renderConfig(state);
+      break;
+    // No need to render auth view - it's static
+  }
 };
 
 // Register callbacks for other modules

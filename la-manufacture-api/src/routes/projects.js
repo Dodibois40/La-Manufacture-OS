@@ -7,8 +7,18 @@ export default async function projectsRoutes(fastify) {
     const { status } = request.query;
 
     let sql = `
-      SELECT p.*
+      SELECT
+        p.*,
+        COALESCE(
+          json_agg(
+            json_build_object('id', tm.id, 'name', tm.name, 'avatar_color', tm.avatar_color)
+            ORDER BY tm.name ASC
+          ) FILTER (WHERE tm.id IS NOT NULL),
+          '[]'::json
+        ) as assigned_members
       FROM projects p
+      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN team_members tm ON pm.team_member_id = tm.id
       WHERE p.user_id = $1
     `;
     const params = [userId];
@@ -19,27 +29,11 @@ export default async function projectsRoutes(fastify) {
       params.push(status);
     }
 
-    sql += ' ORDER BY p.created_at DESC';
+    sql += ' GROUP BY p.id ORDER BY p.created_at DESC';
 
     const result = await query(sql, params);
 
-    // Pour chaque projet, recuperer les membres assignes
-    const projects = await Promise.all(result.rows.map(async (project) => {
-      const membersResult = await query(
-        `SELECT tm.id, tm.name, tm.avatar_color
-         FROM project_members pm
-         JOIN team_members tm ON pm.team_member_id = tm.id
-         WHERE pm.project_id = $1
-         ORDER BY tm.name ASC`,
-        [project.id]
-      );
-      return {
-        ...project,
-        assigned_members: membersResult.rows
-      };
-    }));
-
-    return { projects };
+    return { projects: result.rows };
   });
 
   // GET /api/projects/:id - Details d'un projet avec ses taches et fichiers
@@ -47,53 +41,78 @@ export default async function projectsRoutes(fastify) {
     const { userId } = request.user;
     const { id } = request.params;
 
-    // Recuperer le projet
-    const projectResult = await query(
-      `SELECT * FROM projects WHERE id = $1 AND user_id = $2`,
+    // Une seule requete pour recuperer projet, membres, taches et fichiers
+    const result = await query(
+      `WITH project_data AS (
+        SELECT * FROM projects WHERE id = $1 AND user_id = $2
+      ),
+      members_data AS (
+        SELECT
+          pm.project_id,
+          json_agg(
+            json_build_object('id', tm.id, 'name', tm.name, 'avatar_color', tm.avatar_color)
+            ORDER BY tm.name ASC
+          ) as members
+        FROM project_members pm
+        JOIN team_members tm ON pm.team_member_id = tm.id
+        WHERE pm.project_id = $1
+        GROUP BY pm.project_id
+      ),
+      tasks_data AS (
+        SELECT
+          project_id,
+          json_agg(
+            json_build_object('id', id, 'text', text, 'date', date, 'urgent', urgent, 'done', done, 'status', status)
+            ORDER BY urgent DESC, done ASC, date ASC
+          ) as tasks
+        FROM tasks
+        WHERE project_id = $1 AND user_id = $2
+        GROUP BY project_id
+      ),
+      files_data AS (
+        SELECT
+          project_id,
+          json_agg(
+            json_build_object('id', id, 'original_name', original_name, 'filename', filename, 'mime_type', mime_type, 'size', size, 'created_at', created_at)
+            ORDER BY created_at DESC
+          ) as files
+        FROM team_files
+        WHERE project_id = $1 AND user_id = $2
+        GROUP BY project_id
+      )
+      SELECT
+        p.*,
+        COALESCE(m.members, '[]'::json) as assigned_members,
+        COALESCE(t.tasks, '[]'::json) as tasks,
+        COALESCE(f.files, '[]'::json) as files
+      FROM project_data p
+      LEFT JOIN members_data m ON p.id = m.project_id
+      LEFT JOIN tasks_data t ON p.id = t.project_id
+      LEFT JOIN files_data f ON p.id = f.project_id`,
       [id, userId]
     );
 
-    if (projectResult.rows.length === 0) {
+    if (result.rows.length === 0) {
       return reply.status(404).send({ error: 'Projet non trouve' });
     }
 
-    const project = projectResult.rows[0];
-
-    // Recuperer les membres assignes
-    const membersResult = await query(
-      `SELECT tm.id, tm.name, tm.avatar_color
-       FROM project_members pm
-       JOIN team_members tm ON pm.team_member_id = tm.id
-       WHERE pm.project_id = $1
-       ORDER BY tm.name ASC`,
-      [id]
-    );
-
-    // Recuperer les taches liees au projet
-    const tasksResult = await query(
-      `SELECT id, text, date, urgent, done, status
-       FROM tasks
-       WHERE project_id = $1 AND user_id = $2
-       ORDER BY urgent DESC, done ASC, date ASC`,
-      [id, userId]
-    );
-
-    // Recuperer les fichiers lies au projet
-    const filesResult = await query(
-      `SELECT id, original_name, filename, mime_type, size, created_at
-       FROM team_files
-       WHERE project_id = $1 AND user_id = $2
-       ORDER BY created_at DESC`,
-      [id, userId]
-    );
+    const row = result.rows[0];
 
     return {
       project: {
-        ...project,
-        assigned_members: membersResult.rows
+        id: row.id,
+        user_id: row.user_id,
+        name: row.name,
+        description: row.description,
+        assigned_to: row.assigned_to,
+        deadline: row.deadline,
+        status: row.status,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        assigned_members: row.assigned_members
       },
-      tasks: tasksResult.rows,
-      files: filesResult.rows
+      tasks: row.tasks,
+      files: row.files
     };
   });
 

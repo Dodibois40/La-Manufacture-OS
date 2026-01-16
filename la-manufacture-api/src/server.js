@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
+import compress from '@fastify/compress';
 import multipart from '@fastify/multipart';
 import { clerkPlugin, getAuth } from '@clerk/fastify';
 import { createClerkClient } from '@clerk/backend';
@@ -65,6 +66,13 @@ await fastify.register(cors, {
 });
 
 await fastify.register(cookie);
+
+// Enable compression for responses (gzip/brotli)
+await fastify.register(compress, {
+  global: true,
+  encodings: ['br', 'gzip', 'deflate'],
+  threshold: 1024, // Only compress responses > 1KB
+});
 
 await fastify.register(multipart, {
   limits: {
