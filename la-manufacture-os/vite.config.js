@@ -20,6 +20,8 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         atelier: resolve(__dirname, 'atelier.html'),
         team: resolve(__dirname, 'team.html'),
+        'accept-invite': resolve(__dirname, 'accept-invite.html'),
+        member: resolve(__dirname, 'member.html'),
       },
       output: {
         manualChunks: {

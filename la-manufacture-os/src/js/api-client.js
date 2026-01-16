@@ -391,6 +391,80 @@ export const api = {
       return apiRequest(`/api/google/event/${googleEventId}`, { method: 'DELETE' });
     },
   },
+
+  // Invitations
+  invitations: {
+    async create(email, name, avatar_color) {
+      return apiRequest('/api/invitations', {
+        method: 'POST',
+        body: JSON.stringify({ email, name, avatar_color }),
+      });
+    },
+
+    async list(status) {
+      const query = status ? `?status=${status}` : '';
+      return apiRequest(`/api/invitations${query}`);
+    },
+
+    async revoke(id) {
+      return apiRequest(`/api/invitations/${id}`, { method: 'DELETE' });
+    },
+
+    async resend(id) {
+      return apiRequest(`/api/invitations/${id}/resend`, { method: 'POST' });
+    },
+
+    async validate(token) {
+      return apiRequest(`/api/invitations/validate/${token}`);
+    },
+
+    async accept(token) {
+      return apiRequest(`/api/invitations/${token}/accept`, { method: 'POST' });
+    },
+  },
+
+  // Member dashboard
+  member: {
+    async getProjects(status) {
+      const query = status ? `?status=${status}` : '';
+      return apiRequest(`/api/member/projects${query}`);
+    },
+
+    async getTasks(filters) {
+      const query = new URLSearchParams(filters).toString();
+      return apiRequest(`/api/member/tasks?${query}`);
+    },
+
+    async updateTask(id, updates) {
+      return apiRequest(`/api/member/tasks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+    },
+
+    async logTaskTime(id, minutes, description, date) {
+      return apiRequest(`/api/member/tasks/${id}/time`, {
+        method: 'POST',
+        body: JSON.stringify({ minutes, description, date }),
+      });
+    },
+
+    async logProjectTime(id, minutes, description, date) {
+      return apiRequest(`/api/member/projects/${id}/time`, {
+        method: 'POST',
+        body: JSON.stringify({ minutes, description, date }),
+      });
+    },
+
+    async getTimeLogs(filters) {
+      const query = new URLSearchParams(filters).toString();
+      return apiRequest(`/api/member/time-logs?${query}`);
+    },
+
+    async getProfile() {
+      return apiRequest('/api/member/profile');
+    },
+  },
 };
 
 // Export mode for conditional logic

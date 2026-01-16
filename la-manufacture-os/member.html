@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mon Espace - FLOW</title>
+  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- CSS imports -->
+  <link rel="stylesheet" href="/src/css/variables.css">
+  <link rel="stylesheet" href="/src/css/reset.css">
+  <link rel="stylesheet" href="/src/css/components.css">
+  <link rel="stylesheet" href="/src/css/app.css">
+</head>
+
+<body>
+  <div class="container" id="app">
+    <header>
+      <div class="brand">
+        <div class="header-logo">
+          <span class="header-logo-letter">F</span>
+          <span class="header-logo-letter">L</span>
+          <span class="header-logo-letter">O</span>
+          <span class="header-logo-letter">W</span>
+        </div>
+      </div>
+      <div class="topStatus">
+        <span class="badge">MEMBRE</span>
+        <span class="badge" id="memberName">—</span>
+      </div>
+    </header>
+
+    <nav class="topNav">
+      <button class="nav-item active" data-view="tasks">Mes Tâches</button>
+      <button class="nav-item" data-view="projects">Mes Projets</button>
+      <button class="nav-item" data-view="time">Temps</button>
+    </nav>
+
+    <!-- Tasks View -->
+    <div id="tasksView" class="view-content">
+      <div class="section-header">
+        <h2>Mes Tâches</h2>
+        <button class="btn-secondary" id="refreshTasks">↻</button>
+      </div>
+      <div id="tasksList"></div>
+    </div>
+
+    <!-- Projects View -->
+    <div id="projectsView" class="view-content hidden">
+      <div class="section-header">
+        <h2>Mes Projets</h2>
+        <button class="btn-secondary" id="refreshProjects">↻</button>
+      </div>
+      <div id="projectsList"></div>
+    </div>
+
+    <!-- Time View -->
+    <div id="timeView" class="view-content hidden">
+      <div class="section-header">
+        <h2>Suivi du Temps</h2>
+      </div>
+      <div id="timeStats"></div>
+      <div id="timeLogs"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/js/member.js"></script>
+</body>
+</html>

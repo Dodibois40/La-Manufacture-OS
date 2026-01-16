@@ -23,6 +23,17 @@ import teamRoutes from './routes/team.js';
 import teamFilesRoutes from './routes/team-files.js';
 import projectsRoutes from './routes/projects.js';
 import googleCalendarRoutes from './routes/google-calendar.js';
+import invitationsRoutes from './routes/invitations.js';
+import memberRoutes from './routes/member.js';
+
+// Middleware
+import {
+  requireManager,
+  requireMember,
+  loadTeamMemberProfile,
+  canAccessProject,
+  canAccessTask
+} from './middleware/authorization.js';
 
 dotenv.config();
 
@@ -151,6 +162,13 @@ fastify.decorate('authenticate', async function (request, reply) {
 // Export clerkClient for routes
 fastify.decorate('clerkClient', clerkClient);
 
+// Decorate fastify with authorization middleware
+fastify.decorate('requireManager', requireManager);
+fastify.decorate('requireMember', requireMember);
+fastify.decorate('loadTeamMemberProfile', loadTeamMemberProfile);
+fastify.decorate('canAccessProject', canAccessProject);
+fastify.decorate('canAccessTask', canAccessTask);
+
 // Health check
 fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
@@ -168,6 +186,8 @@ await fastify.register(teamRoutes, { prefix: '/api/team' });
 await fastify.register(teamFilesRoutes, { prefix: '/api/team' });
 await fastify.register(projectsRoutes, { prefix: '/api/projects' });
 await fastify.register(googleCalendarRoutes, { prefix: '/api/google' });
+await fastify.register(invitationsRoutes, { prefix: '/api/invitations' });
+await fastify.register(memberRoutes, { prefix: '/api/member' });
 
 // Start server
 const start = async () => {

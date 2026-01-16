@@ -456,6 +456,153 @@ document.getElementById('nav-config')?.addEventListener('click', () => {
 });
 
 // ==========================================
+// INVITATIONS TAB
+// ==========================================
+
+let invitations = [];
+
+async function loadInvitations() {
+  try {
+    if (!isApiMode || !isSignedIn()) return;
+
+    const response = await api.invitations.list();
+    invitations = response.invitations || [];
+    renderInvitations();
+  } catch (error) {
+    console.error('Error loading invitations:', error);
+    toast('Erreur lors du chargement des invitations', 'danger');
+  }
+}
+
+function renderInvitations() {
+  const list = document.getElementById('invitationsList');
+
+  if (invitations.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📧</div>
+        <div class="empty-state-title">Aucune invitation</div>
+        <div class="empty-state-message">Invitez des membres à rejoindre votre équipe</div>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = invitations.map(invite => {
+    const metadata = invite.metadata || {};
+    const statusBadge = getInvitationStatusBadge(invite.status);
+    const expiresAt = new Date(invite.expires_at);
+    const isExpired = expiresAt < new Date();
+
+    return `
+      <div class="invitation-card">
+        <div class="invitation-header">
+          <div>
+            <h3 class="invitation-name">${metadata.invited_name || 'Membre'}</h3>
+            <p class="invitation-email">${invite.email}</p>
+          </div>
+          ${statusBadge}
+        </div>
+        <div class="invitation-meta">
+          <span>Envoyée: ${new Date(invite.invited_at).toLocaleDateString('fr-FR')}</span>
+          <span>Expire: ${expiresAt.toLocaleDateString('fr-FR')}</span>
+        </div>
+        ${invite.status === 'pending' && !isExpired ? `
+          <div class="invitation-actions">
+            <button class="btn btn-sm btn-secondary" onclick="resendInvitation(${invite.id})">Renvoyer</button>
+            <button class="btn btn-sm btn-danger" onclick="revokeInvitation(${invite.id})">Révoquer</button>
+          </div>
+        ` : ''}
+        ${invite.status === 'accepted' && invite.member_name ? `
+          <div class="invitation-info">
+            <span style="color: #10b981;">✓ Acceptée par ${invite.member_name}</span>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function getInvitationStatusBadge(status) {
+  const badges = {
+    pending: '<span class="badge badge-warning">En attente</span>',
+    accepted: '<span class="badge badge-success">Acceptée</span>',
+    expired: '<span class="badge badge-danger">Expirée</span>',
+    revoked: '<span class="badge badge-danger">Révoquée</span>',
+  };
+  return badges[status] || '<span class="badge">Inconnu</span>';
+}
+
+// Invite member button
+document.getElementById('inviteMemberBtn')?.addEventListener('click', () => {
+  openModal('inviteMemberModal');
+});
+
+// Send invitation
+document.getElementById('sendInviteBtn')?.addEventListener('click', async () => {
+  const email = document.getElementById('inviteEmail').value.trim();
+  const name = document.getElementById('inviteName').value.trim();
+  const color = document.getElementById('inviteColor').value;
+
+  if (!email || !name) {
+    toast('Veuillez remplir tous les champs requis', 'warning');
+    return;
+  }
+
+  try {
+    const response = await api.invitations.create(email, name, color);
+
+    if (response.emailSent) {
+      toast(`Invitation envoyée à ${email} !`, 'success');
+    } else {
+      toast(`Invitation créée mais email non envoyé: ${response.emailError}`, 'warning');
+    }
+
+    closeModal('inviteMemberModal');
+    document.getElementById('inviteEmail').value = '';
+    document.getElementById('inviteName').value = '';
+    document.getElementById('inviteColor').value = '#3b82f6';
+
+    await loadInvitations();
+  } catch (error) {
+    console.error('Error sending invitation:', error);
+    toast(error.message || 'Erreur lors de l\'envoi de l\'invitation', 'danger');
+  }
+});
+
+// Revoke invitation
+window.revokeInvitation = async (invitationId) => {
+  if (!confirm('Êtes-vous sûr de vouloir révoquer cette invitation ?')) {
+    return;
+  }
+
+  try {
+    await api.invitations.revoke(invitationId);
+    toast('Invitation révoquée', 'success');
+    await loadInvitations();
+  } catch (error) {
+    console.error('Error revoking invitation:', error);
+    toast(error.message || 'Erreur lors de la révocation', 'danger');
+  }
+};
+
+// Resend invitation
+window.resendInvitation = async (invitationId) => {
+  try {
+    const response = await api.invitations.resend(invitationId);
+
+    if (response.emailSent) {
+      toast('Invitation renvoyée !', 'success');
+    } else {
+      toast(`Erreur d'envoi: ${response.emailError}`, 'warning');
+    }
+  } catch (error) {
+    console.error('Error resending invitation:', error);
+    toast(error.message || 'Erreur lors du renvoi', 'danger');
+  }
+};
+
+// ==========================================
 // INITIALIZATION
 // ==========================================
 
@@ -473,6 +620,7 @@ async function init() {
 
   await Promise.all([
     loadMembers(),
+    loadInvitations(),
     loadProjects(),
     loadFiles()
   ]);

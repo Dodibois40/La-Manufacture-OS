@@ -316,3 +316,126 @@
     flex: 1;
   }
 }
+
+/* ==========================================
+   INVITATIONS
+   ========================================== */
+
+.invitations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.invitation-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--radius-m);
+  padding: 20px;
+  transition: all 0.2s var(--ease-smooth);
+}
+
+.invitation-card:hover {
+  background: var(--bg-card-hover);
+}
+
+.invitation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.invitation-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.invitation-email {
+  font-size: 0.9rem;
+  color: var(--text-sec);
+}
+
+.invitation-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: var(--text-sec);
+  margin-bottom: 12px;
+}
+
+.invitation-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.invitation-info {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.9rem;
+}
+
+/* Badges for invitation status */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-s);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.badge-warning {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Small buttons for invitation actions */
+.btn-sm {
+  padding: 6px 16px;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .invitation-header {
+    flex-direction: column;
+  }
+
+  .invitation-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .invitation-actions {
+    flex-direction: column;
+  }
+
+  .invitation-actions .btn {
+    width: 100%;
+  }
+}

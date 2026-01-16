@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="FLOW - Accepter votre invitation">
+  <title>Invitation - FLOW</title>
+  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- CSS imports -->
+  <link rel="stylesheet" href="/src/css/variables.css">
+  <link rel="stylesheet" href="/src/css/reset.css">
+  <link rel="stylesheet" href="/src/css/components.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .invite-container {
+      max-width: 500px;
+      width: 100%;
+      margin: 20px;
+    }
+
+    .invite-card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .invite-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .invite-logo h1 {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: 12px;
+      color: #667eea;
+      margin: 0;
+    }
+
+    .invite-logo p {
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .invite-content h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1d1d1f;
+      margin-bottom: 16px;
+    }
+
+    .invite-info {
+      background: #f5f5f7;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 24px 0;
+    }
+
+    .invite-info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .invite-info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .invite-info-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .invite-info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .invite-actions {
+      margin-top: 32px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c33;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="invite-container">
+    <div class="invite-card">
+      <div class="invite-logo">
+        <h1>FLOW</h1>
+        <p>La Manufacture OS</p>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="loading-spinner">
+        <div class="spinner"></div>
+        <p class="loading-text">Validation de votre invitation...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="errorState" class="hidden">
+        <div class="error-message" id="errorMessage"></div>
+        <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+      </div>
+
+      <!-- Valid Invitation State -->
+      <div id="inviteState" class="hidden">
+        <div class="invite-content">
+          <h2>Vous êtes invité !</h2>
+          <p>Vous avez été invité à rejoindre une équipe sur FLOW.</p>
+
+          <div class="invite-info">
+            <div class="invite-info-row">
+              <span class="invite-info-label">Invité par</span>
+              <span class="invite-info-value" id="managerName">—</span>
+            </div>
+            <div class="invite-info-row">
+              <span class="invite-info-label">Votre email</span>
+              <span class="invite-info-value" id="inviteEmail">—</span>
+            </div>
+            <div class="invite-info-row">
+              <span class="invite-info-label">Expire le</span>
+              <span class="invite-info-value" id="expiresAt">—</span>
+            </div>
+          </div>
+
+          <div class="invite-actions">
+            <button id="acceptBtn" class="btn btn-primary">Accepter l'invitation</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success State -->
+      <div id="successState" class="hidden">
+        <div class="invite-content">
+          <h2>✓ Invitation acceptée !</h2>
+          <p>Bienvenue dans l'équipe. Vous allez être redirigé vers votre espace membre...</p>
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/js/accept-invite.js"></script>
+</body>
+
+</html>

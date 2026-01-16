@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
 ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_id VARCHAR(255) UNIQUE;
 -- Migration: Make password_hash nullable (Clerk handles auth)
 ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+-- Migration: Add role column for user type (manager, member, admin)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'manager' CHECK (role IN ('manager', 'member', 'admin'));
 
 -- Tasks table (version cible avec statuts + délégation)
 CREATE TABLE IF NOT EXISTS tasks (
@@ -111,6 +113,11 @@ CREATE TABLE IF NOT EXISTS team_members (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Migration: Add columns for invited members (can be linked to actual user accounts)
+ALTER TABLE team_members ADD COLUMN IF NOT EXISTS invited_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE team_members ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+ALTER TABLE team_members ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'member' CHECK (role IN ('member', 'manager'));
+
 -- Team tasks (taches assignees aux membres d'equipe)
 CREATE TABLE IF NOT EXISTS team_tasks (
   id SERIAL PRIMARY KEY,
@@ -124,6 +131,10 @@ CREATE TABLE IF NOT EXISTS team_tasks (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Migration: Add status and time tracking to team_tasks
+ALTER TABLE team_tasks ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'completed', 'blocked'));
+ALTER TABLE team_tasks ADD COLUMN IF NOT EXISTS time_spent INTEGER DEFAULT 0; -- minutes
 
 -- Team files (fichiers partages - globaux ou par membre)
 CREATE TABLE IF NOT EXISTS team_files (
@@ -157,6 +168,48 @@ CREATE TABLE IF NOT EXISTS project_members (
   team_member_id INTEGER NOT NULL REFERENCES team_members(id) ON DELETE CASCADE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(project_id, team_member_id)
+);
+
+-- Team invitations (invitations par email pour nouveaux membres)
+CREATE TABLE IF NOT EXISTS team_invitations (
+  id SERIAL PRIMARY KEY,
+  manager_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL,
+  token VARCHAR(255) UNIQUE NOT NULL, -- Secure UUID v4 token
+  team_member_id INTEGER REFERENCES team_members(id) ON DELETE SET NULL,
+  status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
+  invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NOT NULL, -- Token expires after 7 days
+  accepted_at TIMESTAMP,
+  metadata JSONB, -- Additional info like invited user name
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Project time logs (temps passe sur les projets par les membres)
+CREATE TABLE IF NOT EXISTS project_time_logs (
+  id SERIAL PRIMARY KEY,
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Member who logged time
+  team_member_id INTEGER REFERENCES team_members(id) ON DELETE SET NULL, -- Link to team member profile
+  minutes INTEGER NOT NULL CHECK (minutes > 0),
+  description TEXT,
+  date DATE NOT NULL, -- Date the work was done
+  logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Task time logs (temps passe sur les taches par les membres)
+CREATE TABLE IF NOT EXISTS task_time_logs (
+  id SERIAL PRIMARY KEY,
+  team_task_id INTEGER REFERENCES team_tasks(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  team_member_id INTEGER REFERENCES team_members(id) ON DELETE SET NULL,
+  minutes INTEGER NOT NULL CHECK (minutes > 0),
+  description TEXT,
+  date DATE NOT NULL, -- Date the work was done
+  logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Ajouter project_id aux tasks
@@ -218,6 +271,18 @@ CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id) WHERE project_
 CREATE INDEX IF NOT EXISTS idx_team_files_project ON team_files(project_id) WHERE project_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_project_members_project ON project_members(project_id);
 CREATE INDEX IF NOT EXISTS idx_project_members_member ON project_members(team_member_id);
+CREATE INDEX IF NOT EXISTS idx_team_members_invited_user ON team_members(invited_user_id) WHERE invited_user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_team_members_email ON team_members(email) WHERE email IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_team_invitations_manager ON team_invitations(manager_id, status);
+CREATE INDEX IF NOT EXISTS idx_team_invitations_email ON team_invitations(email, status);
+CREATE INDEX IF NOT EXISTS idx_team_invitations_token ON team_invitations(token) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_team_invitations_expires ON team_invitations(expires_at) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_project_time_logs_project ON project_time_logs(project_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_project_time_logs_user ON project_time_logs(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_project_time_logs_member ON project_time_logs(team_member_id) WHERE team_member_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_task_time_logs_task ON task_time_logs(team_task_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_task_time_logs_user ON task_time_logs(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_task_time_logs_member ON task_time_logs(team_member_id) WHERE team_member_id IS NOT NULL;
 
 -- Trigger pour updated_at automatique
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -259,4 +324,9 @@ CREATE TRIGGER update_google_tokens_updated_at BEFORE UPDATE ON google_tokens
 DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
 
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_team_invitations_updated_at ON team_invitations;
+
+CREATE TRIGGER update_team_invitations_updated_at BEFORE UPDATE ON team_invitations
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

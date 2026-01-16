@@ -43,6 +43,7 @@
       <div class="tabs-wrapper">
         <div class="tabs">
           <button class="tab active" data-tab="membres">Membres</button>
+          <button class="tab" data-tab="invitations">Invitations</button>
           <button class="tab" data-tab="projets">Projets</button>
           <button class="tab" data-tab="documents">Documents</button>
         </div>
@@ -66,6 +67,25 @@
               <button class="btn btn-primary" id="addMemberBtn">+ Ajouter</button>
             </div>
             <div class="team-grid" id="membersGrid">
+              <!-- Généré dynamiquement -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Invitations Tab -->
+        <div class="tab-pane" id="invitations">
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <label class="settings-label">
+                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                Invitations envoyées
+              </label>
+              <button class="btn btn-primary" id="inviteMemberBtn">+ Inviter</button>
+            </div>
+            <div class="invitations-list" id="invitationsList">
               <!-- Généré dynamiquement -->
             </div>
           </div>
@@ -150,7 +170,7 @@
     </button>
   </nav>
 
-  <!-- Modal: Add Member -->
+  <!-- Modal: Add Member (Simple - no invitation) -->
   <div class="modal-overlay" id="addMemberModal">
     <div class="modal">
       <div class="modal-header">
@@ -166,6 +186,37 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('addMemberModal')">Annuler</button>
         <button class="btn btn-primary" id="saveMemberBtn">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Invite Member (with email) -->
+  <div class="modal-overlay" id="inviteMemberModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Inviter un membre</h2>
+        <button class="modal-close" onclick="closeModal('inviteMemberModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+          Le membre recevra un email avec un lien d'invitation pour créer son compte et accéder à ses tâches.
+        </p>
+        <div class="input-group">
+          <label class="input-label">Email du membre *</label>
+          <input type="email" class="input" id="inviteEmail" placeholder="membre@example.com" required>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Nom du membre *</label>
+          <input type="text" class="input" id="inviteName" placeholder="Ex: Nicolas Dupont" required>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Couleur d'avatar (optionnel)</label>
+          <input type="color" class="input" id="inviteColor" value="#3b82f6">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('inviteMemberModal')">Annuler</button>
+        <button class="btn btn-primary" id="sendInviteBtn">Envoyer l'invitation</button>
       </div>
     </div>
   </div>
