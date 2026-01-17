@@ -675,8 +675,8 @@ export const renderDay = (state) => {
     brainClearEl.innerHTML = `
       <div class="brain-clear-icon">✓</div>
       <div class="brain-clear-text">
-        <span class="brain-clear-title">Cerveau vidé</span>
-        <span class="brain-clear-sub">Tout est sous contrôle. Respire.</span>
+        <span class="brain-clear-title">Esprit clair</span>
+        <span class="brain-clear-sub">Rien à traiter, profite du moment.</span>
       </div>
     `;
     dayList.appendChild(brainClearEl);
