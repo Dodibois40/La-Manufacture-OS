@@ -67,6 +67,14 @@ export async function getToken() {
   }
 }
 
+// Helper: Promise with timeout
+const withTimeout = (promise, ms, errorMsg) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms))
+  ]);
+};
+
 // Sign in with email/password (custom UI)
 export async function signInWithEmail(email, password) {
   if (!clerk) {
@@ -74,13 +82,22 @@ export async function signInWithEmail(email, password) {
   }
 
   try {
-    const result = await clerk.client.signIn.create({
-      identifier: email,
-      password: password,
-    });
+    // Timeout after 15s (iOS Safari can hang on Clerk API calls)
+    const result = await withTimeout(
+      clerk.client.signIn.create({
+        identifier: email,
+        password: password,
+      }),
+      15000,
+      'Connexion timeout - vérifie ta connexion internet'
+    );
 
     if (result.status === 'complete') {
-      await clerk.setActive({ session: result.createdSessionId });
+      await withTimeout(
+        clerk.setActive({ session: result.createdSessionId }),
+        10000,
+        'Session timeout'
+      );
       return { success: true };
     } else {
       // Handle other statuses (e.g., needs_second_factor)
@@ -88,7 +105,7 @@ export async function signInWithEmail(email, password) {
     }
   } catch (err) {
     console.error('Sign in error:', err);
-    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Sign in failed';
+    const message = err.message || err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Sign in failed';
     return { success: false, error: message };
   }
 }
