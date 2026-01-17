@@ -445,6 +445,20 @@
   font-size: 1.5rem;
 }
 
+.btn-icon-small {
+  width: 42px !important;
+  min-width: 42px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-small svg {
+  width: 18px;
+  height: 18px;
+}
+
 .btn-icon {
   width: 18px;
   height: 18px;

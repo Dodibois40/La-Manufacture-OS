@@ -114,86 +114,6 @@
   color: white;
 }
 
-/* ===== Tags Bar ===== */
-.tags-bar {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding: 0;
-  background: transparent;
-  border: none;
-}
-
-.tag-manage-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 16px;
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.tag-manage-btn:hover {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-.tag-manage-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-.tags-list {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tag-pill:hover {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.3);
-  color: var(--accent);
-}
-
-.tag-pill.active {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.4);
-  color: var(--accent);
-}
-
-.tag-pill .count {
-  margin-left: 4px;
-  padding: 2px 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 /* ===== Notes Container & Sections ===== */
 .notes-container {
   margin-bottom: 80px;
@@ -394,22 +314,6 @@
   -webkit-box-orient: vertical;
 }
 
-.note-tags {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.note-tag {
-  display: inline-block;
-  padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
 .note-footer {
   display: flex;
   justify-content: space-between;
@@ -526,41 +430,6 @@
   font-weight: bold;
 }
 
-/* Tags Selected */
-.tags-selected {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-  min-height: 32px;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-}
-
-.tag-selected {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  font-size: 13px;
-  color: white;
-}
-
-.tag-remove {
-  width: 16px;
-  height: 16px;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.tag-remove:hover {
-  color: #ef4444;
-}
-
 /* Shares List */
 .shares-list {
   display: flex;
@@ -614,100 +483,6 @@
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-/* Tags Manage List */
-.tags-manage-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.tag-manage-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-}
-
-.tag-manage-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.tag-color-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.tag-manage-name {
-  font-size: 14px;
-  color: white;
-  font-weight: 500;
-}
-
-.tag-manage-count {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-left: 8px;
-}
-
-.tag-manage-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.tag-edit-btn,
-.tag-delete-btn {
-  padding: 6px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.tag-edit-btn {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--accent);
-}
-
-.tag-edit-btn:hover {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.2);
-}
-
-.tag-delete-btn {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-}
-
-.tag-delete-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.2);
-}
-
-/* Tag Input Row */
-.tag-input-row {
-  display: flex;
-  gap: 8px;
-}
-
-.tag-input-row .input:first-of-type {
-  flex: 1;
-}
-
-.tag-input-row input[type="color"] {
-  width: 60px;
-}
-
 /* Checkbox Label */
 .checkbox-label {
   display: inline-flex;
@@ -743,10 +518,6 @@
   .filter-chip,
   .filter-select {
     width: 100%;
-  }
-
-  .tags-bar {
-    padding: 12px;
   }
 
   .modal-large {

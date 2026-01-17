@@ -9,7 +9,7 @@ import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
-import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCode } from './clerk-auth.js';
+import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCode, forgotPassword, resetPassword } from './clerk-auth.js';
 import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
@@ -261,6 +261,104 @@ const initAuthUI = () => {
   document.getElementById('verifyCode')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') verifyBtn?.click();
   });
+
+  // ========================================
+  // Forgot Password handlers
+  // ========================================
+  const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+  const resetPasswordForm = document.getElementById('resetPasswordForm');
+  const forgotBtn = document.getElementById('forgotBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const forgotError = document.getElementById('forgotError');
+  const resetError = document.getElementById('resetError');
+
+  let pendingResetSignIn = null;
+
+  // Show forgot password form
+  document.getElementById('showForgotPassword')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm?.classList.add('hidden');
+    forgotPasswordForm?.classList.remove('hidden');
+  });
+
+  // Back to login from forgot password
+  document.getElementById('backToLogin')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    forgotPasswordForm?.classList.add('hidden');
+    loginForm?.classList.remove('hidden');
+    pendingResetSignIn = null;
+  });
+
+  // Send reset code
+  forgotBtn?.addEventListener('click', async () => {
+    const email = document.getElementById('forgotEmail')?.value?.trim();
+    if (!email) {
+      if (forgotError) forgotError.textContent = 'Please enter your email';
+      return;
+    }
+
+    forgotBtn.disabled = true;
+    forgotBtn.textContent = 'Sending...';
+    if (forgotError) forgotError.textContent = '';
+
+    const result = await forgotPassword(email);
+
+    if (result.success) {
+      pendingResetSignIn = result.signIn;
+      forgotPasswordForm?.classList.add('hidden');
+      resetPasswordForm?.classList.remove('hidden');
+      document.getElementById('resetCode')?.focus();
+      forgotBtn.disabled = false;
+      forgotBtn.textContent = 'Send Reset Code';
+    } else {
+      if (forgotError) forgotError.textContent = result.error || 'Failed to send reset code';
+      forgotBtn.disabled = false;
+      forgotBtn.textContent = 'Send Reset Code';
+    }
+  });
+
+  // Reset password with code
+  resetBtn?.addEventListener('click', async () => {
+    const code = document.getElementById('resetCode')?.value?.trim();
+    const newPassword = document.getElementById('newPassword')?.value;
+
+    if (!code || !newPassword) {
+      if (resetError) resetError.textContent = 'Please fill in all fields';
+      return;
+    }
+
+    if (!pendingResetSignIn) {
+      if (resetError) resetError.textContent = 'Session expired, please try again';
+      return;
+    }
+
+    resetBtn.disabled = true;
+    resetBtn.textContent = 'Resetting...';
+    if (resetError) resetError.textContent = '';
+
+    const result = await resetPassword(pendingResetSignIn, code, newPassword);
+
+    if (result.success) {
+      window.location.reload();
+    } else {
+      if (resetError) resetError.textContent = result.error || 'Reset failed';
+      resetBtn.disabled = false;
+      resetBtn.textContent = 'Reset Password';
+    }
+  });
+
+  // Enter key handlers for forgot/reset
+  document.getElementById('forgotEmail')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') forgotBtn?.click();
+  });
+
+  document.getElementById('resetCode')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') resetBtn?.click();
+  });
+
+  document.getElementById('newPassword')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') resetBtn?.click();
+  });
 };
 
 // Init app
@@ -329,7 +427,7 @@ const initApp = async () => {
   // Navigation listeners
   document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
   document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
-  document.getElementById('nav-inbox')?.addEventListener('click', () => setView('inbox'));
+  // nav-inbox is set up later after handleTasksAdded is defined
   document.getElementById('nav-notes')?.addEventListener('click', () => {
     window.location.href = '/notes.html';
   });
@@ -394,6 +492,23 @@ const initApp = async () => {
       openQuickDump(state, handleTasksAdded);
     });
   }
+
+  // Nav-inbox: ouvre quick dump (comme tous les boutons "Add")
+  document.getElementById('nav-inbox')?.addEventListener('click', () => {
+    openQuickDump(state, handleTasksAdded);
+  });
+
+  // AddBtn (Today view "＋ Vide ta tête"): ouvre quick dump
+  document.getElementById('addBtn')?.addEventListener('click', () => {
+    openQuickDump(state, handleTasksAdded);
+  });
+
+  // ManualAddBtn (Today view "✎"): ouvre command bar pour ajout manuel
+  document.getElementById('manualAddBtn')?.addEventListener('click', () => {
+    if (window.openCommandBar) {
+      window.openCommandBar();
+    }
+  });
 
   initQuickDumpShortcut(state, handleTasksAdded);
 

@@ -16,9 +16,15 @@ export const toast = (msg, type = 'default') => {
   toast._timer = window.setTimeout(() => t.classList.remove('show'), 1800);
 };
 
-// Task completion feedback - just sound, no gamification
+// Task completion feedback - sound + visual pulse
 export const celebrate = () => {
   playSound('complete');
+
+  // Visual pulse feedback
+  const pulse = document.createElement('div');
+  pulse.className = 'success-pulse';
+  document.body.appendChild(pulse);
+  setTimeout(() => pulse.remove(), 450);
 };
 
 // Completion sound - warm wooden "tok"

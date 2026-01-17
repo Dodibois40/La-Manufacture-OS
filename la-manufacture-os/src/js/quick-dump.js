@@ -21,23 +21,22 @@ export const openQuickDump = (state, onTasksAdded) => {
           </svg>
         </div>
         <div>
-          <h2>Vide ta tete</h2>
-          <p>Ecris tout ce qui te passe par la tete, une idee par ligne</p>
+          <h2>Vide ta tête</h2>
+          <p>L'IA trie automatiquement : tâches, RDV au calendrier, et notes</p>
         </div>
       </div>
 
       <textarea
         class="quick-dump-textarea"
-        placeholder="Appeler le client demain&#10;Finir le rapport urgent&#10;Acheter du cafe&#10;RDV dentiste vendredi 14h&#10;@Marc preparer la presentation..."
+        placeholder="Ex: Appeler Marie demain → tâche&#10;Ex: RDV dentiste vendredi 14h → calendrier&#10;Ex: Idée: refonte du site → note&#10;Ex: @Marc finir le rapport → tâche assignée&#10;&#10;Écris librement, l'IA comprend le contexte..."
         autofocus
       ></textarea>
 
       <div class="quick-dump-tips">
-        <span class="tip">💡 Astuces:</span>
-        <span class="tip-item">demain, lundi, 15/01</span>
-        <span class="tip-item">@nom pour assigner</span>
-        <span class="tip-item">urgent, asap</span>
-        <span class="tip-item">14h pour l'heure</span>
+        <span class="tip">🤖 L'IA détecte:</span>
+        <span class="tip-item">qui (@nom)</span>
+        <span class="tip-item">quand (demain, lundi, 14h)</span>
+        <span class="tip-item">quoi (tâche, RDV, note)</span>
       </div>
 
       <div class="quick-dump-actions">

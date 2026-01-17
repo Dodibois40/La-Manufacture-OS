@@ -42,6 +42,9 @@ export const initCommandBar = (state, renderCallback) => {
     updatePreview();
   };
 
+  // Expose open function globally for manual add button
+  window.openCommandBar = open;
+
   // Toggle Command Bar (Ctrl+K or Ctrl+Space)
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === ' ')) {
@@ -54,14 +57,7 @@ export const initCommandBar = (state, renderCallback) => {
     }
   });
 
-  // Redirect "Add Task" button to command bar
-  const addBtn = document.getElementById('addBtn');
-  if (addBtn) {
-    addBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      open();
-    });
-  }
+  // Note: addBtn (+ Nouvelle tâche) is now handled in app.js to open QuickDump
   // Observer for dynamic changes if needed, but manual hook is fine for now
 
   // Live Parsing logic using unified Smart Parser

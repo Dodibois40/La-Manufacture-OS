@@ -77,6 +77,9 @@ async function apiRequest(endpoint, options = {}) {
 
 // API Client
 export const api = {
+  // Generic request method (for custom endpoints)
+  request: apiRequest,
+
   // Auth
   auth: {
     async register(email, password, name) {
@@ -507,47 +510,10 @@ export const api = {
       return apiRequest(`/api/notes/search?q=${encodeURIComponent(query)}&limit=${limit}`);
     },
 
-    // Tags management
-    tags: {
-      async list() {
-        return apiRequest('/api/notes/tags/list');
-      },
-
-      async create(data) {
-        return apiRequest('/api/notes/tags', {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
-      },
-
-      async update(id, data) {
-        return apiRequest(`/api/notes/tags/${id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(data),
-        });
-      },
-
-      async delete(id) {
-        return apiRequest(`/api/notes/tags/${id}`, { method: 'DELETE' });
-      },
-
-      // Note-Tags junction
-      async addToNote(noteId, tagId) {
-        return apiRequest(`/api/notes/${noteId}/tags`, {
-          method: 'POST',
-          body: JSON.stringify({ tag_id: tagId }),
-        });
-      },
-
-      async removeFromNote(noteId, tagId) {
-        return apiRequest(`/api/notes/${noteId}/tags/${tagId}`, { method: 'DELETE' });
-      },
-    },
-
     // Shares management
     shares: {
       async list(noteId) {
-        return apiRequest(`/api/notes/${noteId}/share`);
+        return apiRequest(`/api/notes/${noteId}/shares`);
       },
 
       async create(noteId, data) {

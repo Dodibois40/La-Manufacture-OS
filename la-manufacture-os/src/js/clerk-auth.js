@@ -126,6 +126,47 @@ export async function verifyEmailCode(signUp, code) {
   }
 }
 
+// Forgot Password - Send reset code
+export async function forgotPassword(email) {
+  if (!clerk) {
+    throw new Error('Clerk not initialized');
+  }
+
+  try {
+    const result = await clerk.client.signIn.create({
+      identifier: email,
+      strategy: 'reset_password_email_code',
+    });
+    return { success: true, signIn: result };
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Failed to send reset code';
+    return { success: false, error: message };
+  }
+}
+
+// Reset Password - Complete the reset with code and new password
+export async function resetPassword(signIn, code, newPassword) {
+  try {
+    const result = await signIn.attemptFirstFactor({
+      strategy: 'reset_password_email_code',
+      code,
+      password: newPassword,
+    });
+
+    if (result.status === 'complete') {
+      await clerk.setActive({ session: result.createdSessionId });
+      return { success: true };
+    } else {
+      return { success: false, error: 'Reset incomplete', status: result.status };
+    }
+  } catch (err) {
+    console.error('Reset password error:', err);
+    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Reset failed';
+    return { success: false, error: message };
+  }
+}
+
 // Sign out
 export async function signOut() {
   if (!clerk) return;

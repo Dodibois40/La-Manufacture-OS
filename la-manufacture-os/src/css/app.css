@@ -424,6 +424,30 @@ select.inbox-chip option {
   color: var(--accent);
 }
 
+/* Mic button - always visible/colored so users know they can speak */
+#micBtn {
+  background: rgba(10, 132, 255, 0.15);
+  border-color: rgba(10, 132, 255, 0.3);
+  color: var(--accent);
+}
+
+#micBtn:hover {
+  background: rgba(10, 132, 255, 0.25);
+  transform: scale(1.05);
+}
+
+#micBtn.recording {
+  background: rgba(255, 69, 58, 0.2);
+  border-color: rgba(255, 69, 58, 0.4);
+  color: #ff6961;
+  animation: pulse-mic 1s ease-in-out infinite;
+}
+
+@keyframes pulse-mic {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
 .chip-icon {
   width: 18px;
   height: 18px;
@@ -1027,6 +1051,24 @@ nav button.active .nav-icon {
   border-bottom-color: #fff;
 }
 
+/* Auth forgot password link */
+.auth-forgot-minimal {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.auth-forgot-minimal a {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  font-weight: 300;
+  transition: color 0.2s;
+}
+
+.auth-forgot-minimal a:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* Auth error */
 .auth-error {
   margin-top: 16px;
@@ -1367,6 +1409,41 @@ nav button.active .nav-icon {
   }
 }
 
+/* ========================================
+   SUCCESS PULSE FEEDBACK 💫
+   Subtle green glow effect on task completion
+   ======================================== */
+.success-pulse {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 99998;
+  background: radial-gradient(
+    circle at center,
+    rgba(48, 209, 88, 0.15) 0%,
+    rgba(48, 209, 88, 0.05) 40%,
+    transparent 70%
+  );
+  animation: pulse-flash 0.4s ease-out forwards;
+}
+
+@keyframes pulse-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
 
 /* Toast amélioré */
 .toast {

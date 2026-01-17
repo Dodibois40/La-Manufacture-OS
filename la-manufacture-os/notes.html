@@ -62,28 +62,11 @@
             </svg>
             Épinglées
           </button>
-          <select class="filter-select" id="tagFilter">
-            <option value="">Tous les tags</option>
-            <!-- Généré dynamiquement -->
-          </select>
           <select class="filter-select" id="projectFilter">
             <option value="">Tous les projets</option>
             <!-- Généré dynamiquement -->
           </select>
           <button class="btn btn-primary" id="createNoteBtn">+ Nouvelle idée</button>
-        </div>
-      </div>
-
-      <!-- Tags Bar -->
-      <div class="tags-bar" id="tagsBar">
-        <button class="tag-manage-btn" id="manageTagsBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          Gérer tags
-        </button>
-        <div class="tags-list" id="popularTagsList">
-          <!-- Généré dynamiquement -->
         </div>
       </div>
 
@@ -195,25 +178,16 @@
           </label>
         </div>
 
-        <!-- Tags -->
-        <div class="input-group">
-          <label class="input-label">Tags</label>
-          <div class="tags-selected" id="tagsSelected">
-            <!-- Tags sélectionnés générés dynamiquement -->
-          </div>
-          <select class="input" id="tagSelect">
-            <option value="">+ Ajouter un tag</option>
-            <!-- Généré dynamiquement -->
-          </select>
-        </div>
-
         <!-- Relations -->
         <div class="input-group">
           <label class="input-label">Lier à un projet</label>
-          <select class="input" id="noteProject">
-            <option value="">Aucun projet</option>
-            <!-- Généré dynamiquement -->
-          </select>
+          <div style="display: flex; gap: 8px;">
+            <select class="input" id="noteProject" style="flex: 1;">
+              <option value="">Aucun projet</option>
+              <!-- Généré dynamiquement -->
+            </select>
+            <button type="button" class="btn btn-secondary" id="quickAddProjectBtn" title="Créer un projet">+</button>
+          </div>
         </div>
 
         <div class="input-group">
@@ -237,33 +211,6 @@
         <button class="btn btn-secondary" onclick="closeModal('noteModal')">Annuler</button>
         <button class="btn btn-danger hidden" id="deleteNoteBtn">Supprimer</button>
         <button class="btn btn-primary" id="saveNoteBtn">Enregistrer</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Manage Tags -->
-  <div class="modal-overlay" id="tagsModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Gérer les tags</h2>
-        <button class="modal-close" onclick="closeModal('tagsModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="input-group">
-          <label class="input-label">Créer un nouveau tag</label>
-          <div class="tag-input-row">
-            <input type="text" class="input" id="newTagName" placeholder="Nom du tag">
-            <input type="color" class="input" id="newTagColor" value="#808080">
-            <button class="btn btn-primary" id="createTagBtn">Créer</button>
-          </div>
-        </div>
-
-        <div class="tags-manage-list" id="tagsManageList">
-          <!-- Tags existants générés dynamiquement -->
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" onclick="closeModal('tagsModal')">Fermer</button>
       </div>
     </div>
   </div>

@@ -127,6 +127,7 @@
               </div>
               <button class="btn-minimal" id="loginBtn">Sign In</button>
               <p class="auth-switch-minimal">No account? <a href="#" id="showRegister">Create one</a></p>
+              <p class="auth-forgot-minimal"><a href="#" id="showForgotPassword">Forgot password?</a></p>
               <div class="auth-error" id="loginError"></div>
             </div>
 
@@ -165,6 +166,38 @@
               <p class="auth-switch-minimal"><a href="#" id="backToRegister">Back</a></p>
               <div class="auth-error" id="verifyError"></div>
             </div>
+
+            <!-- Forgot Password -->
+            <div class="auth-form-minimal hidden" id="forgotPasswordForm">
+              <p class="verify-message">Enter your email to reset your password</p>
+              <input type="email" id="forgotEmail" placeholder="Email" autocomplete="email" class="input-minimal">
+              <button class="btn-minimal" id="forgotBtn">Send Reset Code</button>
+              <p class="auth-switch-minimal"><a href="#" id="backToLogin">Back to login</a></p>
+              <div class="auth-error" id="forgotError"></div>
+            </div>
+
+            <!-- Reset Password -->
+            <div class="auth-form-minimal hidden" id="resetPasswordForm">
+              <p class="verify-message">Enter the code and your new password</p>
+              <input type="text" id="resetCode" placeholder="Reset code" autocomplete="one-time-code"
+                class="input-minimal" maxlength="6">
+              <div class="password-wrapper-minimal">
+                <input type="password" id="newPassword" placeholder="New password" autocomplete="new-password"
+                  class="input-minimal">
+                <button type="button" class="password-toggle-minimal" data-target="newPassword">
+                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                </button>
+              </div>
+              <button class="btn-minimal" id="resetBtn">Reset Password</button>
+              <div class="auth-error" id="resetError"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -196,7 +229,12 @@
 
       <div class="day-actions">
         <button class="btn btn-secondary btn-small" id="editModeBtn">Éditer</button>
-        <button class="btn btn-primary" id="addBtn">＋ Nouvelle tâche</button>
+        <button class="btn btn-secondary btn-icon-small" id="manualAddBtn" title="Ajout manuel (Ctrl+K)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </button>
+        <button class="btn btn-primary" id="addBtn">＋ Vide ta tête</button>
       </div>
     </div>
 
