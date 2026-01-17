@@ -28,10 +28,11 @@
   <!-- CRITICAL: Show auth form INSTANTLY on non-localhost (before any JS loads) -->
   <style id="instant-auth-style">
     /* On production (non-localhost), hide loader and show auth immediately */
-    .instant-auth-mode #appLoader { display: none !important; }
-    .instant-auth-mode #view-day { display: none !important; }
-    .instant-auth-mode #view-auth { display: flex !important; }
+    .instant-auth-mode #appLoader { display: none !important; opacity: 0 !important; }
+    .instant-auth-mode #view-day { display: none !important; opacity: 0 !important; }
+    .instant-auth-mode #view-auth { display: block !important; opacity: 1 !important; }
     .instant-auth-mode nav { display: none !important; }
+    .instant-auth-mode .container { opacity: 1 !important; pointer-events: auto !important; }
   </style>
 </head>
 
@@ -42,11 +43,11 @@
       var isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       if (!isLocalhost) {
         document.body.classList.add('instant-auth-mode');
+        // Skip briefing check - user needs to login first
+        return;
       }
-    })();
 
-    // Immediately hide content if morning briefing should show
-    (function () {
+      // Only check briefing on localhost (local dev mode)
       try {
         var today = new Date().toISOString().slice(0, 10);
         var lastBriefing = localStorage.getItem('last_briefing');
