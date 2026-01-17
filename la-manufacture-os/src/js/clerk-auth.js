@@ -167,16 +167,23 @@ export async function signInWithEmail(email, password) {
   try {
     console.log('[Clerk] Calling signIn.create...');
 
-    const result = await withTimeout(
-      clerk.client.signIn.create({
-        identifier: email,
-        password: password,
-      }),
-      15000,
-      'Timeout - Vérifie ta connexion internet'
-    );
+    let result;
+    try {
+      result = await withTimeout(
+        clerk.client.signIn.create({
+          identifier: email,
+          password: password,
+        }),
+        15000,
+        'Timeout - Vérifie ta connexion internet'
+      );
+    } catch (createErr) {
+      console.error('[Clerk] signIn.create error:', createErr);
+      const errMsg = createErr.errors?.[0]?.longMessage || createErr.errors?.[0]?.message || createErr.message || 'Erreur login';
+      return { success: false, error: errMsg };
+    }
 
-    console.log('[Clerk] signIn.create returned:', result?.status);
+    console.log('[Clerk] signIn.create returned:', result?.status, 'firstFactorVerification:', result?.firstFactorVerification?.status);
 
     if (result.status === 'complete') {
       console.log('[Clerk] Status complete, setting active...');
@@ -212,10 +219,10 @@ export async function signInWithEmail(email, password) {
       }
     } else if (result.status === 'needs_second_factor') {
       console.log('[Clerk] 2FA required');
-      return { success: false, status: 'needs_second_factor', signIn: result };
+      return { success: false, status: 'needs_second_factor', signIn: result, error: '2FA requis (contacte admin)' };
     } else {
       console.log('[Clerk] Unexpected status:', result.status);
-      return { success: false, status: result.status, error: `Status: ${result.status}` };
+      return { success: false, status: result.status, error: `Status inattendu: ${result.status}` };
     }
   } catch (err) {
     console.error('[Clerk] signIn error:', err);

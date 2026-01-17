@@ -203,7 +203,9 @@ const initAuthUI = () => {
             window.location.reload();
           }
         } else {
-          setStatus(result.error || 'Échec connexion', true);
+          // Show error with status if available for debugging
+          const errorMsg = result.error || (result.status ? `Status: ${result.status}` : 'Échec connexion');
+          setStatus(errorMsg, true);
           if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.textContent = 'Sign In';
