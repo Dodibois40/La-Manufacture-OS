@@ -3,7 +3,6 @@ import { loadState, saveState, initStorageUI, loadStateFromApi } from './storage
 import { isApiMode, api } from './api-client.js';
 import { appCallbacks } from './app-callbacks.js';
 import { renderDay, renderWeek, initEditMode, initPlanningControls } from './views.js';
-import { renderInboxUI, initInboxControls } from './inbox.js';
 import { renderConfig, initConfig } from './config.js';
 import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
@@ -64,7 +63,7 @@ const initDockMagnification = () => {
 };
 
 // Navigation
-const views = ['day', 'week', 'inbox', 'config', 'auth'];
+const views = ['day', 'week', 'config', 'auth'];
 let currentView = 'day';
 
 export const setView = (name) => {
@@ -96,9 +95,6 @@ export const render = (viewName = currentView) => {
       break;
     case 'week':
       renderWeek(state);
-      break;
-    case 'inbox':
-      renderInboxUI(state);
       break;
     case 'config':
       renderConfig(state);
@@ -440,7 +436,6 @@ const initApp = async () => {
   initDockMagnification();
 
   // Init modules
-  initInboxControls(state, render);
   initConfig(state, render, setView);
   initEditMode(state, render);
   initPlanningControls(state, render);

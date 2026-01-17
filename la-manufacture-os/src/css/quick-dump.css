@@ -301,27 +301,29 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #0A84FF, #BF5AF2);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3);
 }
 
 .quick-dump-mic-btn svg {
-  width: 20px;
-  height: 20px;
-  color: rgba(255, 255, 255, 0.7);
-  transition: color 0.2s ease;
+  width: 22px;
+  height: 22px;
+  color: white;
+  transition: all 0.2s ease;
 }
 
 .quick-dump-mic-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.5);
 }
 
 .quick-dump-mic-btn:hover svg {
