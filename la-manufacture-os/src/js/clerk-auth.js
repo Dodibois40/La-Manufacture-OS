@@ -1,14 +1,32 @@
 // Clerk Authentication Module - Custom UI (Headless)
-import { Clerk } from '@clerk/clerk-js';
+// NOTE: Clerk is loaded LAZILY via dynamic import to not block page load on iOS
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+let Clerk = null; // Will be loaded dynamically
 let clerk = null;
 let initialized = false;
+let clerkLoadPromise = null; // Cache the loading promise
 
 // Token cache for performance (avoid refetching on every API call)
 let cachedToken = null;
 let tokenExpiry = 0;
+
+// Load Clerk SDK lazily (dynamic import)
+async function loadClerkSDK() {
+  if (Clerk) return Clerk;
+
+  if (clerkLoadPromise) return clerkLoadPromise;
+
+  console.log('[Clerk] Loading SDK dynamically...');
+  clerkLoadPromise = import('@clerk/clerk-js').then(module => {
+    Clerk = module.Clerk;
+    console.log('[Clerk] SDK loaded');
+    return Clerk;
+  });
+
+  return clerkLoadPromise;
+}
 
 // Initialize Clerk with timeout for iOS
 export async function initClerk() {
@@ -24,9 +42,11 @@ export async function initClerk() {
     throw new Error('CLERK_PUBLISHABLE_KEY manquant');
   }
 
-  console.log('[Clerk] Creating Clerk instance...');
-
   try {
+    // Load SDK first (lazy)
+    await withTimeout(loadClerkSDK(), 8000, 'Clerk SDK load timeout');
+
+    console.log('[Clerk] Creating Clerk instance...');
     clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
     console.log('[Clerk] Instance created, calling load()...');
 

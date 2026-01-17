@@ -402,33 +402,11 @@ const initApp = async () => {
   // Storage UI
   initStorageUI();
 
-  // API Mode Logic
-  // TEMP: Bypass auth for local testing
-  const bypassAuth = window.location.hostname === 'localhost';
-
-  if (isApiMode && !bypassAuth) {
-    // Show auth form IMMEDIATELY - no waiting for Clerk
-    hideLoader();
-    initAuthUI();
-    setView('auth');
-
-    // Start Clerk init in background (non-blocking) + check if already signed in
-    initClerk().then(() => {
-      console.log('[App] Clerk ready in background');
-      if (isSignedIn()) {
-        // Already logged in -> redirect to app
-        handlePostLogin();
-      }
-    }).catch(err => {
-      console.warn('[App] Background Clerk init failed:', err.message);
-      // User can still click login - it will retry init
-    });
-
-    return; // Don't continue to local mode logic
-  }
-
-  // Helper function for post-login flow
+  // Helper function for post-login flow (defined early so it's available everywhere)
   async function handlePostLogin() {
+    // Remove instant-auth-mode CSS override
+    document.body.classList.remove('instant-auth-mode');
+
     toast('Synchronisation...');
     try {
       const [{ user }, apiState] = await Promise.all([
@@ -458,6 +436,31 @@ const initApp = async () => {
 
   // Expose for auth UI
   window._handlePostLogin = handlePostLogin;
+
+  // API Mode Logic
+  // TEMP: Bypass auth for local testing
+  const bypassAuth = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  if (isApiMode && !bypassAuth) {
+    // Auth form is already visible via instant-auth-mode CSS
+    hideLoader();
+    initAuthUI();
+    setView('auth');
+
+    // Start Clerk init in background (non-blocking) + check if already signed in
+    initClerk().then(() => {
+      console.log('[App] Clerk ready in background');
+      if (isSignedIn()) {
+        // Already logged in -> redirect to app
+        handlePostLogin();
+      }
+    }).catch(err => {
+      console.warn('[App] Background Clerk init failed:', err.message);
+      // User can still click login - it will retry init
+    });
+
+    return; // Don't continue to local mode logic
+  }
 
   // Auto Carry-Over (Silent)
   runAutoCarryOver(state);
