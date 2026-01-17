@@ -627,6 +627,9 @@ Réponds UNIQUEMENT avec JSON valide (pas de texte avant/après) : { "items": [.
           if (item.type === 'task' || item.type === 'event') {
             // ===== CRÉATION TASK/EVENT =====
 
+            // Extract just YYYY-MM-DD to avoid timezone issues
+            const taskDate = item.date ? item.date.split('T')[0] : currentDate;
+
             const taskResult = await query(
               `INSERT INTO tasks (user_id, text, date, urgent, owner, is_event, start_time, end_time, location, done)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -634,7 +637,7 @@ Réponds UNIQUEMENT avec JSON valide (pas de texte avant/après) : { "items": [.
               [
                 userId,
                 item.text,
-                item.date || currentDate,
+                taskDate,
                 item.urgent || false,
                 item.metadata?.people?.[0] || 'Moi',
                 item.type === 'event',
