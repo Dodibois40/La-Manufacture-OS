@@ -10,7 +10,7 @@ let initialized = false;
 let cachedToken = null;
 let tokenExpiry = 0;
 
-// Initialize Clerk
+// Initialize Clerk with timeout for iOS
 export async function initClerk() {
   if (initialized && clerk) {
     return clerk;
@@ -21,11 +21,25 @@ export async function initClerk() {
     return null;
   }
 
-  clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
-  await clerk.load();
+  try {
+    clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
 
-  initialized = true;
-  return clerk;
+    // Timeout after 12s - iOS Safari can be very slow
+    await withTimeout(
+      clerk.load(),
+      12000,
+      'Clerk timeout - connexion lente'
+    );
+
+    initialized = true;
+    return clerk;
+  } catch (err) {
+    console.error('Clerk init failed:', err);
+    // Don't throw - let the app show the form anyway
+    initialized = false;
+    clerk = null;
+    throw err;
+  }
 }
 
 // Check if user is signed in
@@ -77,11 +91,18 @@ const withTimeout = (promise, ms, errorMsg) => {
 
 // Sign in with email/password (custom UI)
 export async function signInWithEmail(email, password) {
+  // Check if Clerk is ready
   if (!clerk) {
-    throw new Error('Clerk not initialized');
+    return { success: false, error: 'Clerk non initialisé. Rafraîchis la page.' };
+  }
+
+  if (!clerk.client) {
+    return { success: false, error: 'Clerk client non prêt. Attends quelques secondes.' };
   }
 
   try {
+    console.log('[Clerk] Starting sign in...');
+
     // Timeout after 15s (iOS Safari can hang on Clerk API calls)
     const result = await withTimeout(
       clerk.client.signIn.create({
@@ -89,23 +110,41 @@ export async function signInWithEmail(email, password) {
         password: password,
       }),
       15000,
-      'Connexion timeout - vérifie ta connexion internet'
+      'Connexion timeout (15s) - vérifie ta connexion internet'
     );
 
+    console.log('[Clerk] Sign in result:', result?.status);
+
     if (result.status === 'complete') {
+      console.log('[Clerk] Setting active session...');
       await withTimeout(
         clerk.setActive({ session: result.createdSessionId }),
         10000,
-        'Session timeout'
+        'Session timeout - réessaie'
       );
+      console.log('[Clerk] Session active, reloading...');
       return { success: true };
     } else {
       // Handle other statuses (e.g., needs_second_factor)
-      return { success: false, status: result.status, error: 'Additional verification required' };
+      console.log('[Clerk] Unexpected status:', result.status);
+      return { success: false, status: result.status, error: 'Vérification additionnelle requise' };
     }
   } catch (err) {
-    console.error('Sign in error:', err);
-    const message = err.message || err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Sign in failed';
+    console.error('[Clerk] Sign in error:', err);
+
+    // Extract meaningful error message
+    let message = 'Connexion échouée';
+    if (err.message) {
+      message = err.message;
+    } else if (err.errors && err.errors[0]) {
+      message = err.errors[0].longMessage || err.errors[0].message || message;
+    }
+
+    // iOS-specific hints
+    if (message.includes('timeout')) {
+      message += ' (iOS: désactive "Empêcher le suivi intersite" dans Réglages > Safari)';
+    }
+
     return { success: false, error: message };
   }
 }
