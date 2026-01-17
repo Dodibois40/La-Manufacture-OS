@@ -498,11 +498,6 @@ const initApp = async () => {
     openQuickDump(state, handleTasksAdded);
   });
 
-  // AddBtn (Today view "＋ Vide ta tête"): ouvre quick dump
-  document.getElementById('addBtn')?.addEventListener('click', () => {
-    openQuickDump(state, handleTasksAdded);
-  });
-
   // ManualAddBtn (Today view "✎"): ouvre command bar pour ajout manuel
   document.getElementById('manualAddBtn')?.addEventListener('click', () => {
     if (window.openCommandBar) {

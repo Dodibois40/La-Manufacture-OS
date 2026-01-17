@@ -198,7 +198,7 @@ function renderNoteCard(note) {
     month: 'short'
   });
 
-  const preview = note.content ? note.content.substring(0, 150) : '';
+  const preview = note.content ? note.content.substring(0, 500) : '';
 
   return `
     <div class="note-card" data-color="${note.color || ''}" data-note-id="${note.id}">
