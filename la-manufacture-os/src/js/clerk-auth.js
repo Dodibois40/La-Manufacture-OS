@@ -219,13 +219,33 @@ export async function signInWithEmail(email, password) {
       }
     } else if (result.status === 'needs_second_factor') {
       console.log('[Clerk] 2FA required, available factors:', result.supportedSecondFactors);
-      console.log('[Clerk] Full result:', JSON.stringify(result, null, 2));
 
       // Check what 2FA options are available
       const factors = result.supportedSecondFactors || [];
-      const factorTypes = factors.map(f => f.strategy).join(', ') || 'aucun';
+      const hasEmailCode = factors.some(f => f.strategy === 'email_code');
+      const hasTotp = factors.some(f => f.strategy === 'totp');
 
-      return { success: false, status: 'needs_second_factor', signIn: result, error: `2FA requis (types: ${factorTypes}). Désactive le 2FA sur ton compte Clerk.` };
+      if (hasEmailCode) {
+        // Send email code automatically
+        console.log('[Clerk] Sending email verification code...');
+        try {
+          await result.prepareSecondFactor({ strategy: 'email_code' });
+          return {
+            success: false,
+            status: 'needs_email_code',
+            signIn: result,
+            error: 'Code envoyé par email. Vérifie ta boîte mail.'
+          };
+        } catch (prepErr) {
+          console.error('[Clerk] Failed to send email code:', prepErr);
+          return { success: false, error: 'Impossible d\'envoyer le code email: ' + (prepErr.message || 'erreur') };
+        }
+      } else if (hasTotp) {
+        return { success: false, status: 'needs_totp', signIn: result, error: '2FA TOTP requis. Désactive-le dans Clerk.' };
+      } else {
+        const factorTypes = factors.map(f => f.strategy).join(', ') || 'aucun';
+        return { success: false, status: 'needs_second_factor', signIn: result, error: `2FA requis (types: ${factorTypes})` };
+      }
     } else {
       console.log('[Clerk] Unexpected status:', result.status);
       return { success: false, status: result.status, error: `Status inattendu: ${result.status}` };
@@ -245,6 +265,40 @@ export async function signInWithEmail(email, password) {
       message += ' (iOS: vérifie les cookies dans Paramètres > Safari)';
     }
 
+    return { success: false, error: message };
+  }
+}
+
+// Complete 2FA with email code
+export async function completeEmailCode(signIn, code) {
+  console.log('[Clerk] completeEmailCode called');
+  const iosDevice = isIOSWebKit();
+
+  try {
+    const result = await withTimeout(
+      signIn.attemptSecondFactor({
+        strategy: 'email_code',
+        code: code,
+      }),
+      10000,
+      'Timeout vérification email'
+    );
+
+    console.log('[Clerk] Email code result:', result?.status);
+
+    if (result.status === 'complete') {
+      await withTimeout(
+        clerk.setActive({ session: result.createdSessionId }),
+        iosDevice ? 5000 : 8000,
+        'Session timeout'
+      );
+      return { success: true };
+    } else {
+      return { success: false, error: `Status: ${result.status}` };
+    }
+  } catch (err) {
+    console.error('[Clerk] Email code error:', err);
+    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Code invalide';
     return { success: false, error: message };
   }
 }

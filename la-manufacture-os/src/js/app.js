@@ -8,7 +8,7 @@ import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 import { initSpeechToText } from './speech.js';
-import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCode, forgotPassword, resetPassword } from './clerk-auth.js';
+import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCode, forgotPassword, resetPassword, completeEmailCode } from './clerk-auth.js';
 import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
@@ -201,6 +201,40 @@ const initAuthUI = () => {
             }
           } else {
             window.location.reload();
+          }
+        } else if (result.status === 'needs_email_code') {
+          // Email code verification needed (new device verification)
+          setStatus(result.error || 'Code envoyé par email', false);
+
+          // Store signIn for verification
+          window._pendingEmailCodeSignIn = result.signIn;
+
+          // Show email code input
+          const codeInput = prompt('Entre le code reçu par email:');
+          if (codeInput) {
+            setStatus('Vérification du code...');
+            const verifyResult = await completeEmailCode(result.signIn, codeInput.trim());
+            if (verifyResult.success) {
+              setStatus('2/3 Connexion OK! Sync données...');
+              if (window._handlePostLogin) {
+                await window._handlePostLogin();
+                setStatus('3/3 Terminé!');
+              } else {
+                window.location.reload();
+              }
+            } else {
+              setStatus(verifyResult.error || 'Code invalide', true);
+              if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+              }
+            }
+          } else {
+            setStatus('Vérification annulée', true);
+            if (loginBtn) {
+              loginBtn.disabled = false;
+              loginBtn.textContent = 'Sign In';
+            }
           }
         } else {
           // Show error with status if available for debugging
