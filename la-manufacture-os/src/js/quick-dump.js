@@ -26,11 +26,21 @@ export const openQuickDump = (state, onTasksAdded) => {
         </div>
       </div>
 
-      <textarea
-        class="quick-dump-textarea"
-        placeholder="Ex: Appeler Marie demain → tâche&#10;Ex: RDV dentiste vendredi 14h → calendrier&#10;Ex: Idée: refonte du site → note&#10;Ex: @Marc finir le rapport → tâche assignée&#10;&#10;Écris librement, l'IA comprend le contexte..."
-        autofocus
-      ></textarea>
+      <div class="quick-dump-input-wrapper">
+        <textarea
+          class="quick-dump-textarea"
+          placeholder="Ex: Appeler Marie demain → tâche&#10;Ex: RDV dentiste vendredi 14h → calendrier&#10;Ex: Idée: refonte du site → note&#10;Ex: @Marc finir le rapport → tâche assignée&#10;&#10;Écris librement, l'IA comprend le contexte..."
+          autofocus
+        ></textarea>
+        <button class="quick-dump-mic-btn" id="quickDumpMicBtn" title="Dictée vocale">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
 
       <div class="quick-dump-tips">
         <span class="tip">🤖 L'IA détecte:</span>
@@ -61,9 +71,90 @@ export const openQuickDump = (state, onTasksAdded) => {
   const textarea = overlay.querySelector('.quick-dump-textarea');
   const submitBtn = overlay.querySelector('#quickDumpSubmit');
   const cancelBtn = overlay.querySelector('#quickDumpCancel');
+  const micBtn = overlay.querySelector('#quickDumpMicBtn');
 
   // Focus textarea
   setTimeout(() => textarea.focus(), 100);
+
+  // Speech recognition setup
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let isListening = false;
+
+  if (SpeechRecognition && micBtn) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let finalTranscript = '';
+
+    micBtn.addEventListener('click', () => {
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+
+      finalTranscript = textarea.value;
+      if (finalTranscript && !finalTranscript.endsWith('\n')) {
+        finalTranscript += '\n';
+      }
+
+      try {
+        recognition.start();
+      } catch (e) {
+        toast('Erreur micro. Réessaie.');
+      }
+    });
+
+    recognition.onstart = () => {
+      isListening = true;
+      micBtn.classList.add('listening');
+      toast('🎤 Parle...');
+    };
+
+    recognition.onend = () => {
+      isListening = false;
+      micBtn.classList.remove('listening');
+    };
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript.trim() + '\n';
+        } else {
+          interimTranscript = transcript;
+        }
+      }
+
+      textarea.value = finalTranscript + interimTranscript;
+      textarea.scrollTop = textarea.scrollHeight;
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      isListening = false;
+      micBtn.classList.remove('listening');
+
+      if (event.error === 'not-allowed') {
+        toast('Autorise le micro dans ton navigateur');
+      } else if (event.error === 'no-speech') {
+        toast('Pas de voix détectée');
+      } else {
+        toast('Erreur: ' + event.error);
+      }
+    };
+  } else if (micBtn) {
+    // Browser doesn't support speech recognition
+    micBtn.style.opacity = '0.3';
+    micBtn.title = 'Dictée non supportée par ce navigateur';
+    micBtn.addEventListener('click', () => {
+      toast('Dictée non supportée. Utilise Chrome ou Edge.');
+    });
+  }
 
   // Handle submit
   const handleSubmit = async () => {

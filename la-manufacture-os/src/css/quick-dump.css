@@ -278,6 +278,10 @@
   margin: 0;
 }
 
+.quick-dump-input-wrapper {
+  position: relative;
+}
+
 .quick-dump-textarea {
   width: 100%;
   height: 200px;
@@ -285,11 +289,57 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 16px;
+  padding-right: 56px;
   font-size: 15px;
   color: white;
   resize: none;
   font-family: inherit;
   line-height: 1.6;
+}
+
+.quick-dump-mic-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.quick-dump-mic-btn svg {
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease;
+}
+
+.quick-dump-mic-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.quick-dump-mic-btn:hover svg {
+  color: white;
+}
+
+.quick-dump-mic-btn.listening {
+  background: linear-gradient(135deg, #FF453A, #FF6961);
+  animation: pulse-mic 1s ease-in-out infinite;
+}
+
+.quick-dump-mic-btn.listening svg {
+  color: white;
+}
+
+@keyframes pulse-mic {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 .quick-dump-textarea::placeholder {
