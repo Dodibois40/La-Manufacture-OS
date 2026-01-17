@@ -55,7 +55,7 @@ async function apiRequest(endpoint, options = {}) {
   }
 
   const defaultOptions = {
-    credentials: 'include',
+    credentials: 'omit', // Changed from 'include' - fixes iOS Safari ITP blocking third-party cookies
     headers
   };
 
@@ -328,7 +328,7 @@ export const api = {
 
       const response = await fetch(`${API_URL}/api/team/files`, {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'omit', // Changed from 'include' - fixes iOS Safari ITP
         headers: authHeaders,
         body: formData,
       });
