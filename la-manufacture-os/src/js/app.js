@@ -151,33 +151,42 @@ const initAuthUI = () => {
     });
   });
 
-  // Login handler
+  // Login handler - with visible debug for iOS
   loginBtn?.addEventListener('click', async () => {
     const email = document.getElementById('loginEmail')?.value?.trim();
     const password = document.getElementById('loginPassword')?.value;
 
+    // Show debug info on screen for iOS (no console access)
+    const showDebug = (msg) => {
+      console.log('[Auth]', msg);
+      if (loginError) loginError.textContent = msg;
+    };
+
     if (!email || !password) {
-      if (loginError) loginError.textContent = 'Please fill in all fields';
+      showDebug('Remplis tous les champs');
       return;
     }
 
     loginBtn.disabled = true;
-    loginBtn.textContent = 'Signing in...';
-    if (loginError) loginError.textContent = '';
+    loginBtn.textContent = 'Connexion...';
+    showDebug('Étape 1: Envoi...');
 
     try {
+      showDebug('Étape 2: Appel Clerk...');
       const result = await signInWithEmail(email, password);
+      showDebug('Étape 3: Réponse reçue');
 
       if (result.success) {
+        showDebug('Étape 4: OK! Rechargement...');
         window.location.reload();
       } else {
-        if (loginError) loginError.textContent = result.error || 'Sign in failed';
+        showDebug(result.error || 'Échec connexion');
         loginBtn.disabled = false;
         loginBtn.textContent = 'Sign In';
       }
     } catch (err) {
       console.error('[Auth] Sign in error:', err);
-      if (loginError) loginError.textContent = 'Erreur: ' + (err.message || 'Connexion impossible');
+      showDebug('ERREUR: ' + (err.message || err.toString() || 'Inconnue'));
       loginBtn.disabled = false;
       loginBtn.textContent = 'Sign In';
     }
@@ -393,17 +402,25 @@ const initApp = async () => {
     const loginError = document.getElementById('loginError');
     if (loginBtn) {
       loginBtn.disabled = true;
-      loginBtn.textContent = 'Chargement...';
+      loginBtn.textContent = 'Chargement Clerk...';
+    }
+    if (loginError) {
+      loginError.textContent = 'Initialisation auth...';
     }
 
     try {
       // Initialize Clerk (this can take 2-10s on mobile)
+      console.log('[App] Starting Clerk init...');
       await initClerk();
+      console.log('[App] Clerk init complete');
 
       // Re-enable login button
       if (loginBtn) {
         loginBtn.disabled = false;
         loginBtn.textContent = 'Sign In';
+      }
+      if (loginError) {
+        loginError.textContent = ''; // Clear loading message
       }
 
       // Check if already signed in (e.g., returning user with valid session)
@@ -443,14 +460,15 @@ const initApp = async () => {
       }
       // Not signed in - form is already visible, user can login
     } catch (err) {
-      console.error('Clerk init error:', err);
+      console.error('[App] Clerk init error:', err);
       // Show error to user - Clerk failed to load
       if (loginError) {
-        loginError.textContent = 'Erreur de chargement. Rafraîchis la page.';
+        loginError.textContent = 'Clerk échoué: ' + (err.message || 'timeout/erreur réseau');
       }
       if (loginBtn) {
+        // Still enable button - maybe Clerk partially loaded
         loginBtn.disabled = false;
-        loginBtn.textContent = 'Sign In';
+        loginBtn.textContent = 'Réessayer';
       }
     }
     return; // Don't continue to local mode logic

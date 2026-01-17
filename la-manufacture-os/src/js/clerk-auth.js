@@ -12,30 +12,36 @@ let tokenExpiry = 0;
 
 // Initialize Clerk with timeout for iOS
 export async function initClerk() {
+  console.log('[Clerk] initClerk called');
+
   if (initialized && clerk) {
+    console.log('[Clerk] Already initialized');
     return clerk;
   }
 
   if (!CLERK_PUBLISHABLE_KEY) {
-    console.warn('Clerk publishable key not configured');
-    return null;
+    console.warn('[Clerk] No publishable key!');
+    throw new Error('CLERK_PUBLISHABLE_KEY manquant');
   }
+
+  console.log('[Clerk] Creating Clerk instance...');
 
   try {
     clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
+    console.log('[Clerk] Instance created, calling load()...');
 
-    // Timeout after 12s - iOS Safari can be very slow
+    // Timeout after 10s (reduced from 12s for faster feedback)
     await withTimeout(
       clerk.load(),
-      12000,
-      'Clerk timeout - connexion lente'
+      10000,
+      'Clerk.load() timeout 10s'
     );
 
+    console.log('[Clerk] load() complete');
     initialized = true;
     return clerk;
   } catch (err) {
-    console.error('Clerk init failed:', err);
-    // Don't throw - let the app show the form anyway
+    console.error('[Clerk] init failed:', err);
     initialized = false;
     clerk = null;
     throw err;
@@ -91,58 +97,68 @@ const withTimeout = (promise, ms, errorMsg) => {
 
 // Sign in with email/password (custom UI)
 export async function signInWithEmail(email, password) {
+  console.log('[Clerk] signInWithEmail called');
+
   // Check if Clerk is ready
   if (!clerk) {
-    return { success: false, error: 'Clerk non initialisé. Rafraîchis la page.' };
+    console.log('[Clerk] ERROR: clerk is null');
+    return { success: false, error: 'Clerk null - Rafraîchis' };
   }
 
   if (!clerk.client) {
-    return { success: false, error: 'Clerk client non prêt. Attends quelques secondes.' };
+    console.log('[Clerk] ERROR: clerk.client is null');
+    return { success: false, error: 'Clerk.client null - Attends 5s' };
+  }
+
+  if (!clerk.client.signIn) {
+    console.log('[Clerk] ERROR: clerk.client.signIn is null');
+    return { success: false, error: 'Clerk.signIn null - Recharge' };
   }
 
   try {
-    console.log('[Clerk] Starting sign in...');
+    console.log('[Clerk] Calling signIn.create...');
 
-    // Timeout after 15s (iOS Safari can hang on Clerk API calls)
+    // Shorter timeout for iOS (10s instead of 15s)
     const result = await withTimeout(
       clerk.client.signIn.create({
         identifier: email,
         password: password,
       }),
-      15000,
-      'Connexion timeout (15s) - vérifie ta connexion internet'
+      10000,
+      'Timeout 10s - iOS: Réglages > Safari > désactive suivi intersite'
     );
 
-    console.log('[Clerk] Sign in result:', result?.status);
+    console.log('[Clerk] signIn.create returned:', result?.status);
 
     if (result.status === 'complete') {
-      console.log('[Clerk] Setting active session...');
+      console.log('[Clerk] Status complete, setting active...');
       await withTimeout(
         clerk.setActive({ session: result.createdSessionId }),
-        10000,
-        'Session timeout - réessaie'
+        8000,
+        'Session timeout 8s'
       );
-      console.log('[Clerk] Session active, reloading...');
+      console.log('[Clerk] Session set, returning success');
       return { success: true };
     } else {
-      // Handle other statuses (e.g., needs_second_factor)
       console.log('[Clerk] Unexpected status:', result.status);
-      return { success: false, status: result.status, error: 'Vérification additionnelle requise' };
+      return { success: false, status: result.status, error: `Status: ${result.status}` };
     }
   } catch (err) {
-    console.error('[Clerk] Sign in error:', err);
+    console.error('[Clerk] signIn error:', err);
 
     // Extract meaningful error message
-    let message = 'Connexion échouée';
+    let message = 'Erreur Clerk';
     if (err.message) {
       message = err.message;
     } else if (err.errors && err.errors[0]) {
       message = err.errors[0].longMessage || err.errors[0].message || message;
+    } else if (typeof err === 'string') {
+      message = err;
     }
 
-    // iOS-specific hints
-    if (message.includes('timeout')) {
-      message += ' (iOS: désactive "Empêcher le suivi intersite" dans Réglages > Safari)';
+    // Shorten iOS hint
+    if (message.includes('timeout') || message.includes('Timeout')) {
+      message = 'Timeout - iOS: désactive "Suivi intersite" dans Réglages Safari';
     }
 
     return { success: false, error: message };
