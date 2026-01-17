@@ -99,33 +99,33 @@ const withTimeout = (promise, ms, errorMsg) => {
 export async function signInWithEmail(email, password) {
   console.log('[Clerk] signInWithEmail called');
 
-  // Check if Clerk is ready
-  if (!clerk) {
-    console.log('[Clerk] ERROR: clerk is null');
-    return { success: false, error: 'Clerk null - Rafraîchis' };
+  // Auto-init Clerk if not ready (lazy initialization for iOS)
+  if (!clerk || !initialized) {
+    console.log('[Clerk] Not initialized, initializing now...');
+    try {
+      await initClerk();
+    } catch (initErr) {
+      console.error('[Clerk] Init failed during login:', initErr);
+      return { success: false, error: 'Connexion serveur échouée. Réessaie.' };
+    }
   }
 
-  if (!clerk.client) {
-    console.log('[Clerk] ERROR: clerk.client is null');
-    return { success: false, error: 'Clerk.client null - Attends 5s' };
-  }
-
-  if (!clerk.client.signIn) {
-    console.log('[Clerk] ERROR: clerk.client.signIn is null');
-    return { success: false, error: 'Clerk.signIn null - Recharge' };
+  // Verify Clerk is ready
+  if (!clerk?.client?.signIn) {
+    console.log('[Clerk] ERROR: Clerk not ready after init');
+    return { success: false, error: 'Service auth indisponible. Recharge la page.' };
   }
 
   try {
     console.log('[Clerk] Calling signIn.create...');
 
-    // Shorter timeout for iOS (10s instead of 15s)
     const result = await withTimeout(
       clerk.client.signIn.create({
         identifier: email,
         password: password,
       }),
-      10000,
-      'Timeout 10s - iOS: Réglages > Safari > désactive suivi intersite'
+      15000,
+      'Timeout - Vérifie ta connexion internet'
     );
 
     console.log('[Clerk] signIn.create returned:', result?.status);
@@ -135,7 +135,7 @@ export async function signInWithEmail(email, password) {
       await withTimeout(
         clerk.setActive({ session: result.createdSessionId }),
         8000,
-        'Session timeout 8s'
+        'Session timeout'
       );
       console.log('[Clerk] Session set, returning success');
       return { success: true };
@@ -146,19 +146,11 @@ export async function signInWithEmail(email, password) {
   } catch (err) {
     console.error('[Clerk] signIn error:', err);
 
-    // Extract meaningful error message
-    let message = 'Erreur Clerk';
+    let message = 'Erreur de connexion';
     if (err.message) {
       message = err.message;
     } else if (err.errors && err.errors[0]) {
       message = err.errors[0].longMessage || err.errors[0].message || message;
-    } else if (typeof err === 'string') {
-      message = err;
-    }
-
-    // Shorten iOS hint
-    if (message.includes('timeout') || message.includes('Timeout')) {
-      message = 'Timeout - iOS: désactive "Suivi intersite" dans Réglages Safari';
     }
 
     return { success: false, error: message };

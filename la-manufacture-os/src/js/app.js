@@ -407,88 +407,57 @@ const initApp = async () => {
   const bypassAuth = window.location.hostname === 'localhost';
 
   if (isApiMode && !bypassAuth) {
-    // CRITICAL FIX: Show auth form IMMEDIATELY, then init Clerk in background
-    // This fixes the iOS latency issue where users wait forever for Clerk to load
+    // Show auth form IMMEDIATELY - no waiting for Clerk
     hideLoader();
     initAuthUI();
     setView('auth');
 
-    // Show loading state on login button while Clerk initializes
-    const loginBtn = document.getElementById('loginBtn');
-    const loginError = document.getElementById('loginError');
-    if (loginBtn) {
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Chargement Clerk...';
-    }
-    if (loginError) {
-      loginError.textContent = 'Initialisation auth...';
-    }
-
-    try {
-      // Initialize Clerk (this can take 2-10s on mobile)
-      console.log('[App] Starting Clerk init...');
-      await initClerk();
-      console.log('[App] Clerk init complete');
-
-      // Re-enable login button
-      if (loginBtn) {
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Sign In';
-      }
-      if (loginError) {
-        loginError.textContent = ''; // Clear loading message
-      }
-
-      // Check if already signed in (e.g., returning user with valid session)
+    // Start Clerk init in background (non-blocking) + check if already signed in
+    initClerk().then(() => {
+      console.log('[App] Clerk ready in background');
       if (isSignedIn()) {
-        // Already logged in -> Sync Data from API
-        toast('Synchronisation...');
-        try {
-          const [{ user }, apiState] = await Promise.all([
-            api.auth.me(),
-            loadStateFromApi()
-          ]);
-
-          if (apiState) {
-            state.tasks = apiState.tasks;
-            state.settings = apiState.settings || state.settings;
-            saveState(state);
-            toast('Synchronisé');
-          }
-
-          // Init Notifications & Share (non-blocking)
-          initNotifications();
-          initShareModal();
-          startNotificationPolling();
-
-          // Init Team Management & Google Calendar (parallel)
-          initTeam(user?.id);
-          initGoogleCalendar();
-
-          // Switch to day view
-          setView('day');
-        } catch (err) {
-          console.error('Sync error:', err);
-          toast('Erreur de synchronisation');
-          setView('day'); // Still show app even if sync fails
-        }
-        return;
+        // Already logged in -> redirect to app
+        handlePostLogin();
       }
-      // Not signed in - form is already visible, user can login
-    } catch (err) {
-      console.error('[App] Clerk init error:', err);
-      // Show error to user - Clerk failed to load
-      if (loginError) {
-        loginError.textContent = 'Clerk échoué: ' + (err.message || 'timeout/erreur réseau');
-      }
-      if (loginBtn) {
-        // Still enable button - maybe Clerk partially loaded
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Réessayer';
-      }
-    }
+    }).catch(err => {
+      console.warn('[App] Background Clerk init failed:', err.message);
+      // User can still click login - it will retry init
+    });
+
     return; // Don't continue to local mode logic
   }
+
+  // Helper function for post-login flow
+  async function handlePostLogin() {
+    toast('Synchronisation...');
+    try {
+      const [{ user }, apiState] = await Promise.all([
+        api.auth.me(),
+        loadStateFromApi()
+      ]);
+
+      if (apiState) {
+        state.tasks = apiState.tasks;
+        state.settings = apiState.settings || state.settings;
+        saveState(state);
+        toast('Synchronisé');
+      }
+
+      initNotifications();
+      initShareModal();
+      startNotificationPolling();
+      initTeam(user?.id);
+      initGoogleCalendar();
+      setView('day');
+    } catch (err) {
+      console.error('Sync error:', err);
+      toast('Erreur de synchronisation');
+      setView('day');
+    }
+  }
+
+  // Expose for auth UI
+  window._handlePostLogin = handlePostLogin;
 
   // Auto Carry-Over (Silent)
   runAutoCarryOver(state);
