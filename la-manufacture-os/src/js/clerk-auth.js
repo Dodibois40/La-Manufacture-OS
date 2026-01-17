@@ -45,6 +45,14 @@ async function loadClerkSDK() {
   return clerkLoadPromise;
 }
 
+// Detect iOS Safari/WebKit (ITP issues with third-party cookies)
+const isIOSWebKit = () => {
+  const ua = navigator.userAgent;
+  // Check for iOS devices or iPad on iOS 13+ (which reports as Mac)
+  return /iPad|iPhone|iPod/.test(ua) ||
+    (ua.includes('Mac') && 'ontouchend' in document);
+};
+
 // Initialize Clerk with timeout for iOS
 export async function initClerk() {
   console.log('[Clerk] initClerk called');
@@ -67,11 +75,16 @@ export async function initClerk() {
     clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
     console.log('[Clerk] Instance created, calling load()...');
 
-    // Timeout after 10s (reduced from 12s for faster feedback)
+    // Use shorter timeout on iOS since ITP can cause hangs
+    const loadTimeout = isIOSWebKit() ? 6000 : 10000;
+
     await withTimeout(
-      clerk.load(),
-      10000,
-      'Clerk.load() timeout 10s'
+      clerk.load({
+        // Standardize browser behavior for consistent auth
+        standardBrowser: true,
+      }),
+      loadTimeout,
+      `Clerk.load() timeout ${loadTimeout/1000}s`
     );
 
     console.log('[Clerk] load() complete');
@@ -127,6 +140,8 @@ export async function getToken() {
 // Sign in with email/password (custom UI)
 export async function signInWithEmail(email, password) {
   console.log('[Clerk] signInWithEmail called');
+  const iosDevice = isIOSWebKit();
+  console.log('[Clerk] iOS device:', iosDevice);
 
   // Auto-init Clerk if not ready (lazy initialization for iOS)
   if (!clerk || !initialized) {
@@ -135,7 +150,11 @@ export async function signInWithEmail(email, password) {
       await initClerk();
     } catch (initErr) {
       console.error('[Clerk] Init failed during login:', initErr);
-      return { success: false, error: 'Connexion serveur échouée. Réessaie.' };
+      // More specific error for iOS
+      if (iosDevice && initErr.message?.includes('timeout')) {
+        return { success: false, error: 'Timeout iOS - vérifie que Safari autorise les cookies. Paramètres > Safari > Bloquer les cookies = Autoriser.' };
+      }
+      return { success: false, error: 'Connexion serveur échouée: ' + (initErr.message || 'Réessaie.') };
     }
   }
 
@@ -161,13 +180,36 @@ export async function signInWithEmail(email, password) {
 
     if (result.status === 'complete') {
       console.log('[Clerk] Status complete, setting active...');
-      await withTimeout(
-        clerk.setActive({ session: result.createdSessionId }),
-        8000,
-        'Session timeout'
-      );
-      console.log('[Clerk] Session set, returning success');
-      return { success: true };
+
+      try {
+        await withTimeout(
+          clerk.setActive({ session: result.createdSessionId }),
+          iosDevice ? 5000 : 8000, // Shorter timeout on iOS
+          'Session timeout'
+        );
+        console.log('[Clerk] Session set, returning success');
+        return { success: true };
+      } catch (setActiveErr) {
+        console.error('[Clerk] setActive failed:', setActiveErr);
+        // On iOS, setActive might fail due to cookie restrictions
+        // But if signIn.create succeeded, the session was created server-side
+        // Try to reload Clerk to pick up the session
+        if (iosDevice) {
+          console.log('[Clerk] iOS fallback: reloading Clerk to sync session...');
+          try {
+            await withTimeout(clerk.load(), 5000, 'Clerk reload timeout');
+            if (clerk.user) {
+              console.log('[Clerk] iOS fallback success - user found after reload');
+              return { success: true };
+            }
+          } catch (reloadErr) {
+            console.error('[Clerk] iOS reload failed:', reloadErr);
+          }
+          // If we get here, login succeeded on server but local session failed
+          return { success: false, error: 'Session créée mais sync iOS échouée. Recharge la page.' };
+        }
+        throw setActiveErr;
+      }
     } else {
       console.log('[Clerk] Unexpected status:', result.status);
       return { success: false, status: result.status, error: `Status: ${result.status}` };
@@ -180,6 +222,11 @@ export async function signInWithEmail(email, password) {
       message = err.message;
     } else if (err.errors && err.errors[0]) {
       message = err.errors[0].longMessage || err.errors[0].message || message;
+    }
+
+    // Add iOS-specific hint for common errors
+    if (iosDevice && (message.includes('timeout') || message.includes('network'))) {
+      message += ' (iOS: vérifie les cookies dans Paramètres > Safari)';
     }
 
     return { success: false, error: message };

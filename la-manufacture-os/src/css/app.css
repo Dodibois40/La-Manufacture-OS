@@ -878,16 +878,22 @@ nav button.active .nav-icon {
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* Auth error */
+/* Auth error/status - always visible for iOS debugging */
 .auth-error {
   margin-top: 16px;
-  color: #ff453a;
+  color: #a1a1aa;
   font-size: 0.85rem;
   text-align: center;
-  padding: 12px;
-  background: rgba(255, 69, 58, 0.1);
-  border: 1px solid rgba(255, 69, 58, 0.2);
-  display: none;
+  padding: 8px 12px;
+  min-height: 20px;
+  background: transparent;
+  border: none;
+  transition: color 0.2s;
+}
+
+.auth-error:not(:empty) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
 }
 
 /* Legacy support */

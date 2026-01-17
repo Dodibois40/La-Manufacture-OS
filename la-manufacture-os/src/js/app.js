@@ -156,15 +156,23 @@ const initAuthUI = () => {
     const email = document.getElementById('loginEmail')?.value?.trim();
     const password = document.getElementById('loginPassword')?.value;
 
+    // Helper to update status (visible on iOS without console)
+    const setStatus = (msg, isError = false) => {
+      if (loginError) {
+        loginError.textContent = msg;
+        loginError.style.color = isError ? '#ef4444' : '#a1a1aa';
+      }
+    };
+
     // Immediate visual feedback
-    if (loginError) loginError.textContent = 'Clic détecté...';
+    setStatus('Clic détecté...');
     if (loginBtn) {
       loginBtn.disabled = true;
       loginBtn.textContent = 'Connexion...';
     }
 
     if (!email || !password) {
-      if (loginError) loginError.textContent = 'Remplis tous les champs';
+      setStatus('Remplis tous les champs', true);
       if (loginBtn) {
         loginBtn.disabled = false;
         loginBtn.textContent = 'Sign In';
@@ -175,19 +183,27 @@ const initAuthUI = () => {
     // Run async login in separate function (iOS Safari fix)
     (async () => {
       try {
-        if (loginError) loginError.textContent = 'Appel Clerk...';
+        setStatus('1/3 Initialisation Clerk...');
         const result = await signInWithEmail(email, password);
 
         if (result.success) {
-          if (loginError) loginError.textContent = 'OK! Synchronisation...';
+          setStatus('2/3 Connexion OK! Sync données...');
           // Don't reload - call handlePostLogin directly (iOS fix)
           if (window._handlePostLogin) {
-            await window._handlePostLogin();
+            try {
+              await window._handlePostLogin();
+              setStatus('3/3 Terminé!');
+            } catch (postErr) {
+              console.error('[Auth] Post-login error:', postErr);
+              setStatus('Sync échouée: ' + (postErr.message || 'erreur'), true);
+              // Still try to show the app
+              setTimeout(() => setView('day'), 1500);
+            }
           } else {
             window.location.reload();
           }
         } else {
-          if (loginError) loginError.textContent = result.error || 'Échec';
+          setStatus(result.error || 'Échec connexion', true);
           if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.textContent = 'Sign In';
@@ -195,7 +211,7 @@ const initAuthUI = () => {
         }
       } catch (err) {
         console.error('[Auth] Error:', err);
-        if (loginError) loginError.textContent = 'Erreur: ' + (err.message || 'inconnue');
+        setStatus('Erreur: ' + (err.message || 'inconnue'), true);
         if (loginBtn) {
           loginBtn.disabled = false;
           loginBtn.textContent = 'Sign In';
