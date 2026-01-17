@@ -198,7 +198,7 @@ const taskRow = (t, state) => {
         saveState(state);
         appCallbacks.render?.();
         celebrate();
-        toast('✨ Bien joué !', 'success');
+        toast('Fait');
       }, 450);
     });
   }
@@ -225,9 +225,8 @@ const taskRow = (t, state) => {
 
       saveState(state);
       appCallbacks.render?.();
-      // 🎉 Célébration !
       celebrate();
-      toast('✨ Bien joué !', 'success');
+      toast('Fait');
     }, 450);
   });
 
