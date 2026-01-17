@@ -29,7 +29,7 @@ export const openQuickDump = (state, onTasksAdded) => {
       <div class="quick-dump-input-wrapper">
         <textarea
           class="quick-dump-textarea"
-          placeholder="Ex: Appeler Marie demain → tâche&#10;Ex: RDV dentiste vendredi 14h → calendrier&#10;Ex: Idée: refonte du site → note&#10;Ex: @Marc finir le rapport → tâche assignée&#10;&#10;Écris librement, l'IA comprend le contexte..."
+          placeholder="Ex: Appeler Marie demain → tâche&#10;Ex: RDV dentiste vendredi 14h → calendrier&#10;Ex: Idée: refonte du site → note&#10;Ex: @Marc finir le rapport → tâche assignée&#10;&#10;Écris ou parle librement, l'IA comprend le contexte..."
           autofocus
         ></textarea>
         <button class="quick-dump-mic-btn" id="quickDumpMicBtn" title="Dictée vocale">
