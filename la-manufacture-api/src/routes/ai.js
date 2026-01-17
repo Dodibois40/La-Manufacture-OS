@@ -375,14 +375,35 @@ RÈGLES DE CLASSIFICATION (par ordre de priorité)
    ✓ Action implicite : "Marie pour discuter budget" (implicite: contacter Marie)
 
 ═══════════════════════════════════════════════════════
-SÉPARATION MULTI-ITEMS (CRITIQUE)
+SÉPARATION MULTI-ITEMS (CRITIQUE - TEXTE PARLÉ/DICTÉ)
 ═══════════════════════════════════════════════════════
 
-Délimiteurs : " + ", " et " (items indépendants), " puis ", " aussi ", nouvelle ligne, numérotation
+**IMPORTANT** : Le texte peut être dicté vocalement sans délimiteurs clairs. Tu DOIS détecter CHAQUE item distinct même dans un flux continu.
 
-Exemples :
+**Technique de détection** :
+1. Cherche les CHANGEMENTS DE CONTEXTE : nouvelle date, nouveau sujet, nouveau type d'action
+2. Cherche les MARQUEURS IMPLICITES : "et lundi...", "et mardi...", "aussi...", "sinon..."
+3. Chaque DATE DIFFÉRENTE = probablement un item DIFFÉRENT
+4. Chaque TYPE DIFFÉRENT (idée vs tâche vs RDV) = items SÉPARÉS
+
+**Délimiteurs explicites** : " + ", " puis ", " aussi ", virgule, nouvelle ligne
+
+**Délimiteurs implicites (CRITIQUES pour texte parlé)** :
+- Changement de jour : "...et lundi...", "...et mardi..."
+- Changement de type : "j'ai une idée..." puis "je dois vérifier..."
+- Changement de sujet : différentes personnes, différents projets
+
+**Exemples texte parlé** :
+• "j'ai une idée pour le projet X avec de l'alu et lundi faut vérifier les factures et mardi rdv avec Marie 14h"
+  → 3 items DISTINCTS :
+    1. NOTE : "Idée projet X avec alu"
+    2. TASK : "Vérifier les factures" (date: lundi)
+    3. EVENT : "RDV Marie" (date: mardi, 14:00)
+
 • "Appeler Marie 14h + Noter: budget OK" → 2 items (EVENT + NOTE)
 • "RDV client lundi 10h, préparer présentation et envoyer facture" → 3 items (EVENT + 2 TASKS)
+
+**RÈGLE D'OR** : En cas de doute, SÉPARE les items plutôt que de tout fusionner.
 
 ═══════════════════════════════════════════════════════
 EXTRACTION DE DATES & HEURES
