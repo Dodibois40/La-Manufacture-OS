@@ -151,46 +151,62 @@ const initAuthUI = () => {
     });
   });
 
-  // Login handler - with visible debug for iOS
-  loginBtn?.addEventListener('click', async () => {
+  // Login handler - iOS compatible (no async in event handler)
+  const handleLogin = () => {
     const email = document.getElementById('loginEmail')?.value?.trim();
     const password = document.getElementById('loginPassword')?.value;
 
-    // Show debug info on screen for iOS (no console access)
-    const showDebug = (msg) => {
-      console.log('[Auth]', msg);
-      if (loginError) loginError.textContent = msg;
-    };
-
-    if (!email || !password) {
-      showDebug('Remplis tous les champs');
-      return;
+    // Immediate visual feedback
+    if (loginError) loginError.textContent = 'Clic détecté...';
+    if (loginBtn) {
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Connexion...';
     }
 
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Connexion...';
-    showDebug('Étape 1: Envoi...');
-
-    try {
-      showDebug('Étape 2: Appel Clerk...');
-      const result = await signInWithEmail(email, password);
-      showDebug('Étape 3: Réponse reçue');
-
-      if (result.success) {
-        showDebug('Étape 4: OK! Rechargement...');
-        window.location.reload();
-      } else {
-        showDebug(result.error || 'Échec connexion');
+    if (!email || !password) {
+      if (loginError) loginError.textContent = 'Remplis tous les champs';
+      if (loginBtn) {
         loginBtn.disabled = false;
         loginBtn.textContent = 'Sign In';
       }
-    } catch (err) {
-      console.error('[Auth] Sign in error:', err);
-      showDebug('ERREUR: ' + (err.message || err.toString() || 'Inconnue'));
-      loginBtn.disabled = false;
-      loginBtn.textContent = 'Sign In';
+      return;
     }
-  });
+
+    // Run async login in separate function (iOS Safari fix)
+    (async () => {
+      try {
+        if (loginError) loginError.textContent = 'Appel Clerk...';
+        const result = await signInWithEmail(email, password);
+
+        if (result.success) {
+          if (loginError) loginError.textContent = 'OK! Rechargement...';
+          window.location.reload();
+        } else {
+          if (loginError) loginError.textContent = result.error || 'Échec';
+          if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
+          }
+        }
+      } catch (err) {
+        console.error('[Auth] Error:', err);
+        if (loginError) loginError.textContent = 'Erreur: ' + (err.message || 'inconnue');
+        if (loginBtn) {
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Sign In';
+        }
+      }
+    })();
+  };
+
+  // Multiple event types for iOS compatibility
+  if (loginBtn) {
+    loginBtn.addEventListener('click', handleLogin);
+    loginBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      handleLogin();
+    });
+  }
 
   // Register handler
   let pendingSignUp = null;
