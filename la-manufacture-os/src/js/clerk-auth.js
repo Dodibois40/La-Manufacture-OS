@@ -12,6 +12,14 @@ let clerkLoadPromise = null; // Cache the loading promise
 let cachedToken = null;
 let tokenExpiry = 0;
 
+// Helper: Promise with timeout (MUST be defined before initClerk uses it)
+const withTimeout = (promise, ms, errorMsg) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms))
+  ]);
+};
+
 // Load Clerk SDK lazily (dynamic import)
 async function loadClerkSDK() {
   if (Clerk) return Clerk;
@@ -106,14 +114,6 @@ export async function getToken() {
     return null;
   }
 }
-
-// Helper: Promise with timeout
-const withTimeout = (promise, ms, errorMsg) => {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms))
-  ]);
-};
 
 // Sign in with email/password (custom UI)
 export async function signInWithEmail(email, password) {
