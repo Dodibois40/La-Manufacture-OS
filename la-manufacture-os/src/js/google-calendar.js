@@ -20,7 +20,7 @@ export async function initGoogleCalendar() {
   if (!section) return;
 
   // Show section
-  section.style.display = 'block';
+  section.classList.remove('hidden');
 
   // Check URL params for OAuth callback result
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
