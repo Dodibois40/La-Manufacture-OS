@@ -28,9 +28,18 @@ async function loadClerkSDK() {
 
   console.log('[Clerk] Loading SDK dynamically...');
   clerkLoadPromise = import('@clerk/clerk-js').then(module => {
-    Clerk = module.Clerk;
-    console.log('[Clerk] SDK loaded');
+    // Handle both named export and default export
+    Clerk = module.Clerk || module.default;
+    if (!Clerk) {
+      console.error('[Clerk] SDK module structure:', Object.keys(module));
+      throw new Error('Clerk class not found in SDK module');
+    }
+    console.log('[Clerk] SDK loaded successfully');
     return Clerk;
+  }).catch(err => {
+    console.error('[Clerk] Failed to load SDK:', err);
+    clerkLoadPromise = null; // Reset so we can retry
+    throw err;
   });
 
   return clerkLoadPromise;

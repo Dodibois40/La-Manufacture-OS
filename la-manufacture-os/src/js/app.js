@@ -179,8 +179,13 @@ const initAuthUI = () => {
         const result = await signInWithEmail(email, password);
 
         if (result.success) {
-          if (loginError) loginError.textContent = 'OK! Rechargement...';
-          window.location.reload();
+          if (loginError) loginError.textContent = 'OK! Synchronisation...';
+          // Don't reload - call handlePostLogin directly (iOS fix)
+          if (window._handlePostLogin) {
+            await window._handlePostLogin();
+          } else {
+            window.location.reload();
+          }
         } else {
           if (loginError) loginError.textContent = result.error || 'Échec';
           if (loginBtn) {
@@ -199,13 +204,9 @@ const initAuthUI = () => {
     })();
   };
 
-  // Multiple event types for iOS compatibility
+  // Single click handler (touchend was causing double-fires on iOS)
   if (loginBtn) {
     loginBtn.addEventListener('click', handleLogin);
-    loginBtn.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      handleLogin();
-    });
   }
 
   // Register handler
