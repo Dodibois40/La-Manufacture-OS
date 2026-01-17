@@ -3,7 +3,7 @@ import { loadState, saveState, initStorageUI, loadStateFromApi } from './storage
 import { isApiMode, api } from './api-client.js';
 import { appCallbacks } from './app-callbacks.js';
 import { renderDay, renderWeek, initEditMode, initPlanningControls } from './views.js';
-import { renderInboxUI, initInboxControls, inboxCtx } from './inbox.js';
+import { renderInboxUI, initInboxControls } from './inbox.js';
 import { renderConfig, initConfig } from './config.js';
 import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
@@ -277,7 +277,10 @@ const initApp = async () => {
   initStorageUI();
 
   // API Mode Logic
-  if (isApiMode) {
+  // TEMP: Bypass auth for local testing
+  const bypassAuth = window.location.hostname === 'localhost';
+
+  if (isApiMode && !bypassAuth) {
     // 1. Initialize Clerk
     await initClerk();
 
@@ -290,27 +293,30 @@ const initApp = async () => {
       return;
     }
 
-    // 3. Logged in -> Sync Data from API
+    // 3. Logged in -> Sync Data from API (parallelized for speed)
     toast('Synchronisation...');
     try {
-      // Call /me to sync local user and get userId
-      const { user } = await api.auth.me();
-      const apiState = await loadStateFromApi();
+      // Parallel API calls for faster loading
+      const [{ user }, apiState] = await Promise.all([
+        api.auth.me(),
+        loadStateFromApi()
+      ]);
+
       if (apiState) {
         state.tasks = apiState.tasks;
         state.settings = apiState.settings || state.settings;
         saveState(state);
-        toast('Synchronise');
+        toast('Synchronisé');
       }
 
-      // 4. Init Notifications & Share
+      // 4. Init Notifications & Share (non-blocking)
       initNotifications();
       initShareModal();
       startNotificationPolling();
 
-      // 5. Init Team Management & Google Calendar
+      // 5. Init Team Management & Google Calendar (parallel)
       initTeam(user?.id);
-      await initGoogleCalendar();
+      initGoogleCalendar(); // Don't await - load in background
     } catch (err) {
       console.error('Sync error:', err);
       toast('Erreur de synchronisation');
@@ -320,11 +326,13 @@ const initApp = async () => {
   // Auto Carry-Over (Silent)
   runAutoCarryOver(state);
 
-
   // Navigation listeners
   document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
   document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
   document.getElementById('nav-inbox')?.addEventListener('click', () => setView('inbox'));
+  document.getElementById('nav-notes')?.addEventListener('click', () => {
+    window.location.href = '/notes.html';
+  });
   document.getElementById('nav-team')?.addEventListener('click', () => {
     window.location.href = '/team.html';
   });
@@ -343,13 +351,13 @@ const initApp = async () => {
   initFocusTimer();
   initSpeechToText();
   initDailyReview(state, render);
-  // Render streak widget
-  // Quick dump button
+
+  // Quick dump handler
   const handleTasksAdded = async (tasks) => {
-    if (isApiMode && isLoggedIn()) {
+    if (isApiMode && isSignedIn()) {
       for (const t of tasks) {
         try {
-          const apiTask = await taskApi.create(t);
+          const apiTask = await api.tasks.create(t);
           state.tasks.push(apiTask);
 
           // Sync to Google Calendar if event and connected

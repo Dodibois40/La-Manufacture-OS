@@ -1,4 +1,4 @@
-import Clerk from '@clerk/clerk-js';
+import { Clerk } from '@clerk/clerk-js';
 import { api, isApiMode } from './api-client.js';
 
 // Initialize Clerk

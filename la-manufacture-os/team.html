@@ -29,7 +29,7 @@
         </div>
       </div>
       <div class="topStatus">
-        <span class="badge">ÉQUIPE</span>
+        <span class="badge">SECOND BRAIN</span>
       </div>
     </header>
 
@@ -64,7 +64,7 @@
                 </svg>
                 Membres de l'équipe
               </label>
-              <button class="btn btn-primary" id="addMemberBtn">+ Ajouter</button>
+              <p class="help-text">Pour ajouter un membre, utilisez l'onglet "Invitations"</p>
             </div>
             <div class="team-grid" id="membersGrid">
               <!-- Généré dynamiquement -->
@@ -153,6 +153,12 @@
       </svg>
       <span class="nav-label">Add</span>
     </button>
+    <button id="nav-notes">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+      </svg>
+      <span class="nav-label">Notes</span>
+    </button>
     <button class="active" id="nav-team">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -170,25 +176,7 @@
     </button>
   </nav>
 
-  <!-- Modal: Add Member (Simple - no invitation) -->
-  <div class="modal-overlay" id="addMemberModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Ajouter un membre</h2>
-        <button class="modal-close" onclick="closeModal('addMemberModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="input-group">
-          <label class="input-label">Nom du membre</label>
-          <input type="text" class="input" id="memberName" placeholder="Ex: Nicolas">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('addMemberModal')">Annuler</button>
-        <button class="btn btn-primary" id="saveMemberBtn">Ajouter</button>
-      </div>
-    </div>
-  </div>
+  <!-- Modal "Add Member" supprimé - utiliser le système d'invitation à la place -->
 
   <!-- Modal: Invite Member (with email) -->
   <div class="modal-overlay" id="inviteMemberModal">

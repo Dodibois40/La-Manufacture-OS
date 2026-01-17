@@ -64,6 +64,13 @@
   margin-bottom: 24px;
 }
 
+/* Help Text */
+.help-text {
+  color: var(--text-sec);
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
 /* Team Grid */
 .team-grid {
   display: grid;
@@ -344,7 +351,7 @@
 .invitation-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 12px;
   gap: 16px;
 }
@@ -415,11 +422,7 @@
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* Small buttons for invitation actions */
-.btn-sm {
-  padding: 6px 16px;
-  font-size: 0.85rem;
-}
+/* Small buttons - inherits from design-system.css */
 
 @media (max-width: 768px) {
   .invitation-header {

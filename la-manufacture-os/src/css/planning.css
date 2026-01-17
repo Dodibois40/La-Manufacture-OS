@@ -164,20 +164,7 @@
   letter-spacing: -0.02em;
 }
 
-.day-detail-header .btn {
-  background: transparent !important;
-  border: none !important;
-  color: var(--accent) !important;
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-  padding: 0 !important;
-  width: auto !important;
-  min-width: unset !important;
-}
-
-.day-detail-header .btn:hover {
-  opacity: 0.7;
-}
+/* .btn-link styles are in components.css */
 
 .day-tasks-list {
   display: flex;

@@ -60,6 +60,26 @@ src/
     └── logo.png
 ```
 
+## Morning Briefing - Règles importantes
+
+### Rotation de la Terre
+**IMPORTANT**: Pour que les continents tournent vers la DROITE (sens réaliste vu de l'espace):
+- Le `background-position` doit aller vers des valeurs NÉGATIVES
+- Animation correcte: `from { background-position: 0 0; } to { background-position: -100% 0; }`
+- Ne JAMAIS utiliser `translateX` pour la rotation (cause des artefacts/rectangles noirs)
+
+### Son de démarrage
+- Style inspiré PS1: notes cristallines éthérées avec grande reverb
+- Fichier: `src/js/startup-sound.js`
+- Ne pas utiliser de "BOOM" style Hans Zimmer, trop agressif
+- Notes recommandées: Do-Sol-Do (C5, G5, C6) avec harmoniques
+
+### Test du briefing
+- Ajouter `?forceBrief` à l'URL pour forcer l'affichage
+- Le briefing ne s'affiche qu'une fois par jour sinon
+
+---
+
 ## Checklist avant validation
 
 - [ ] Les éléments sont alignés visuellement

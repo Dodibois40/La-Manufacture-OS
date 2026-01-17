@@ -2,7 +2,6 @@ import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode, api } from './api-client.js';
 import { openShareModal } from './share.js';
-import { recordTaskCompletion, recordPerfectDay, renderStreakWidget, playSound } from './gamification.js';
 import { initSwipeGestures } from './swipe.js';
 import { appCallbacks } from './app-callbacks.js';
 import { isGoogleConnected, syncTaskToGoogle, deleteGoogleEvent } from './google-calendar.js';
@@ -155,6 +154,11 @@ export const stopQuoteRotation = () => {
 let editMode = false;
 let selectedTasks = new Set();
 
+// Focus 3 collapse state (session only)
+let moreTasksExpanded = false;
+let doneTasksExpanded = false;
+let overdueExpanded = false;
+
 const taskRow = (t, state) => {
   const task = ensureTask(t, 'Moi');
   const el = document.createElement('div');
@@ -193,17 +197,8 @@ const taskRow = (t, state) => {
         task.updatedAt = nowISO();
         saveState(state);
         appCallbacks.render?.();
-        playSound.complete();
         celebrate();
         toast('✨ Bien joué !', 'success');
-        recordTaskCompletion(task);
-
-        // Check for perfect day
-        const todayISO = isoLocal(new Date());
-        const todayTasks = state.tasks.filter(t => t.date === todayISO);
-        if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
-          recordPerfectDay();
-        }
       }, 450);
     });
   }
@@ -233,13 +228,6 @@ const taskRow = (t, state) => {
       // 🎉 Célébration !
       celebrate();
       toast('✨ Bien joué !', 'success');
-      recordTaskCompletion(task);
-      // Check for perfect day
-      const todayISO = isoLocal(new Date());
-      const todayTasks = state.tasks.filter(t => t.date === todayISO);
-      if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
-        recordPerfectDay();
-      }
     }, 450);
   });
 
@@ -675,7 +663,29 @@ export const renderDay = (state) => {
     dayList.appendChild(focusContainer);
   }
 
-  // --- OVERDUE SECTION (integrated) ---
+  // ═══════════════════════════════════════════════════════════════
+  // "CERVEAU VIDÉ" INDICATOR - Trust signal for cognitive offloading
+  // Shows when: no overdue tasks + all today's tasks done
+  // ═══════════════════════════════════════════════════════════════
+  const allTodayDone = todayTasks.length > 0 && todayTasks.every(t => t.done);
+  const noOverdue = overdueTasks.length === 0;
+
+  if (noOverdue && allTodayDone) {
+    const brainClearEl = document.createElement('div');
+    brainClearEl.className = 'brain-clear-indicator';
+    brainClearEl.innerHTML = `
+      <div class="brain-clear-icon">✓</div>
+      <div class="brain-clear-text">
+        <span class="brain-clear-title">Cerveau vidé</span>
+        <span class="brain-clear-sub">Tout est sous contrôle. Respire.</span>
+      </div>
+    `;
+    dayList.appendChild(brainClearEl);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // OVERDUE SECTION - Make it actionable with "Rescue All" button
+  // ═══════════════════════════════════════════════════════════════
   if (overdueTasks.length > 0) {
     const overdueSection = document.createElement('div');
     overdueSection.className = 'overdue-section';
@@ -684,18 +694,76 @@ export const renderDay = (state) => {
         <span class="section-icon">⚠️</span>
         <span class="section-title">En retard</span>
         <span class="section-count">${overdueTasks.length}</span>
+        <button class="rescue-all-btn" id="rescueAllBtn">Tout à aujourd'hui</button>
       </div>
     `;
     dayList.appendChild(overdueSection);
 
-    for (const t of overdueTasks) {
+    // Handle "Rescue All" button
+    const rescueBtn = overdueSection.querySelector('#rescueAllBtn');
+    if (rescueBtn) {
+      rescueBtn.addEventListener('click', async () => {
+        rescueBtn.disabled = true;
+        rescueBtn.textContent = '...';
+
+        for (const task of overdueTasks) {
+          task.date = today;
+          task.updatedAt = nowISO();
+          if (isApiMode && isLoggedIn()) {
+            try {
+              await taskApi.update(task.id, { date: today });
+            } catch (e) {
+              console.error('API update failed:', e);
+            }
+          }
+        }
+
+        saveState(state);
+        toast(`${overdueTasks.length} tâche${overdueTasks.length > 1 ? 's' : ''} reprogrammée${overdueTasks.length > 1 ? 's' : ''}`);
+        appCallbacks.render?.();
+      });
+    }
+
+    // Focus 3: show max 3 overdue tasks
+    const focusOverdue = overdueTasks.slice(0, 3);
+    const moreOverdue = overdueTasks.slice(3);
+
+    for (const t of focusOverdue) {
       const row = taskRow(t, state);
       row.classList.add('overdue-task');
       dayList.appendChild(row);
     }
+
+    // Show "more" button if needed
+    if (moreOverdue.length > 0) {
+      const moreContainer = document.createElement('div');
+      moreContainer.className = 'collapsed-tasks' + (overdueExpanded ? ' expanded' : '');
+      for (const t of moreOverdue) {
+        const row = taskRow(t, state);
+        row.classList.add('overdue-task');
+        moreContainer.appendChild(row);
+      }
+
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'show-more-tasks';
+      moreBtn.innerHTML = overdueExpanded
+        ? `<span class="show-more-icon">−</span> Masquer`
+        : `<span class="show-more-icon">+</span> ${moreOverdue.length} autre${moreOverdue.length > 1 ? 's' : ''} en retard`;
+      moreBtn.addEventListener('click', () => {
+        overdueExpanded = !overdueExpanded;
+        appCallbacks.render?.();
+      });
+
+      dayList.appendChild(moreBtn);
+      dayList.appendChild(moreContainer);
+    }
   }
 
-  // --- TODAY SECTION ---
+  // --- TODAY SECTION with Focus 3 ---
+  // Separate pending and done tasks
+  const pendingToday = todayTasks.filter(t => !t.done);
+  const doneToday = todayTasks.filter(t => t.done);
+
   if (todayTasks.length > 0 || overdueTasks.length > 0) {
     if (overdueTasks.length > 0) {
       // Only show header if we have overdue section above
@@ -705,14 +773,62 @@ export const renderDay = (state) => {
         <div class="section-header today">
           <span class="section-icon">☀️</span>
           <span class="section-title">Aujourd'hui</span>
-          <span class="section-count">${todayTasks.length}</span>
+          <span class="section-count">${pendingToday.length}</span>
         </div>
       `;
       dayList.appendChild(todaySection);
     }
 
-    for (const t of todayTasks) {
+    // Focus 3: show max 3 pending tasks
+    const focusTasks = pendingToday.slice(0, 3);
+    const moreTasks = pendingToday.slice(3);
+
+    for (const t of focusTasks) {
       dayList.appendChild(taskRow(t, state));
+    }
+
+    // Show "more" button for additional pending tasks
+    if (moreTasks.length > 0) {
+      const moreContainer = document.createElement('div');
+      moreContainer.className = 'collapsed-tasks' + (moreTasksExpanded ? ' expanded' : '');
+      for (const t of moreTasks) {
+        moreContainer.appendChild(taskRow(t, state));
+      }
+
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'show-more-tasks';
+      moreBtn.innerHTML = moreTasksExpanded
+        ? `<span class="show-more-icon">−</span> Masquer`
+        : `<span class="show-more-icon">+</span> ${moreTasks.length} autre${moreTasks.length > 1 ? 's' : ''} tâche${moreTasks.length > 1 ? 's' : ''}`;
+      moreBtn.addEventListener('click', () => {
+        moreTasksExpanded = !moreTasksExpanded;
+        appCallbacks.render?.();
+      });
+
+      dayList.appendChild(moreBtn);
+      dayList.appendChild(moreContainer);
+    }
+
+    // Show done tasks collapsed
+    if (doneToday.length > 0) {
+      const doneBtn = document.createElement('button');
+      doneBtn.className = 'show-more-tasks done-toggle';
+      doneBtn.innerHTML = doneTasksExpanded
+        ? `<span class="show-more-icon">−</span> Masquer terminées`
+        : `<span class="show-more-icon">✓</span> ${doneToday.length} terminée${doneToday.length > 1 ? 's' : ''}`;
+      doneBtn.addEventListener('click', () => {
+        doneTasksExpanded = !doneTasksExpanded;
+        appCallbacks.render?.();
+      });
+
+      const doneContainer = document.createElement('div');
+      doneContainer.className = 'collapsed-tasks done-section' + (doneTasksExpanded ? ' expanded' : '');
+      for (const t of doneToday) {
+        doneContainer.appendChild(taskRow(t, state));
+      }
+
+      dayList.appendChild(doneBtn);
+      dayList.appendChild(doneContainer);
     }
   }
 
@@ -749,10 +865,8 @@ export const renderDay = (state) => {
         task.done = true;
         task.updatedAt = nowISO();
         saveState(state);
-        playSound.complete();
         celebrate();
         toast('Fait!');
-        recordTaskCompletion(task);
         appCallbacks.render?.();
       }
     },

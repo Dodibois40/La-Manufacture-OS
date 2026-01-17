@@ -6,19 +6,18 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  background: rgba(28, 28, 30, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  /* Solid background instead of blur for performance */
+  background: rgba(28, 28, 30, 0.95);
   padding: 18px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
   position: relative;
 }
 
 .task:hover {
   transform: translateY(-2px);
-  background: rgba(38, 38, 40, 0.85);
+  background: rgba(38, 38, 40, 0.98);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   border-color: rgba(255, 255, 255, 0.15);
   z-index: 10;
@@ -416,6 +415,25 @@
 
 .btn:active {
   transform: scale(0.96);
+}
+
+/* Link-style button - no background, no padding */
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.btn-link:hover {
+  opacity: 0.7;
 }
 
 .btn-icon-only {
@@ -1362,7 +1380,7 @@ textarea:focus {
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 6px;
   font-size: 0.75rem;
-  color: #60a5fa;
+  color: var(--accent);
   margin-left: 8px;
 }
 
@@ -1384,7 +1402,7 @@ textarea:focus {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  color: #60a5fa;
+  color: var(--accent);
 }
 
 .google-sync-btn:hover {
@@ -1666,6 +1684,109 @@ textarea:focus {
   margin-bottom: 8px;
 }
 
+/* ========================================
+   "CERVEAU VIDÉ" INDICATOR
+   Trust signal for cognitive offloading
+   ======================================== */
+
+.brain-clear-indicator {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, rgba(50, 215, 75, 0.12) 0%, rgba(50, 215, 75, 0.05) 100%);
+  border: 1px solid rgba(50, 215, 75, 0.25);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  animation: brainClearAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.brain-clear-indicator.free-day {
+  background: linear-gradient(135deg, rgba(255, 214, 10, 0.1) 0%, rgba(255, 159, 10, 0.05) 100%);
+  border-color: rgba(255, 214, 10, 0.2);
+}
+
+@keyframes brainClearAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.brain-clear-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(50, 215, 75, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #32d74b;
+  flex-shrink: 0;
+}
+
+.brain-clear-indicator.free-day .brain-clear-icon {
+  background: rgba(255, 214, 10, 0.15);
+  color: #ffd60a;
+}
+
+.brain-clear-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brain-clear-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #32d74b;
+}
+
+.brain-clear-indicator.free-day .brain-clear-title {
+  color: #ffd60a;
+}
+
+.brain-clear-sub {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   "RESCUE ALL" BUTTON - Overdue section
+   ======================================== */
+
+.rescue-all-btn {
+  margin-left: auto;
+  background: rgba(255, 69, 58, 0.15);
+  border: 1px solid rgba(255, 69, 58, 0.3);
+  color: #ff6961;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rescue-all-btn:hover {
+  background: rgba(255, 69, 58, 0.25);
+  border-color: rgba(255, 69, 58, 0.5);
+}
+
+.rescue-all-btn:active {
+  transform: scale(0.95);
+}
+
+.rescue-all-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .today-section {
   margin-top: 16px;
   padding-top: 16px;
@@ -1696,6 +1817,74 @@ textarea:focus {
   font-size: 0.75rem;
   margin: 0 2px;
   border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ========================================
+   FOCUS 3 - COLLAPSED TASKS
+   ======================================== */
+
+.show-more-tasks {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.show-more-tasks:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.show-more-tasks .show-more-icon {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.show-more-tasks.done-toggle {
+  background: rgba(48, 209, 88, 0.05);
+  border-color: rgba(48, 209, 88, 0.2);
+  color: rgba(48, 209, 88, 0.6);
+}
+
+.show-more-tasks.done-toggle:hover {
+  background: rgba(48, 209, 88, 0.1);
+  color: rgba(48, 209, 88, 0.9);
+}
+
+.collapsed-tasks {
+  display: none;
+  animation: slideDown 0.3s ease;
+}
+
+.collapsed-tasks.expanded {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.collapsed-tasks.done-section .task {
+  opacity: 0.6;
 }
 
 /* ========================================

@@ -1,8 +1,8 @@
 // Quick Dump - Rapid brain dump to tasks
 // Captures multiple thoughts at once, AI parses them into tasks
 
-import { parseTaskInput } from './parser.js';
-import { isoLocal, toast } from './utils.js';
+import { api } from './api-client.js';
+import { toast } from './utils.js';
 
 // Create quick dump modal
 export const openQuickDump = (state, onTasksAdded) => {
@@ -67,47 +67,54 @@ export const openQuickDump = (state, onTasksAdded) => {
   setTimeout(() => textarea.focus(), 100);
 
   // Handle submit
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const text = textarea.value.trim();
     if (!text) {
       toast('Ecris quelque chose d\'abord!');
       return;
     }
 
-    const lines = text.split('\n').filter(l => l.trim());
-    const tasks = [];
-    const today = isoLocal(new Date());
-    const defaultOwner = 'Moi';
+    // Show loader
+    const originalBtnContent = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+      <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" opacity="0.25"/>
+        <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"/>
+      </svg>
+      Analyse en cours...
+    `;
+    submitBtn.classList.add('loading');
 
-    for (const line of lines) {
-      const parsed = parseTaskInput(line.trim(), [defaultOwner]);
+    try {
+      // Call AI to process inbox
+      const response = await api.ai.processInbox(text);
 
-      const task = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-        text: parsed.title || line.trim(),
-        date: parsed.date || today,
-        done: false,
-        urgent: parsed.urgent || false,
-        owner: parsed.owner || defaultOwner,
-        updatedAt: new Date().toISOString(),
-      };
+      // Build feedback message with counts
+      const { stats } = response;
+      const messages = [];
+      if (stats.tasks > 0) messages.push(`${stats.tasks} tâche(s)`);
+      if (stats.events > 0) messages.push(`${stats.events} RDV`);
+      if (stats.notes > 0) messages.push(`${stats.notes} note(s)`);
 
-      // Add optional fields
-      if (parsed.estimated_duration) task.estimated_duration = parsed.estimated_duration;
-      if (parsed.start_time) {
-        task.start_time = parsed.start_time;
-        task.is_event = true;
+      if (messages.length > 0) {
+        toast(`✅ ${messages.join(', ')} créé(s)!`, 'success');
+
+        // Trigger refresh - call with empty array since items are already in DB
+        onTasksAdded([]);
+
+        closeQuickDump();
+      } else {
+        toast('Aucun élément créé', 'warning');
       }
-      if (parsed.recurrence) task.recurrence = parsed.recurrence;
-      if (parsed.project) task.project = parsed.project;
+    } catch (error) {
+      console.error('Error processing inbox:', error);
+      toast(`Erreur: ${error.message}`, 'danger');
 
-      tasks.push(task);
-    }
-
-    if (tasks.length > 0) {
-      onTasksAdded(tasks);
-      toast(`✨ ${tasks.length} tache${tasks.length > 1 ? 's' : ''} ajoutee${tasks.length > 1 ? 's' : ''}!`);
-      closeQuickDump();
+      // Restore button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnContent;
+      submitBtn.classList.remove('loading');
     }
   };
 

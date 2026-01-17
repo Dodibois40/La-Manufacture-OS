@@ -68,7 +68,8 @@ let files = [];
 
 async function loadMembers() {
   try {
-    if (!isApiMode || !isSignedIn()) return;
+    // TEMPORAIRE: Auth désactivée pour tests
+    // if (!isApiMode || !isSignedIn()) return;
 
     const response = await api.team.getMembers();
     members = response.members || [];
@@ -116,30 +117,8 @@ function renderMembers() {
   `).join('');
 }
 
-// Add member
-document.getElementById('addMemberBtn').addEventListener('click', () => {
-  document.getElementById('memberName').value = '';
-  openModal('addMemberModal');
-});
-
-document.getElementById('saveMemberBtn').addEventListener('click', async () => {
-  const name = document.getElementById('memberName').value.trim();
-
-  if (!name) {
-    toast('Le nom est requis', 'warning');
-    return;
-  }
-
-  try {
-    await api.team.addMember(name);
-    toast('Membre ajouté avec succès', 'success');
-    closeModal('addMemberModal');
-    await loadMembers();
-  } catch (error) {
-    console.error('Error adding member:', error);
-    toast('Erreur lors de l\'ajout du membre', 'danger');
-  }
-});
+// Add member - SUPPRIMÉ : utiliser le système d'invitation à la place
+// Les membres sont maintenant ajoutés uniquement via l'onglet "Invitations"
 
 // Delete member
 window.deleteMember = async (memberId) => {
@@ -161,7 +140,8 @@ window.deleteMember = async (memberId) => {
 
 async function loadProjects() {
   try {
-    if (!isApiMode || !isSignedIn()) return;
+    // TEMPORAIRE: Auth désactivée pour tests
+    // if (!isApiMode || !isSignedIn()) return;
 
     const response = await api.projects.getAll();
     projects = response.projects || [];
@@ -341,7 +321,8 @@ window.deleteProject = async (projectId) => {
 
 async function loadFiles() {
   try {
-    if (!isApiMode || !isSignedIn()) return;
+    // TEMPORAIRE: Auth désactivée pour tests
+    // if (!isApiMode || !isSignedIn()) return;
 
     const response = await api.team.getFiles();
     files = response.files || [];
@@ -451,6 +432,10 @@ document.getElementById('nav-inbox')?.addEventListener('click', () => {
   window.location.href = '/';
 });
 
+document.getElementById('nav-notes')?.addEventListener('click', () => {
+  window.location.href = '/notes.html';
+});
+
 document.getElementById('nav-config')?.addEventListener('click', () => {
   window.location.href = '/';
 });
@@ -463,7 +448,8 @@ let invitations = [];
 
 async function loadInvitations() {
   try {
-    if (!isApiMode || !isSignedIn()) return;
+    // TEMPORAIRE: Auth désactivée pour tests
+    // if (!isApiMode || !isSignedIn()) return;
 
     const response = await api.invitations.list();
     invitations = response.invitations || [];
@@ -610,13 +596,14 @@ async function init() {
   // Initialize Clerk first
   await initClerk();
 
-  if (!isApiMode || !isSignedIn()) {
-    toast('Vous devez être connecté pour accéder à cette page', 'warning');
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 2000);
-    return;
-  }
+  // TEMPORAIRE: Auth désactivée pour tests
+  // if (!isApiMode || !isSignedIn()) {
+  //   toast('Vous devez être connecté pour accéder à cette page', 'warning');
+  //   setTimeout(() => {
+  //     window.location.href = '/';
+  //   }, 2000);
+  //   return;
+  // }
 
   await Promise.all([
     loadMembers(),

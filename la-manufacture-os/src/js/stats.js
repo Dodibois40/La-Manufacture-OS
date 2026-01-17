@@ -1,6 +1,5 @@
 // Stats View - Simple productivity statistics
 import { isoLocal } from './utils.js';
-import { getStats, BADGES, loadGamification } from './gamification.js';
 
 // Calculate stats from tasks
 export const calculateTaskStats = (tasks) => {
@@ -39,10 +38,9 @@ export const calculateTaskStats = (tasks) => {
   const bestDay = dailyStats.reduce((best, day) =>
     day.done > best.done ? day : best, dailyStats[0]);
 
-  // Productivity score (weighted)
-  const streakBonus = getStats().streak * 5;
+  // Productivity score based on completion rate only
   const completionRate = weekTasks.length > 0 ? (weekDone.length / weekTasks.length) * 100 : 0;
-  const productivityScore = Math.min(100, Math.round(completionRate + streakBonus));
+  const productivityScore = Math.min(100, Math.round(completionRate));
 
   return {
     today: { total: todayTasks.length, done: todayDone.length },
@@ -55,10 +53,9 @@ export const calculateTaskStats = (tasks) => {
   };
 };
 
-// Render stats view
+// Render stats view - Clean, focused on clarity
 export const renderStatsView = (tasks) => {
   const stats = calculateTaskStats(tasks);
-  const gamification = getStats();
 
   return `
     <div class="stats-view">
@@ -66,55 +63,40 @@ export const renderStatsView = (tasks) => {
         <h2>Statistiques</h2>
       </div>
 
-      <!-- Level Card -->
-      <div class="stats-card level-card">
-        <div class="level-display">
-          <span class="level-big-icon">${gamification.levelIcon}</span>
-          <div class="level-info">
-            <span class="level-name">${gamification.levelName}</span>
-            <span class="level-number">Niveau ${gamification.level}</span>
-          </div>
-        </div>
-        <div class="xp-bar">
-          <div class="xp-progress" style="width: ${gamification.levelProgress}%"></div>
-        </div>
-        <div class="xp-text">${gamification.xp} / ${gamification.nextLevelXp} XP</div>
-      </div>
-
       <!-- Quick Stats -->
       <div class="stats-grid">
         <div class="stat-card">
-          <span class="stat-icon">🔥</span>
-          <span class="stat-value">${gamification.streak}</span>
-          <span class="stat-label">jours de streak</span>
+          <span class="stat-icon">📅</span>
+          <span class="stat-value">${stats.today.done}/${stats.today.total}</span>
+          <span class="stat-label">aujourd'hui</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">📊</span>
+          <span class="stat-value">${stats.week.done}/${stats.week.total}</span>
+          <span class="stat-label">cette semaine</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">📈</span>
+          <span class="stat-value">${stats.month.done}</span>
+          <span class="stat-label">ce mois</span>
         </div>
         <div class="stat-card">
           <span class="stat-icon">✅</span>
-          <span class="stat-value">${gamification.totalTasks}</span>
-          <span class="stat-label">taches totales</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon">🎯</span>
-          <span class="stat-value">${gamification.totalFocusHours}h</span>
-          <span class="stat-label">de focus</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon">⭐</span>
-          <span class="stat-value">${gamification.perfectDays}</span>
-          <span class="stat-label">perfect days</span>
+          <span class="stat-value">${stats.allTime.done}</span>
+          <span class="stat-label">total</span>
         </div>
       </div>
 
       <!-- Productivity Score -->
       <div class="stats-card">
-        <h3>Score de productivite</h3>
+        <h3>Taux de complétion</h3>
         <div class="score-circle">
           <svg viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" class="score-bg"/>
             <circle cx="50" cy="50" r="45" class="score-progress"
               style="stroke-dasharray: ${stats.productivityScore * 2.83} 283"/>
           </svg>
-          <span class="score-value">${stats.productivityScore}</span>
+          <span class="score-value">${stats.productivityScore}%</span>
         </div>
       </div>
 
@@ -133,94 +115,10 @@ export const renderStatsView = (tasks) => {
           `).join('')}
         </div>
         <p class="week-summary">
-          ${stats.week.done}/${stats.week.total} taches cette semaine
+          ${stats.week.done}/${stats.week.total} tâches cette semaine
           ${stats.bestDay.done > 0 ? `• Meilleur jour: ${stats.bestDay.day} (${stats.bestDay.done})` : ''}
         </p>
       </div>
-
-      <!-- Badges -->
-      <div class="stats-card badges-card">
-        <h3>Badges (${gamification.badgesUnlocked}/${gamification.totalBadges})</h3>
-        <div class="badges-grid">
-          ${renderBadgesSection()}
-        </div>
-      </div>
-
-      <!-- Badge History -->
-      ${renderBadgeTimeline()}
     </div>
   `;
-};
-
-// Render badges section
-const renderBadgesSection = () => {
-  const state = loadGamification();
-
-  return Object.values(BADGES).map(badge => {
-    const unlocked = state.unlockedBadges.includes(badge.id);
-    return `
-      <div class="badge-item ${unlocked ? 'unlocked' : 'locked'}"
-           title="${badge.desc}">
-        <span class="badge-icon">${unlocked ? badge.icon : '🔒'}</span>
-        <span class="badge-name">${badge.name}</span>
-      </div>
-    `;
-  }).join('');
-};
-
-// Render badge timeline
-const renderBadgeTimeline = () => {
-  const state = loadGamification();
-  const history = state.badgeHistory || [];
-
-  if (history.length === 0) {
-    return '';
-  }
-
-  // Sort by timestamp (newest first)
-  const sorted = [...history].sort((a, b) =>
-    new Date(b.timestamp) - new Date(a.timestamp)
-  );
-
-  // Show only last 10
-  const recent = sorted.slice(0, 10);
-
-  return `
-    <div class="stats-card badge-timeline-card">
-      <h3>Recent Badges (${history.length} total)</h3>
-      <div class="badge-timeline">
-        ${recent.map(entry => {
-          const date = new Date(entry.timestamp);
-          const relativeTime = getRelativeTime(date);
-
-          return `
-            <div class="timeline-item">
-              <div class="timeline-icon">${entry.icon}</div>
-              <div class="timeline-content">
-                <div class="timeline-name">${entry.name}</div>
-                <div class="timeline-time">${relativeTime}</div>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    </div>
-  `;
-};
-
-// Get relative time string
-const getRelativeTime = (date) => {
-  const now = new Date();
-  const diffMs = now - date;
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
-
-  if (diffSec < 60) return 'A l\'instant';
-  if (diffMin < 60) return `Il y a ${diffMin}min`;
-  if (diffHour < 24) return `Il y a ${diffHour}h`;
-  if (diffDay === 1) return 'Hier';
-  if (diffDay < 7) return `Il y a ${diffDay}j`;
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 };

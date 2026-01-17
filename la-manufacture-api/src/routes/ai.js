@@ -287,4 +287,475 @@ Reponds UNIQUEMENT en JSON:
       return reply.status(500).send({ error: 'Event detection failed' });
     }
   });
+
+  // ============================================================
+  // INBOX UNIVERSELLE - IA Processing (CŒUR DU SYSTÈME)
+  // ============================================================
+  // Analyse texte avec Claude Sonnet 4.5 et crée automatiquement :
+  // - Tasks → table tasks
+  // - Events → table tasks (is_event=true)
+  // - Notes → table notes + auto-create tags
+  fastify.post('/process-inbox', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
+    const { text } = request.body;
+    const startTime = Date.now();
+
+    if (!text || text.trim().length === 0) {
+      return reply.status(400).send({ error: 'Missing text' });
+    }
+
+    try {
+      // ===== 1. CONTEXTE DYNAMIQUE =====
+
+      // Date actuelle
+      const now = new Date();
+      const currentDate = now.toISOString().split('T')[0];
+      const dayNames = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+      const currentDayName = dayNames[now.getDay()];
+      const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      // Projets actifs
+      const projectsResult = await query(
+        "SELECT id, name FROM projects WHERE user_id = $1 AND status != 'archived' ORDER BY name",
+        [userId]
+      );
+      const activeProjects = projectsResult.rows.map(p => p.name);
+
+      // Tags existants
+      const tagsResult = await query(
+        'SELECT name FROM tags WHERE user_id = $1 ORDER BY name',
+        [userId]
+      );
+      const existingTags = tagsResult.rows.map(t => t.name);
+
+      // Membres d'équipe
+      const membersResult = await query(
+        'SELECT name FROM team_members WHERE user_id = $1 AND active = TRUE ORDER BY name',
+        [userId]
+      );
+      const teamMembers = membersResult.rows.map(m => m.name);
+
+      // ===== 2. SYSTEM PROMPT (Version Production - Exhaustive) =====
+
+      const systemPrompt = `Tu es un assistant expert en productivité GTD (Getting Things Done) et méthode Second Brain. Tu analyses les entrées d'une inbox universelle et catégorises chaque élément avec une précision maximale.
+
+═══════════════════════════════════════════════════════
+RÈGLES DE CLASSIFICATION (par ordre de priorité)
+═══════════════════════════════════════════════════════
+
+1. EVENT (Événement/RDV) - Priorité HAUTE
+   ✓ Conditions STRICTES (toutes requises) :
+     - Heure EXPLICITE mentionnée : "14h", "10h30", "à 9h", "demain 15h"
+     - OU mot-clé temporel : "rendez-vous", "RDV", "réunion", "meeting", "appel prévu"
+   ✓ Exemples positifs :
+     - "Appeler Marie demain 14h" → EVENT
+     - "RDV dentiste jeudi" → EVENT (même sans heure, RDV = event)
+     - "Réunion budget lundi 10h" → EVENT
+   ✗ Contre-exemples :
+     - "Appeler Marie demain" → TASK (pas d'heure = tâche)
+     - "Préparer réunion" → TASK (préparation = action, pas l'event lui-même)
+
+2. NOTE (Information/Connaissance)
+   ✓ Conditions :
+     - Commence par : "Note:", "Idée:", "Remarque:", "À retenir:", "!"
+     - OU contient information factuelle sans action : "Paul préfère X", "Budget alloué: Y"
+     - OU citation, lien, référence : "https://...", "Voir article sur X"
+     - OU observation : "Le client a dit que..."
+   ✓ Exemples positifs :
+     - "Idée: utiliser React pour le dashboard" → NOTE
+     - "Paul préfère les réunions le matin" → NOTE
+     - "Budget 2026: 50k€ alloués au marketing" → NOTE
+   ✗ Contre-exemples :
+     - "Vérifier le budget" → TASK (action = verbe)
+     - "Demander à Paul ses préférences" → TASK (demander = action)
+
+3. TASK (Tâche/Action)
+   ✓ Par défaut si pas EVENT ni NOTE
+   ✓ Verbe d'action : appeler, envoyer, préparer, finaliser, vérifier, contacter, acheter, réserver
+   ✓ Action implicite : "Marie pour discuter budget" (implicite: contacter Marie)
+
+═══════════════════════════════════════════════════════
+SÉPARATION MULTI-ITEMS (CRITIQUE)
+═══════════════════════════════════════════════════════
+
+Délimiteurs : " + ", " et " (items indépendants), " puis ", " aussi ", nouvelle ligne, numérotation
+
+Exemples :
+• "Appeler Marie 14h + Noter: budget OK" → 2 items (EVENT + NOTE)
+• "RDV client lundi 10h, préparer présentation et envoyer facture" → 3 items (EVENT + 2 TASKS)
+
+═══════════════════════════════════════════════════════
+EXTRACTION DE DATES & HEURES
+═══════════════════════════════════════════════════════
+
+Dates relatives (base: ${currentDate} = ${currentDayName}) :
+- "aujourd'hui" → ${currentDate}
+- "demain" → ${currentDate} + 1 jour
+- "lundi", "mardi" → prochain jour de la semaine
+- "lundi prochain" → semaine suivante
+- "dans X jours/semaines/mois"
+
+Heures :
+- "14h", "14h30", "9h" → formats standards
+- "matin" → 09:00, "midi" → 12:00, "après-midi" → 14:00, "soir" → 18:00
+
+Durée par défaut : RDV/Réunion = 30min, Appel = 15min
+
+═══════════════════════════════════════════════════════
+EXTRACTION ENTITÉS & MÉTADONNÉES
+═══════════════════════════════════════════════════════
+
+1. PERSONNES : Noms propres, rôles → metadata.people: ["Marie", "Paul"]
+2. LIEUX : Adresses, lieux → location (events uniquement)
+3. PROJETS : Match FUZZY dans ${JSON.stringify(activeProjects)} → project: "nom exact"
+4. SUJETS : Thème principal → metadata.topic
+
+═══════════════════════════════════════════════════════
+URGENCE & PRIORITÉ
+═══════════════════════════════════════════════════════
+
+urgent: true SI : "URGENT", "ASAP", "immédiatement", "rapidement", "prioritaire", "!!!", deadline courte
+important: true SI : "important", "crucial", "essentiel", "critique", impact business
+
+═══════════════════════════════════════════════════════
+TAGS AUTOMATIQUES (Max 5 tags, pertinents)
+═══════════════════════════════════════════════════════
+
+Catégories : priorité (urgent, important), type (idée, question), domaine (technique, marketing, finance), contexte (réunion, appel), technologies (react, postgresql, api)
+
+Utiliser tags existants si dans ${JSON.stringify(existingTags)}, sinon créer nouveaux (minuscules, sans accents)
+
+═══════════════════════════════════════════════════════
+COULEURS NOTES
+═══════════════════════════════════════════════════════
+
+blue: technique/dev | green: idée/créativité | yellow: warning/attention | orange: urgent | red: critique | purple: stratégie | null: neutre
+
+═══════════════════════════════════════════════════════
+STRUCTURATION DU CONTENU (NOTES) - ÉVITER LE CHARABIA
+═══════════════════════════════════════════════════════
+
+**Objectif** : Notes PROPRES, STRUCTURÉES, FACILES À RELIRE. Pas de charabia, pas de duplication titre/contenu.
+
+**Règle #1 - Titre pertinent** :
+- Extraire le CONCEPT PRINCIPAL, pas juste "Idée" ou "Note"
+- 3-8 mots maximum, descriptif
+- ✓ Exemples bons : "Stack technique dashboard client", "Processus onboarding utilisateurs", "Optimisation cache Redis"
+- ✗ Exemples mauvais : "Idée", "Note importante", "Chose à retenir"
+
+**Règle #2 - Contenu structuré** :
+
+A) **CONCEPT UNIQUE** (1 seule idée claire) :
+   → Paragraphe cohérent, pas de bullet points
+
+B) **CONCEPTS MULTIPLES** (plusieurs idées liées) :
+   → Bullet points (•) pour clarté
+
+C) **OBSERVATION FACTUELLE** :
+   → Phrase claire, contexte si nécessaire
+
+**Règle #3 - Éviter duplication** :
+- Ne PAS répéter le titre dans le contenu
+- Le contenu DÉVELOPPE le titre, ne le redit pas
+
+**Règle #4 - Formatting** :
+- Bullet points : Commencer par "• " (bullet Unicode + espace)
+- Pas de numérotation (1., 2., 3.) → utiliser bullets
+- Sauts de ligne : "\\n" entre bullets ou paragraphes
+- Capitalisation : Première lettre en majuscule
+
+**Règle #5 - Longueur** :
+- Titre : 3-8 mots
+- Contenu : 1-5 phrases (ou 2-5 bullets)
+- Si trop long (>500 chars) : séparer en plusieurs notes
+
+═══════════════════════════════════════════════════════
+FORMAT JSON (STRICT)
+═══════════════════════════════════════════════════════
+
+{
+  "items": [{
+    "type": "task"|"event"|"note",
+    "text": "Texte nettoyé",
+    "title": "Titre court" | null,
+    "content": "Contenu détaillé" | null,
+    "date": "YYYY-MM-DD" | null,
+    "start_time": "HH:MM" | null,
+    "end_time": "HH:MM" | null,
+    "location": "Lieu" | null,
+    "project": "Nom projet exact" | null,
+    "urgent": true|false,
+    "important": true|false,
+    "tags": ["tag1", "tag2"],
+    "color": "blue"|"green"|"yellow"|"orange"|"red"|"purple"|null,
+    "metadata": {
+      "people": ["Marie"],
+      "topic": "budget",
+      "duration_minutes": 30,
+      "original_text": "texte brut exact",
+      "confidence": 0.95
+    }
+  }]
+}
+
+Règles : Tous champs présents (null si non applicable), dates ISO, heures 24h, échapper quotes, metadata.confidence (0-1)
+
+═══════════════════════════════════════════════════════
+GESTION AMBIGUÏTÉS
+═══════════════════════════════════════════════════════
+
+Si doute : Heure mentionnée ? → EVENT | Verbe action ? → TASK | Info factuelle ? → NOTE | Vraiment ambigu ? → TASK (safe)
+
+Toujours inclure metadata.confidence : 1.0 = certain, 0.8-0.9 = très probable, 0.5-0.7 = probable, <0.5 = incertain
+
+Objectif : ZÉRO ERREUR, MAXIMUM D'INTELLIGENCE.`;
+
+      // ===== 3. USER PROMPT (avec contexte enrichi) =====
+
+      const userPrompt = `Analyse cette entrée inbox et catégorise-la avec précision maximale :
+
+═══════════════════════════════════════════════════════
+TEXTE À ANALYSER
+═══════════════════════════════════════════════════════
+
+"""
+${text}
+"""
+
+═══════════════════════════════════════════════════════
+CONTEXTE UTILISATEUR
+═══════════════════════════════════════════════════════
+
+📅 Date actuelle : ${currentDate} (${currentDayName})
+🕐 Heure actuelle : ${currentTime}
+
+📁 Projets actifs (pour matching) :
+${activeProjects.length > 0 ? activeProjects.join(', ') : 'Aucun projet'}
+
+🏷️ Tags existants (priorité sur nouveaux) :
+${existingTags.length > 0 ? existingTags.join(', ') : 'Aucun tag'}
+
+👤 Membres d'équipe (pour extraction personnes) :
+${teamMembers.length > 0 ? teamMembers.join(', ') : 'Aucun membre'}
+
+═══════════════════════════════════════════════════════
+FORMAT RÉPONSE
+═══════════════════════════════════════════════════════
+
+Réponds UNIQUEMENT avec JSON valide (pas de texte avant/après) : { "items": [...] }`;
+
+      // ===== 4. APPEL CLAUDE API =====
+
+      const message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{
+          role: 'user',
+          content: userPrompt
+        }]
+      });
+
+      const responseText = message.content[0].text;
+
+      // ===== 5. PARSE RÉPONSE JSON =====
+
+      let aiResponse;
+      try {
+        // Extract JSON from response
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error('No JSON found in response');
+        }
+        aiResponse = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        fastify.log.error('AI response JSON parse failed:', parseError);
+        fastify.log.error('Raw response:', responseText);
+
+        // Fallback: créer une task simple
+        aiResponse = {
+          items: [{
+            type: 'task',
+            text: text,
+            title: null,
+            content: null,
+            date: currentDate,
+            start_time: null,
+            end_time: null,
+            location: null,
+            project: null,
+            urgent: false,
+            important: false,
+            tags: [],
+            color: null,
+            metadata: {
+              original_text: text,
+              confidence: 0.5
+            }
+          }]
+        };
+      }
+
+      // ===== 6. CRÉATION ITEMS EN BDD =====
+
+      const itemsCreated = [];
+      const items = aiResponse.items || [];
+
+      for (const item of items) {
+        try {
+          if (item.type === 'task' || item.type === 'event') {
+            // ===== CRÉATION TASK/EVENT =====
+
+            const taskResult = await query(
+              `INSERT INTO tasks (user_id, text, date, urgent, owner, is_event, start_time, end_time, location, done)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+               RETURNING *`,
+              [
+                userId,
+                item.text,
+                item.date || currentDate,
+                item.urgent || false,
+                item.metadata?.people?.[0] || 'Moi',
+                item.type === 'event',
+                item.start_time || null,
+                item.end_time || null,
+                item.location || null,
+                false
+              ]
+            );
+
+            const createdTask = taskResult.rows[0];
+
+            // Auto-matching projet
+            if (item.project) {
+              const projectMatch = await query(
+                'SELECT id FROM projects WHERE user_id = $1 AND name ILIKE $2 LIMIT 1',
+                [userId, item.project]
+              );
+
+              if (projectMatch.rows.length > 0) {
+                await query(
+                  'UPDATE tasks SET project_id = $1 WHERE id = $2',
+                  [projectMatch.rows[0].id, createdTask.id]
+                );
+                createdTask.project_id = projectMatch.rows[0].id;
+              }
+            }
+
+            itemsCreated.push({
+              type: item.type,
+              id: createdTask.id,
+              text: createdTask.text,
+              date: createdTask.date
+            });
+
+          } else if (item.type === 'note') {
+            // ===== CRÉATION NOTE =====
+
+            const noteResult = await query(
+              `INSERT INTO notes (user_id, title, content, color, is_pinned)
+               VALUES ($1, $2, $3, $4, $5)
+               RETURNING *`,
+              [
+                userId,
+                item.title || 'Note',
+                item.content || '',
+                item.color || null,
+                false
+              ]
+            );
+
+            const createdNote = noteResult.rows[0];
+
+            // Auto-création tags
+            if (item.tags && item.tags.length > 0) {
+              for (const tagName of item.tags) {
+                // Créer tag si n'existe pas
+                const tagResult = await query(
+                  `INSERT INTO tags (user_id, name, color)
+                   VALUES ($1, $2, $3)
+                   ON CONFLICT (user_id, name) DO UPDATE SET color = EXCLUDED.color
+                   RETURNING *`,
+                  [userId, tagName.toLowerCase(), 'gray']
+                );
+
+                const tag = tagResult.rows[0];
+
+                // Lier tag à note
+                await query(
+                  'INSERT INTO note_tags (note_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                  [createdNote.id, tag.id]
+                );
+              }
+            }
+
+            // Auto-matching projet
+            if (item.project) {
+              const projectMatch = await query(
+                'SELECT id FROM projects WHERE user_id = $1 AND name ILIKE $2 LIMIT 1',
+                [userId, item.project]
+              );
+
+              if (projectMatch.rows.length > 0) {
+                await query(
+                  'UPDATE notes SET project_id = $1 WHERE id = $2',
+                  [projectMatch.rows[0].id, createdNote.id]
+                );
+                createdNote.project_id = projectMatch.rows[0].id;
+              }
+            }
+
+            itemsCreated.push({
+              type: 'note',
+              id: createdNote.id,
+              title: createdNote.title,
+              tags: item.tags || []
+            });
+          }
+        } catch (itemError) {
+          fastify.log.error('Error creating item:', itemError);
+          // Continue avec les autres items
+        }
+      }
+
+      // ===== 7. TRACKING POUR AMÉLIORATION CONTINUE =====
+
+      const processingTime = Date.now() - startTime;
+      const confidenceAvg = items.reduce((sum, i) => sum + (i.metadata?.confidence || 0.5), 0) / items.length;
+
+      await query(
+        `INSERT INTO ai_inbox_decisions (user_id, input_text, ai_response, items_created, confidence_avg, processing_time_ms)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          userId,
+          text,
+          JSON.stringify(aiResponse),
+          JSON.stringify(itemsCreated),
+          confidenceAvg,
+          processingTime
+        ]
+      );
+
+      // ===== 8. RETOUR RÉSULTAT =====
+
+      return {
+        success: true,
+        items: itemsCreated,
+        stats: {
+          total: itemsCreated.length,
+          tasks: itemsCreated.filter(i => i.type === 'task').length,
+          events: itemsCreated.filter(i => i.type === 'event').length,
+          notes: itemsCreated.filter(i => i.type === 'note').length
+        },
+        processing_time_ms: processingTime
+      };
+
+    } catch (error) {
+      fastify.log.error('Process inbox error:', error);
+      return reply.status(500).send({
+        error: 'Inbox processing failed',
+        details: error.message
+      });
+    }
+  });
 }

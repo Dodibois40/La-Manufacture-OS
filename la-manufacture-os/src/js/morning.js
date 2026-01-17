@@ -1,6 +1,25 @@
-import { isoLocal, nowISO } from './utils.js';
+import { isoLocal } from './utils.js';
+import { playStartupSound } from './startup-sound.js';
 
-export const initMorningBriefing = (state) => {
+// Preload Earth textures for smooth display
+const preloadTextures = () => {
+  const textures = [
+    '/earth-day.webp',
+    '/earth-clouds.webp',
+    '/earth-night.webp'
+  ];
+
+  return Promise.all(textures.map(src => {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(src);
+      img.onerror = () => resolve(src); // Continue even if failed
+      img.src = src;
+    });
+  }));
+};
+
+export const initMorningBriefing = async (state) => {
   // Check if first launch of the day
   const today = isoLocal();
   let lastLaunch = null;
@@ -15,13 +34,13 @@ export const initMorningBriefing = (state) => {
 
   const user = 'Moi';
 
+  // Preload textures before showing briefing
+  await preloadTextures();
+
   // Stats calculation
   const tasks = state.tasks || [];
   const todayCount = tasks.filter(t => !t.done && t.date === today).length;
   const urgentCount = tasks.filter(t => !t.done && t.urgent).length;
-  const completedToday = tasks.filter(t => t.done && t.date === today).length;
-  const totalToday = todayCount + completedToday;
-  const progress = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
   const html = `
     <div id="briefOverlay" class="brief-overlay-spacex">
@@ -60,6 +79,8 @@ export const initMorningBriefing = (state) => {
   document.body.appendChild(div.firstElementChild);
 
   document.getElementById('startDayBtn').addEventListener('click', () => {
+    playStartupSound();
+
     const el = document.getElementById('briefOverlay');
     const btn = document.getElementById('startDayBtn');
 

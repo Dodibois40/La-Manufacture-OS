@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="/src/css/commandbar.css">
   <link rel="stylesheet" href="/src/css/morning.css">
   <link rel="stylesheet" href="/src/css/planning.css">
-  <link rel="stylesheet" href="/src/css/gamification.css">
   <link rel="stylesheet" href="/src/css/app.css">
+  <link rel="stylesheet" href="/src/css/quick-dump.css">
 </head>
 
 <body>
@@ -64,6 +64,7 @@
         </div>
       </div>
       <div class="topStatus">
+        <span class="badge">SECOND BRAIN</span>
         <span class="badge" id="storageBadge">Storage...</span>
         <span class="badge hidden" id="googleBadge">G</span>
         <span class="badge" id="progressBadge">—</span>
@@ -215,7 +216,7 @@
         <div class="day-detail" id="dayDetail">
           <div class="day-detail-header">
             <h3 id="selectedDayTitle">Sélectionne un jour</h3>
-            <button class="btn btn-primary btn-small" id="addTaskToDay" style="display:none;">+ Ajouter</button>
+            <button class="btn-link hidden" id="addTaskToDay">+ Ajouter</button>
           </div>
           <div class="day-tasks-list" id="dayTasksList"></div>
         </div>
@@ -306,7 +307,7 @@
       </div>
 
       <!-- Google Calendar Integration -->
-      <div class="settings-section" id="googleCalendarSection" style="display: none;">
+      <div class="settings-section hidden" id="googleCalendarSection">
         <label class="settings-label">
           <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -368,6 +369,12 @@
       </svg>
       <span class="nav-label">Add</span>
     </button>
+    <button id="nav-notes">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+      </svg>
+      <span class="nav-label">Notes</span>
+    </button>
     <button id="nav-team">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -411,13 +418,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Quick Dump Button -->
-  <button class="quick-dump-trigger" id="quickDumpBtn" title="Vide ta tete (Ctrl+Shift+N)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  </button>
 
   <!-- Main App -->
   <script type="module" src="/src/js/app.js"></script>

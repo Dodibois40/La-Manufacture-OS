@@ -330,3 +330,122 @@ DROP TRIGGER IF EXISTS update_team_invitations_updated_at ON team_invitations;
 
 CREATE TRIGGER update_team_invitations_updated_at BEFORE UPDATE ON team_invitations
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- SECOND BRAIN NOTES SYSTEM
+-- =====================================================
+
+-- Notes table (système Second Brain)
+CREATE TABLE IF NOT EXISTS notes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  content TEXT,
+  content_search TSVECTOR, -- Full-Text Search vector
+  color VARCHAR(20) DEFAULT NULL, -- Couleur pour catégorisation visuelle (blue, green, yellow, orange, red, purple)
+  is_pinned BOOLEAN DEFAULT FALSE,
+  project_id UUID REFERENCES projects(id) ON DELETE SET NULL, -- Relation optionnelle
+  task_id UUID REFERENCES tasks(id) ON DELETE SET NULL, -- Relation optionnelle
+  archived_at TIMESTAMP, -- Soft-delete
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tags définis par utilisateur
+CREATE TABLE IF NOT EXISTS tags (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name VARCHAR(100) NOT NULL,
+  color VARCHAR(20) DEFAULT 'gray',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, name) -- Évite tags dupliqués
+);
+
+-- Junction table many-to-many (notes ↔ tags)
+CREATE TABLE IF NOT EXISTS note_tags (
+  note_id UUID NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+  tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (note_id, tag_id)
+);
+
+-- Partage notes avec équipe
+CREATE TABLE IF NOT EXISTS note_shares (
+  id SERIAL PRIMARY KEY,
+  note_id UUID NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+  shared_with_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  shared_by_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  permission VARCHAR(20) DEFAULT 'view' CHECK (permission IN ('view', 'edit')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(note_id, shared_with_user_id)
+);
+
+-- Tracking décisions IA pour amélioration continue
+CREATE TABLE IF NOT EXISTS ai_inbox_decisions (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  input_text TEXT NOT NULL,
+  ai_response JSONB NOT NULL,           -- Réponse brute de Claude
+  items_created JSONB NOT NULL,          -- Items effectivement créés en BDD
+  user_feedback VARCHAR(50),             -- 'correct', 'incorrect', 'partial'
+  user_corrections JSONB,                -- Corrections manuelles utilisateur
+  confidence_avg FLOAT,                  -- Moyenne des confidences
+  processing_time_ms INTEGER,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- INDEXES - Second Brain Notes
+-- =====================================================
+
+-- Performance requêtes utilisateur (notes)
+CREATE INDEX IF NOT EXISTS idx_notes_user ON notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_notes_user_archived ON notes(user_id, archived_at) WHERE archived_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notes_pinned ON notes(user_id, is_pinned) WHERE is_pinned = TRUE;
+
+-- Relations optionnelles
+CREATE INDEX IF NOT EXISTS idx_notes_project ON notes(project_id) WHERE project_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_notes_task ON notes(task_id) WHERE task_id IS NOT NULL;
+
+-- Full-Text Search (CRITIQUE pour performance)
+CREATE INDEX IF NOT EXISTS idx_notes_search ON notes USING GiST(content_search);
+
+-- Tags
+CREATE INDEX IF NOT EXISTS idx_tags_user ON tags(user_id);
+CREATE INDEX IF NOT EXISTS idx_note_tags_note ON note_tags(note_id);
+CREATE INDEX IF NOT EXISTS idx_note_tags_tag ON note_tags(tag_id);
+
+-- Partage
+CREATE INDEX IF NOT EXISTS idx_note_shares_note ON note_shares(note_id);
+CREATE INDEX IF NOT EXISTS idx_note_shares_user ON note_shares(shared_with_user_id);
+
+-- AI Decisions (amélioration continue)
+CREATE INDEX IF NOT EXISTS idx_ai_decisions_user ON ai_inbox_decisions(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_decisions_feedback ON ai_inbox_decisions(user_feedback) WHERE user_feedback IS NOT NULL;
+
+-- =====================================================
+-- TRIGGERS FTS - Auto-update content_search
+-- =====================================================
+
+-- Fonction trigger pour Full-Text Search (configuration française)
+CREATE OR REPLACE FUNCTION notes_search_trigger() RETURNS TRIGGER AS $$
+BEGIN
+  -- Pondération: titre (A) prioritaire, contenu (B) secondaire
+  -- Configuration 'french' pour tokenization française (accents, stemming)
+  NEW.content_search :=
+    setweight(to_tsvector('french', COALESCE(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('french', COALESCE(NEW.content, '')), 'B');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger FTS sur INSERT/UPDATE
+DROP TRIGGER IF EXISTS notes_search_update ON notes;
+CREATE TRIGGER notes_search_update
+  BEFORE INSERT OR UPDATE OF title, content ON notes
+  FOR EACH ROW EXECUTE FUNCTION notes_search_trigger();
+
+-- Trigger updated_at pour notes
+DROP TRIGGER IF EXISTS update_notes_updated_at ON notes;
+CREATE TRIGGER update_notes_updated_at BEFORE UPDATE ON notes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

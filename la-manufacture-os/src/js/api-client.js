@@ -203,6 +203,13 @@ export const api = {
         body: JSON.stringify({ text }),
       });
     },
+
+    async processInbox(text) {
+      return apiRequest('/api/ai/process-inbox', {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      });
+    },
   },
 
   // Email
@@ -463,6 +470,96 @@ export const api = {
 
     async getProfile() {
       return apiRequest('/api/member/profile');
+    },
+  },
+
+  // Idées
+  notes: {
+    // Notes CRUD
+    async list(filters = {}) {
+      const query = new URLSearchParams(filters).toString();
+      return apiRequest(`/api/notes?${query}`);
+    },
+
+    async get(id) {
+      return apiRequest(`/api/notes/${id}`);
+    },
+
+    async create(data) {
+      return apiRequest('/api/notes', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async update(id, data) {
+      return apiRequest(`/api/notes/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async delete(id) {
+      return apiRequest(`/api/notes/${id}`, { method: 'DELETE' });
+    },
+
+    async search(query, limit = 50) {
+      return apiRequest(`/api/notes/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+    },
+
+    // Tags management
+    tags: {
+      async list() {
+        return apiRequest('/api/notes/tags/list');
+      },
+
+      async create(data) {
+        return apiRequest('/api/notes/tags', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      },
+
+      async update(id, data) {
+        return apiRequest(`/api/notes/tags/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(data),
+        });
+      },
+
+      async delete(id) {
+        return apiRequest(`/api/notes/tags/${id}`, { method: 'DELETE' });
+      },
+
+      // Note-Tags junction
+      async addToNote(noteId, tagId) {
+        return apiRequest(`/api/notes/${noteId}/tags`, {
+          method: 'POST',
+          body: JSON.stringify({ tag_id: tagId }),
+        });
+      },
+
+      async removeFromNote(noteId, tagId) {
+        return apiRequest(`/api/notes/${noteId}/tags/${tagId}`, { method: 'DELETE' });
+      },
+    },
+
+    // Shares management
+    shares: {
+      async list(noteId) {
+        return apiRequest(`/api/notes/${noteId}/share`);
+      },
+
+      async create(noteId, data) {
+        return apiRequest(`/api/notes/${noteId}/share`, {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      },
+
+      async remove(noteId, targetUserId) {
+        return apiRequest(`/api/notes/${noteId}/share/${targetUserId}`, { method: 'DELETE' });
+      },
     },
   },
 };

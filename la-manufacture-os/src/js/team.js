@@ -176,7 +176,6 @@ async function deleteMember(id) {
   if (!confirm('Supprimer ce membre ? Ses taches seront aussi supprimees.')) return;
 
   try {
-    console.log(`Suppression du membre ${id}...`);
     await api.team.deleteMember(id);
     teamMembers = teamMembers.filter(m => String(m.id) !== String(id));
     renderMembers();
@@ -334,7 +333,6 @@ export async function initTeam(userId) {
   const syncFileTargetState = () => {
     if (fileTargetMember && fileGlobal) {
       fileTargetMember.disabled = fileGlobal.checked;
-      console.log('Syncing file target state:', fileGlobal.checked);
     }
   };
 

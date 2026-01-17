@@ -109,47 +109,54 @@
     height: 100%;
     border-radius: 50%;
     overflow: hidden;
-    /* clip-path is more reliable than overflow:hidden + border-radius */
-    clip-path: circle(50% at 50% 50%);
-    -webkit-clip-path: circle(50% at 50% 50%);
+    background: #000;
 }
 
-/* Earth day texture 8K - rotating to the RIGHT */
+/* Earth day texture - rotating to the RIGHT */
 .planet-day {
     position: absolute;
-    width: 200%;
+    width: 100%;
     height: 100%;
     left: 0;
     top: 0;
-    background: url('/earth-day-8k.jpg') repeat-x;
-    background-size: 50% 100%;
-    animation: rotateEarth 90s linear infinite;
+    background-color: #1a4d6e;
+    background-image: url('/earth-day.webp');
+    background-repeat: repeat-x;
+    background-size: cover;
+    background-position: 0 0;
+    animation: rotateEarthRight 90s linear infinite;
 }
 
 /* Clouds layer - slightly faster rotation for realism */
 .planet-clouds {
     position: absolute;
-    width: 200%;
+    width: 100%;
     height: 100%;
     left: 0;
     top: 0;
-    background: url('/earth-clouds-8k.jpg') repeat-x;
-    background-size: 50% 100%;
-    animation: rotateEarth 80s linear infinite;
+    background-color: transparent;
+    background-image: url('/earth-clouds.webp');
+    background-repeat: repeat-x;
+    background-size: cover;
+    background-position: 0 0;
+    animation: rotateEarthRight 80s linear infinite;
     opacity: 0.5;
     z-index: 2;
 }
 
-/* Earth night/cities texture 8K - same rotation as day */
+/* Earth night/cities texture - same rotation as day */
 .planet-night {
     position: absolute;
-    width: 200%;
+    width: 100%;
     height: 100%;
     left: 0;
     top: 0;
-    background: url('/earth-night-8k.jpg') repeat-x;
-    background-size: 50% 100%;
-    animation: rotateEarth 90s linear infinite;
+    background-color: #0a0a12;
+    background-image: url('/earth-night.webp');
+    background-repeat: repeat-x;
+    background-size: cover;
+    background-position: 0 0;
+    animation: rotateEarthRight 90s linear infinite;
 }
 
 /* Shadow layer - sun from LEFT, shadow on RIGHT with curved terminator */
@@ -179,6 +186,7 @@
     height: 100%;
     border-radius: 50%;
     overflow: hidden;
+    background: transparent;
     /* Mask shows cities only on the dark/right side */
     -webkit-mask-image: radial-gradient(ellipse 120% 100% at -30% 50%,
         transparent 40%,
@@ -198,7 +206,7 @@
 /* Planet night inside mask - needs same sizing as day */
 .planet-cities-mask .planet-night {
     position: absolute;
-    width: 200%;
+    width: 100%;
     height: 100%;
     left: 0;
     top: 0;
@@ -218,25 +226,10 @@
     pointer-events: none;
 }
 
-/* 3D sphere lighting effect */
-.planet-3d {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    /* Subtle highlight on lit edge for 3D depth */
-    background: radial-gradient(
-        ellipse 30% 50% at 15% 50%,
-        rgba(255, 255, 255, 0.03) 0%,
-        transparent 70%
-    );
-    z-index: 11;
-    pointer-events: none;
-}
-
-@keyframes rotateEarth {
-    from { transform: translateX(-50%); }
-    to { transform: translateX(0); }
+/* Rotation vers la DROITE (continents vont vers la droite = fond va vers la gauche) */
+@keyframes rotateEarthRight {
+    from { background-position: 0 0; }
+    to { background-position: -100% 0; }
 }
 
 /* Content - Centered Mission Control Style */
@@ -245,7 +238,7 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
+    z-index: 100;
     text-align: center;
     max-width: 600px;
     padding: 0 40px;
@@ -353,8 +346,9 @@
     animation: zoomIntoSpace 0.7s ease-in forwards;
 }
 
-.brief-overlay-spacex.launching .planet-surface,
-.brief-overlay-spacex.launching .planet-cities {
+.brief-overlay-spacex.launching .planet-day,
+.brief-overlay-spacex.launching .planet-clouds,
+.brief-overlay-spacex.launching .planet-night {
     animation-play-state: paused;
 }
 
@@ -362,7 +356,7 @@
     animation: planetZoom 0.7s ease-in forwards;
 }
 
-.brief-overlay-spacex.launching .brief-content-spacex {
+.brief-overlay-spacex.launching .brief-content-mission {
     animation: contentFadeOut 0.5s ease-in forwards;
 }
 
