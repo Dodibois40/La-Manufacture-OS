@@ -6,6 +6,10 @@ const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 let clerk = null;
 let initialized = false;
 
+// Token cache for performance (avoid refetching on every API call)
+let cachedToken = null;
+let tokenExpiry = 0;
+
 // Initialize Clerk
 export async function initClerk() {
   if (initialized && clerk) {
@@ -39,15 +43,26 @@ export function getSession() {
   return clerk?.session || null;
 }
 
-// Get JWT token for API calls
+// Get JWT token for API calls (cached for 50s to avoid refetching)
 export async function getToken() {
   if (!clerk?.session) {
+    cachedToken = null;
     return null;
   }
+
+  // Return cached token if still valid (with 10s buffer before expiry)
+  const now = Date.now();
+  if (cachedToken && tokenExpiry > now + 10000) {
+    return cachedToken;
+  }
+
   try {
-    return await clerk.session.getToken();
+    cachedToken = await clerk.session.getToken();
+    tokenExpiry = now + 50000; // Cache for 50s (Clerk tokens expire at 60s)
+    return cachedToken;
   } catch (err) {
     console.error('Error getting Clerk token:', err);
+    cachedToken = null;
     return null;
   }
 }
@@ -170,6 +185,8 @@ export async function resetPassword(signIn, code, newPassword) {
 // Sign out
 export async function signOut() {
   if (!clerk) return;
+  cachedToken = null; // Clear token cache
+  tokenExpiry = 0;
   await clerk.signOut();
   window.location.reload();
 }

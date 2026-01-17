@@ -165,12 +165,19 @@ const initAuthUI = () => {
     loginBtn.textContent = 'Signing in...';
     if (loginError) loginError.textContent = '';
 
-    const result = await signInWithEmail(email, password);
+    try {
+      const result = await signInWithEmail(email, password);
 
-    if (result.success) {
-      window.location.reload();
-    } else {
-      if (loginError) loginError.textContent = result.error || 'Sign in failed';
+      if (result.success) {
+        window.location.reload();
+      } else {
+        if (loginError) loginError.textContent = result.error || 'Sign in failed';
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Sign In';
+      }
+    } catch (err) {
+      console.error('[Auth] Sign in error:', err);
+      if (loginError) loginError.textContent = 'Erreur: ' + (err.message || 'Connexion impossible');
       loginBtn.disabled = false;
       loginBtn.textContent = 'Sign In';
     }
