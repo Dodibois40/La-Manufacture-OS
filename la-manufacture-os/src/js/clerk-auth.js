@@ -218,8 +218,14 @@ export async function signInWithEmail(email, password) {
         throw setActiveErr;
       }
     } else if (result.status === 'needs_second_factor') {
-      console.log('[Clerk] 2FA required');
-      return { success: false, status: 'needs_second_factor', signIn: result, error: '2FA requis (contacte admin)' };
+      console.log('[Clerk] 2FA required, available factors:', result.supportedSecondFactors);
+      console.log('[Clerk] Full result:', JSON.stringify(result, null, 2));
+
+      // Check what 2FA options are available
+      const factors = result.supportedSecondFactors || [];
+      const factorTypes = factors.map(f => f.strategy).join(', ') || 'aucun';
+
+      return { success: false, status: 'needs_second_factor', signIn: result, error: `2FA requis (types: ${factorTypes}). Désactive le 2FA sur ton compte Clerk.` };
     } else {
       console.log('[Clerk] Unexpected status:', result.status);
       return { success: false, status: result.status, error: `Status inattendu: ${result.status}` };
