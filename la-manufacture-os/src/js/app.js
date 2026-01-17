@@ -438,6 +438,83 @@ const initApp = async () => {
         toast('Synchronisé');
       }
 
+      // Initialize navigation listeners (needed for API mode since initApp returns early)
+      document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
+      document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
+      document.getElementById('nav-notes')?.addEventListener('click', () => {
+        window.location.href = '/notes.html';
+      });
+      document.getElementById('nav-team')?.addEventListener('click', () => {
+        window.location.href = '/team.html';
+      });
+      document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
+
+      // macOS Dock Magnification Effect
+      initDockMagnification();
+
+      // Init modules (needed for API mode)
+      initConfig(state, render, setView);
+      initEditMode(state, render);
+      initPlanningControls(state, render);
+      initCommandBar(state, render);
+      initMorningBriefing(state);
+      initFocusTimer();
+      initSpeechToText();
+      initDailyReview(state, render);
+
+      // Quick dump handler for API mode
+      const handleTasksAdded = async (tasks) => {
+        for (const t of tasks) {
+          try {
+            const apiTask = await api.tasks.create(t);
+            state.tasks.push(apiTask);
+
+            // Sync to Google Calendar if event and connected
+            if (apiTask.is_event) {
+              if (isGoogleConnected()) {
+                try {
+                  const googleEventId = await syncTaskToGoogle(apiTask);
+                  if (googleEventId) {
+                    await api.tasks.update(apiTask.id, { google_event_id: googleEventId });
+                    apiTask.google_event_id = googleEventId;
+                  }
+                } catch (syncError) {
+                  console.warn('Google sync failed:', syncError);
+                }
+              } else {
+                toast('RDV créé, mais Google Calendar non connecté', 'info');
+              }
+            }
+          } catch (e) {
+            console.error('Error adding task from Quick Dump:', e);
+            state.tasks.push(t); // Fallback
+          }
+        }
+        saveState(state);
+        render();
+      };
+
+      const quickDumpBtn = document.getElementById('quickDumpBtn');
+      if (quickDumpBtn) {
+        quickDumpBtn.addEventListener('click', () => {
+          openQuickDump(state, handleTasksAdded);
+        });
+      }
+
+      // Nav-inbox: ouvre quick dump
+      document.getElementById('nav-inbox')?.addEventListener('click', () => {
+        openQuickDump(state, handleTasksAdded);
+      });
+
+      // ManualAddBtn (Today view "✎"): ouvre command bar
+      document.getElementById('manualAddBtn')?.addEventListener('click', () => {
+        if (window.openCommandBar) {
+          window.openCommandBar();
+        }
+      });
+
+      initQuickDumpShortcut(state, handleTasksAdded);
+
       initNotifications();
       initShareModal();
       startNotificationPolling();

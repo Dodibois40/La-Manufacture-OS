@@ -210,6 +210,9 @@ export async function signInWithEmail(email, password) {
         }
         throw setActiveErr;
       }
+    } else if (result.status === 'needs_second_factor') {
+      console.log('[Clerk] 2FA required');
+      return { success: false, status: 'needs_second_factor', signIn: result };
     } else {
       console.log('[Clerk] Unexpected status:', result.status);
       return { success: false, status: result.status, error: `Status: ${result.status}` };
@@ -229,6 +232,40 @@ export async function signInWithEmail(email, password) {
       message += ' (iOS: vérifie les cookies dans Paramètres > Safari)';
     }
 
+    return { success: false, error: message };
+  }
+}
+
+// Complete 2FA with TOTP code
+export async function complete2FA(signIn, code) {
+  console.log('[Clerk] complete2FA called');
+  const iosDevice = isIOSWebKit();
+
+  try {
+    const result = await withTimeout(
+      signIn.attemptSecondFactor({
+        strategy: 'totp',
+        code: code,
+      }),
+      10000,
+      'Timeout 2FA'
+    );
+
+    console.log('[Clerk] 2FA result:', result?.status);
+
+    if (result.status === 'complete') {
+      await withTimeout(
+        clerk.setActive({ session: result.createdSessionId }),
+        iosDevice ? 5000 : 8000,
+        'Session timeout'
+      );
+      return { success: true };
+    } else {
+      return { success: false, error: `Status: ${result.status}` };
+    }
+  } catch (err) {
+    console.error('[Clerk] 2FA error:', err);
+    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Code invalide';
     return { success: false, error: message };
   }
 }
