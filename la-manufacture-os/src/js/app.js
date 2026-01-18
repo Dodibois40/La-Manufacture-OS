@@ -474,8 +474,14 @@ const initApp = async () => {
 
   // Helper function for post-login flow (defined early so it's available everywhere)
   async function handlePostLogin() {
-    // Remove instant-auth-mode CSS override
+    // Mark user as logged in (prevents login flash on navigation)
+    try {
+      localStorage.setItem('flow_auth_session', 'true');
+    } catch (e) {}
+
+    // Remove auth CSS overrides
     document.body.classList.remove('instant-auth-mode');
+    document.body.classList.remove('auth-checking');
 
     toast('Synchronisation...');
     try {
@@ -613,10 +619,14 @@ const initApp = async () => {
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   if (isApiMode && !bypassAuth) {
-    // Auth form is already visible via instant-auth-mode CSS
-    hideLoader();
-    initAuthUI();
-    setView('auth');
+    const isAuthChecking = document.body.classList.contains('auth-checking');
+
+    // If not checking auth (new user), show auth form immediately
+    if (!isAuthChecking) {
+      hideLoader();
+      initAuthUI();
+      setView('auth');
+    }
 
     // Start Clerk init in background (non-blocking) + check if already signed in
     initClerk()
@@ -625,11 +635,29 @@ const initApp = async () => {
         if (isSignedIn()) {
           // Already logged in -> redirect to app
           handlePostLogin();
+        } else if (isAuthChecking) {
+          // Was checking auth but user not signed in -> show auth form
+          try {
+            localStorage.removeItem('flow_auth_session');
+          } catch (e) {}
+          document.body.classList.remove('auth-checking');
+          hideLoader();
+          initAuthUI();
+          setView('auth');
         }
       })
       .catch(err => {
         console.warn('[App] Background Clerk init failed:', err.message);
-        // User can still click login - it will retry init
+        // If was checking auth, fall back to showing auth form
+        if (isAuthChecking) {
+          try {
+            localStorage.removeItem('flow_auth_session');
+          } catch (e) {}
+          document.body.classList.remove('auth-checking');
+          hideLoader();
+          initAuthUI();
+          setView('auth');
+        }
       });
 
     return; // Don't continue to local mode logic
