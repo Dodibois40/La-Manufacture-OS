@@ -19,7 +19,7 @@ const preloadTextures = () => {
   }));
 };
 
-export const initMorningBriefing = async (state) => {
+export const initMorningBriefing = async (state, user = null) => {
   // Check if first launch of the day
   const today = isoLocal();
   let lastLaunch = null;
@@ -32,7 +32,7 @@ export const initMorningBriefing = async (state) => {
   // If already seen today, skip (unless debug force)
   if (lastLaunch === today && !window.location.search.includes('forceBrief')) return;
 
-  const user = 'Moi';
+  const userName = user?.name || 'Moi';
 
   // Preload textures before showing briefing
   await preloadTextures();
@@ -61,7 +61,7 @@ export const initMorningBriefing = async (state) => {
       <!-- Content - Centered Mission Control Style -->
       <div class="brief-content-mission">
         <div class="mission-date">${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase()}</div>
-        <h1 class="mission-greeting">Bonjour, ${user}</h1>
+        <h1 class="mission-greeting">Bonjour, ${userName}</h1>
         <p class="mission-tagline">${todayCount > 0 ? `${todayCount} objectif${todayCount > 1 ? 's' : ''} aujourd'hui.` : 'Aucune mission planifiée.'}</p>
         ${urgentCount > 0 ? `<p class="mission-urgent">${urgentCount} prioritaire${urgentCount > 1 ? 's' : ''}</p>` : ''}
         <button class="btn-mission" id="startDayBtn">

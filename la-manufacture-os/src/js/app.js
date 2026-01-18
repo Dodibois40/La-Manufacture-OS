@@ -494,7 +494,7 @@ const initApp = async () => {
       initDayDetailEditMode(state);
       initPlanningControls(state, render);
       initCommandBar(state, render);
-      initMorningBriefing(state);
+      initMorningBriefing(state, user);
       initFocusTimer();
       // initSpeechToText(); // removed - now in quick-dump.js
       initDailyReview(state, render);

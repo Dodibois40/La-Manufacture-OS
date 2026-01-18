@@ -105,91 +105,59 @@ await fastify.register(clerkPlugin, {
 
 // Auth decorator using Clerk
 fastify.decorate('authenticate', async function (request, reply) {
-  // ===============================================
-  // TEMPORAIRE: Auth désactivée pour tests
-  // ===============================================
-  const testEmail = 'test@lamanufacture64.com';
+  const auth = getAuth(request);
 
-  try {
-    let localUser = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
-      [testEmail]
-    );
-
-    if (localUser.rows.length === 0) {
-      const result = await pool.query(
-        `INSERT INTO users (clerk_id, email, name, role)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id`,
-        ['test-clerk-id', testEmail, 'Test Manager', 'manager']
-      );
-      request.user = { userId: result.rows[0].id, clerkId: 'test-clerk-id' };
-      fastify.log.info('✅ Test user created:', { userId: result.rows[0].id });
-    } else {
-      request.user = { userId: localUser.rows[0].id, clerkId: 'test-clerk-id' };
-    }
-    return; // Succès
-  } catch (err) {
-    fastify.log.error('Error with test user:', err);
-    return reply.status(500).send({ error: 'Test user error' });
+  if (!auth.userId) {
+    return reply.status(401).send({ error: 'Unauthorized' });
   }
 
-  // ===============================================
-  // CODE ORIGINAL (commenté temporairement)
-  // ===============================================
-  // const auth = getAuth(request);
-  //
-  // if (!auth.userId) {
-  //   return reply.status(401).send({ error: 'Unauthorized' });
-  // }
-  //
-  // // Get or create local user from Clerk
-  // const localUser = await pool.query(
-  //   'SELECT id FROM users WHERE clerk_id = $1',
-  //   [auth.userId]
-  // );
-  //
-  // if (localUser.rows.length > 0) {
-  //   request.user = { userId: localUser.rows[0].id, clerkId: auth.userId };
-  // } else {
-  //   // Auto-create local user on first auth
-  //   try {
-  //     const clerkUser = await clerkClient.users.getUser(auth.userId);
-  //     const email = clerkUser.emailAddresses[0]?.emailAddress;
-  //     const name = clerkUser.firstName || clerkUser.username || 'User';
-  //
-  //     // Validate email
-  //     if (!email) {
-  //       fastify.log.error('Clerk user has no email address:', { userId: auth.userId, clerkUser });
-  //       return reply.status(400).send({ error: 'User must have an email address' });
-  //     }
-  //
-  //     fastify.log.info('Creating/updating user from Clerk:', { clerkId: auth.userId, email, name });
-  //
-  //     // Use UPSERT: insert or update if user already exists with this email
-  //     const result = await pool.query(
-  //       `INSERT INTO users (clerk_id, email, name)
-  //        VALUES ($1, $2, $3)
-  //        ON CONFLICT (email)
-  //        DO UPDATE SET clerk_id = EXCLUDED.clerk_id, name = EXCLUDED.name, updated_at = CURRENT_TIMESTAMP
-  //        RETURNING id`,
-  //       [auth.userId, email, name]
-  //     );
-  //     request.user = { userId: result.rows[0].id, clerkId: auth.userId };
-  //
-  //     fastify.log.info('User created/updated successfully:', { userId: result.rows[0].id, clerkId: auth.userId });
-  //   } catch (err) {
-  //     fastify.log.error('Error creating/updating user from Clerk:', {
-  //       message: err.message,
-  //       code: err.code,
-  //       detail: err.detail,
-  //       constraint: err.constraint,
-  //       clerkId: auth.userId
-  //     });
-  //
-  //     return reply.status(500).send({ error: 'Failed to create/update user', details: err.message });
-  //   }
-  // }
+  // Get or create local user from Clerk
+  const localUser = await pool.query(
+    'SELECT id FROM users WHERE clerk_id = $1',
+    [auth.userId]
+  );
+
+  if (localUser.rows.length > 0) {
+    request.user = { userId: localUser.rows[0].id, clerkId: auth.userId };
+  } else {
+    // Auto-create local user on first auth
+    try {
+      const clerkUser = await clerkClient.users.getUser(auth.userId);
+      const email = clerkUser.emailAddresses[0]?.emailAddress;
+      const name = clerkUser.firstName || clerkUser.username || 'User';
+
+      // Validate email
+      if (!email) {
+        fastify.log.error('Clerk user has no email address:', { userId: auth.userId, clerkUser });
+        return reply.status(400).send({ error: 'User must have an email address' });
+      }
+
+      fastify.log.info('Creating/updating user from Clerk:', { clerkId: auth.userId, email, name });
+
+      // Use UPSERT: insert or update if user already exists with this email
+      const result = await pool.query(
+        `INSERT INTO users (clerk_id, email, name)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (email)
+         DO UPDATE SET clerk_id = EXCLUDED.clerk_id, name = EXCLUDED.name, updated_at = CURRENT_TIMESTAMP
+         RETURNING id`,
+        [auth.userId, email, name]
+      );
+      request.user = { userId: result.rows[0].id, clerkId: auth.userId };
+
+      fastify.log.info('User created/updated successfully:', { userId: result.rows[0].id, clerkId: auth.userId });
+    } catch (err) {
+      fastify.log.error('Error creating/updating user from Clerk:', {
+        message: err.message,
+        code: err.code,
+        detail: err.detail,
+        constraint: err.constraint,
+        clerkId: auth.userId
+      });
+
+      return reply.status(500).send({ error: 'Failed to create/update user', details: err.message });
+    }
+  }
 });
 
 // Export clerkClient for routes
