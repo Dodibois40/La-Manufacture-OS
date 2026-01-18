@@ -500,30 +500,39 @@ const initApp = async () => {
 
       // Quick dump handler for API mode
       const handleTasksAdded = async (tasks) => {
-        for (const t of tasks) {
-          try {
-            const apiTask = await api.tasks.create(t);
-            state.tasks.push(apiTask);
+        // Si array vide = items créés via l'API (process-inbox), recharger le state
+        if (tasks.length === 0) {
+          const apiState = await loadStateFromApi();
+          if (apiState) {
+            state.tasks = apiState.tasks;
+            state.settings = apiState.settings || state.settings;
+          }
+        } else {
+          for (const t of tasks) {
+            try {
+              const apiTask = await api.tasks.create(t);
+              state.tasks.push(apiTask);
 
-            // Sync to Google Calendar if event and connected
-            if (apiTask.is_event) {
-              if (isGoogleConnected()) {
-                try {
-                  const googleEventId = await syncTaskToGoogle(apiTask);
-                  if (googleEventId) {
-                    await api.tasks.update(apiTask.id, { google_event_id: googleEventId });
-                    apiTask.google_event_id = googleEventId;
+              // Sync to Google Calendar if event and connected
+              if (apiTask.is_event) {
+                if (isGoogleConnected()) {
+                  try {
+                    const googleEventId = await syncTaskToGoogle(apiTask);
+                    if (googleEventId) {
+                      await api.tasks.update(apiTask.id, { google_event_id: googleEventId });
+                      apiTask.google_event_id = googleEventId;
+                    }
+                  } catch (syncError) {
+                    console.warn('Google sync failed:', syncError);
                   }
-                } catch (syncError) {
-                  console.warn('Google sync failed:', syncError);
+                } else {
+                  toast('RDV créé, mais Google Calendar non connecté', 'info');
                 }
-              } else {
-                toast('RDV créé, mais Google Calendar non connecté', 'info');
               }
+            } catch (e) {
+              console.error('Error adding task from Quick Dump:', e);
+              state.tasks.push(t); // Fallback
             }
-          } catch (e) {
-            console.error('Error adding task from Quick Dump:', e);
-            state.tasks.push(t); // Fallback
           }
         }
         saveState(state);
