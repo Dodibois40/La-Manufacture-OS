@@ -1,8 +1,9 @@
 // Quick Dump - Rapid brain dump to tasks
 // Captures multiple thoughts at once, AI parses them into tasks
 
-import { api } from './api-client.js';
+import { api, isApiMode } from './api-client.js';
 import { toast } from './utils.js';
+import { loadStateFromApi } from './storage.js';
 
 // Create quick dump modal
 export const openQuickDump = (state, onTasksAdded) => {
@@ -190,7 +191,16 @@ export const openQuickDump = (state, onTasksAdded) => {
       if (messages.length > 0) {
         toast(`✅ ${messages.join(', ')} créé(s)!`, 'success');
 
-        // Trigger refresh - call with empty array since items are already in DB
+        // Reload state from API directly (items are already in DB)
+        if (isApiMode) {
+          const apiState = await loadStateFromApi();
+          if (apiState) {
+            state.tasks = apiState.tasks;
+            state.settings = apiState.settings || state.settings;
+          }
+        }
+
+        // Trigger render
         onTasksAdded([]);
 
         closeQuickDump();
