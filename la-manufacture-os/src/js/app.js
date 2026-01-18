@@ -7,7 +7,7 @@ import { renderConfig, initConfig } from './config.js';
 import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
-import { initSpeechToText } from './speech.js';
+// speech.js removed - speech recognition is now in quick-dump.js
 import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCode, forgotPassword, resetPassword, completeEmailCode } from './clerk-auth.js';
 import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
@@ -495,7 +495,7 @@ const initApp = async () => {
       initCommandBar(state, render);
       initMorningBriefing(state);
       initFocusTimer();
-      initSpeechToText();
+      // initSpeechToText(); // removed - now in quick-dump.js
       initDailyReview(state, render);
 
       // Quick dump handler for API mode
@@ -626,7 +626,7 @@ const initApp = async () => {
   initCommandBar(state, render);
   initMorningBriefing(state);
   initFocusTimer();
-  initSpeechToText();
+  // initSpeechToText(); // removed - now in quick-dump.js
   initDailyReview(state, render);
 
   // Quick dump handler
