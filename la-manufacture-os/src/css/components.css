@@ -2108,3 +2108,13 @@ textarea:focus {
 .review-btn.secondary:hover {
   background: rgba(10, 132, 255, 0.25);
 }
+
+/* ========================================
+   MOBILE - Hide non-essential elements
+   ======================================== */
+
+@media (max-width: 768px) {
+  .daily-inspiration {
+    display: none;
+  }
+}

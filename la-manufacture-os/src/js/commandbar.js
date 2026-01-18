@@ -22,14 +22,20 @@ export const initCommandBar = (state, renderCallback) => {
     <div class="cmd-box">
       <div class="cmd-input-wrap">
         <span class="cmd-icon">⚡</span>
-        <input type="text" id="cmdInput" placeholder="Nouveau rappel... (@Thibaud, urgent, lundi)" autocomplete="off">
+        <input type="text" id="cmdInput" placeholder="Écris ta tâche ici... (ex: RDV dentiste lundi 14h)" autocomplete="off">
       </div>
       <div class="cmd-preview" id="cmdPreview">
-        <span class="cmd-tag placeholder">Tapez votre tâche...</span>
+        <span class="cmd-preview-hint">👆 L'IA détecte automatiquement : qui, quand, quoi</span>
       </div>
-      <div class="cmd-hints">
-        <span><kbd>⏎</kbd> Créer</span>
-        <span><kbd>Esc</kbd> Fermer</span>
+      <div class="cmd-actions">
+        <button class="cmd-btn cmd-btn-cancel" id="cmdCancel">
+          <span class="cmd-btn-key">Esc</span>
+          Fermer
+        </button>
+        <button class="cmd-btn cmd-btn-create" id="cmdCreate" disabled>
+          Créer
+          <span class="cmd-btn-key">⏎</span>
+        </button>
       </div>
     </div>
   `;
@@ -38,11 +44,15 @@ export const initCommandBar = (state, renderCallback) => {
   const input = document.getElementById('cmdInput');
   const preview = document.getElementById('cmdPreview');
   const overlay = document.getElementById('cmdBarOverlay');
+  const cancelBtn = document.getElementById('cmdCancel');
+  const createBtn = document.getElementById('cmdCreate');
 
   const close = () => {
     overlay.classList.remove('active');
     input.value = '';
-    preview.innerHTML = '<span class="cmd-tag placeholder">Tapez votre tâche...</span>';
+    preview.innerHTML =
+      '<span class="cmd-preview-hint">👆 L\'IA détecte automatiquement : qui, quand, quoi</span>';
+    createBtn.disabled = true;
   };
 
   const open = () => {
@@ -125,9 +135,14 @@ export const initCommandBar = (state, renderCallback) => {
     const meta = analyze(val);
 
     if (!meta || !meta.title) {
-      preview.innerHTML = '<span class="cmd-tag placeholder">Tapez votre tâche...</span>';
+      preview.innerHTML =
+        '<span class="cmd-preview-hint">👆 L\'IA détecte automatiquement : qui, quand, quoi</span>';
+      createBtn.disabled = true;
       return;
     }
+
+    // Enable create button when there's valid input
+    createBtn.disabled = false;
 
     let html = `
       <span class="cmd-tag owner">👤 ${meta.owner}</span>
@@ -209,5 +224,12 @@ export const initCommandBar = (state, renderCallback) => {
 
   overlay.addEventListener('click', e => {
     if (e.target === overlay) close();
+  });
+
+  // Button click handlers
+  cancelBtn.addEventListener('click', close);
+  createBtn.addEventListener('click', () => {
+    // Trigger the same logic as Enter key
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
   });
 };

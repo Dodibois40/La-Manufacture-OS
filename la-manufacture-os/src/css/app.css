@@ -1505,3 +1505,52 @@ nav button.active .nav-icon {
     transform: translateY(0) scale(1);
   }
 }
+
+/* ========================================
+   MOBILE OPTIMIZATIONS - Espace vertical
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Header global - toutes les pages */
+  header {
+    padding: 16px 0 12px;
+  }
+
+  .header-logo-letter {
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+  }
+
+  .topStatus {
+    margin: 8px 0 4px;
+    gap: 6px;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+  }
+
+  /* Vue Jour - date compacte */
+  #view-day .view-header {
+    padding: 12px 0 16px;
+  }
+
+  #view-day .view-header h1 {
+    font-size: 3rem;
+  }
+
+  #view-day .view-header .date-sub {
+    font-size: 0.95rem;
+  }
+
+  /* Bouton Focus compact */
+  .focus-launch-container {
+    margin-bottom: 12px;
+  }
+
+  .btn-focus-start {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}

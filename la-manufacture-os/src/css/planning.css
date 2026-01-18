@@ -207,3 +207,36 @@
   color: var(--text-sec);
   font-size: 0.9rem;
 }
+
+/* ========================================
+   MOBILE - Planning compact
+   ======================================== */
+
+@media (max-width: 768px) {
+  .planning-container {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .planning-header {
+    padding: 8px 0;
+  }
+
+  .month-title {
+    font-size: 1.2rem;
+  }
+
+  .calendar-grid {
+    padding: 12px;
+    gap: 4px;
+  }
+
+  .day-detail {
+    padding: 16px;
+    min-height: 140px;
+  }
+
+  .day-detail-header h3 {
+    font-size: 1.1rem;
+  }
+}

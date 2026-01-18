@@ -155,28 +155,119 @@
   font-weight: 400;
 }
 
-.cmd-hints {
-  display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-  padding: 10px 24px;
-  background: rgba(0, 0, 0, 0.1);
-  font-size: 0.75rem;
+.cmd-preview-hint {
   color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.cmd-hints span {
+/* Action buttons - Mobile first UX */
+.cmd-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.cmd-btn {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.cmd-hints kbd {
-  background: rgba(255, 255, 255, 0.1);
+.cmd-btn-key {
+  font-size: 0.75rem;
   padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-family: inherit;
-  color: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 0.7;
+}
+
+/* Cancel button - secondary, left */
+.cmd-btn-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cmd-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cmd-btn-cancel:active {
+  transform: scale(0.98);
+}
+
+/* Create button - primary, right */
+.cmd-btn-create {
+  background: rgba(50, 215, 75, 0.2);
+  color: #32d74b;
+  border: 1px solid rgba(50, 215, 75, 0.3);
+}
+
+.cmd-btn-create:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.25);
+  border: 1px solid transparent;
+  cursor: not-allowed;
+}
+
+.cmd-btn-create:not(:disabled):hover {
+  background: rgba(50, 215, 75, 0.3);
+  box-shadow: 0 0 20px rgba(50, 215, 75, 0.2);
+}
+
+.cmd-btn-create:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+/* Pulse animation when enabled */
+.cmd-btn-create:not(:disabled) {
+  animation: createPulse 2s ease-in-out infinite;
+}
+
+@keyframes createPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(50, 215, 75, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px 2px rgba(50, 215, 75, 0.2);
+  }
+}
+
+/* Hide keyboard hints on mobile, show on desktop */
+@media (max-width: 768px) {
+  .cmd-btn-key {
+    display: none;
+  }
+
+  .cmd-btn {
+    padding: 14px 16px;
+  }
+}
+
+@media (min-width: 769px) {
+  .cmd-actions {
+    padding: 10px 24px;
+  }
+
+  .cmd-btn {
+    flex: 0 1 auto;
+    padding: 8px 16px;
+  }
+
+  .cmd-btn-cancel {
+    background: transparent;
+  }
 }
