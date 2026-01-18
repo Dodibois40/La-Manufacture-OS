@@ -1,6 +1,100 @@
 import { google } from 'googleapis';
 import { query } from '../db/connection.js';
 
+// Helper function for internal sync (called from ai.js for auto-sync)
+export async function syncEventToGoogleInternal(fastify, userId, task) {
+  try {
+    // Check if Google connected
+    const tokensResult = await query(
+      'SELECT access_token, refresh_token, token_expiry, calendar_id FROM google_tokens WHERE user_id = $1',
+      [userId]
+    );
+    if (tokensResult.rows.length === 0) {
+      return null; // Google not connected, skip silently
+    }
+
+    const tokens = tokensResult.rows[0];
+    const calendar_id = tokens.calendar_id || 'primary';
+
+    // Setup OAuth client
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+    oauth2Client.setCredentials({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expiry_date: new Date(tokens.token_expiry).getTime()
+    });
+
+    // Refresh token if expired
+    if (new Date(tokens.token_expiry) < new Date()) {
+      fastify.log.info({ userId }, 'Auto-sync: Refreshing Google token...');
+      const { credentials } = await oauth2Client.refreshAccessToken();
+      await query(
+        'UPDATE google_tokens SET access_token = $1, token_expiry = $2, updated_at = CURRENT_TIMESTAMP WHERE user_id = $3',
+        [credentials.access_token, new Date(credentials.expiry_date), userId]
+      );
+      oauth2Client.setCredentials(credentials);
+    }
+
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+    // Format time to HH:MM
+    const formatTime = (t) => {
+      if (!t) return null;
+      const match = String(t).match(/^(\d{1,2})[:h](\d{2})/i);
+      return match ? `${match[1].padStart(2, '0')}:${match[2]}` : null;
+    };
+
+    const startHM = formatTime(task.start_time);
+    if (!startHM) {
+      fastify.log.warn({ taskId: task.id, start_time: task.start_time }, 'Auto-sync: Invalid start_time format');
+      return null;
+    }
+
+    let endHM = formatTime(task.end_time);
+    if (!endHM) {
+      // Default: 30 min after start
+      const [h, m] = startHM.split(':').map(Number);
+      const endD = new Date(2000, 0, 1, h, m + 30);
+      endHM = `${String(endD.getHours()).padStart(2, '0')}:${String(endD.getMinutes()).padStart(2, '0')}`;
+    }
+
+    // Ensure date is only YYYY-MM-DD
+    const cleanDate = typeof task.date === 'string' ? task.date.split('T')[0] : new Date(task.date).toISOString().split('T')[0];
+
+    const event = {
+      summary: task.text,
+      description: 'Synchronisé depuis FLOW',
+      location: task.location || undefined,
+      start: {
+        dateTime: `${cleanDate}T${startHM}:00`,
+        timeZone: 'Europe/Paris',
+      },
+      end: {
+        dateTime: `${cleanDate}T${endHM}:00`,
+        timeZone: 'Europe/Paris',
+      },
+    };
+
+    fastify.log.info({ taskId: task.id, summary: event.summary, start: event.start.dateTime }, 'Auto-sync: Creating Google event');
+
+    const result = await calendar.events.insert({
+      calendarId: calendar_id,
+      resource: event,
+    });
+
+    fastify.log.info({ taskId: task.id, googleEventId: result.data.id }, 'Auto-sync: Success');
+    return result.data.id;
+
+  } catch (error) {
+    fastify.log.error({ userId, taskId: task.id, error: error.message }, 'Auto-sync: Failed');
+    return null; // Don't throw - event creation should succeed even if sync fails
+  }
+}
+
 // OAuth2 client getter to ensure env vars are loaded
 let _oauth2Client = null;
 function getOAuth2Client() {

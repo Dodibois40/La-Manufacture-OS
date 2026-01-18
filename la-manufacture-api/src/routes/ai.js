@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { query } from '../db/connection.js';
+import { syncEventToGoogleInternal } from './google-calendar.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -679,11 +680,24 @@ Réponds UNIQUEMENT avec JSON valide (pas de texte avant/après) : { "items": [.
               }
             }
 
+            // Auto-sync to Google Calendar if event with start_time
+            if (item.type === 'event' && createdTask.start_time) {
+              const googleEventId = await syncEventToGoogleInternal(fastify, userId, createdTask);
+              if (googleEventId) {
+                await query(
+                  'UPDATE tasks SET google_event_id = $1 WHERE id = $2',
+                  [googleEventId, createdTask.id]
+                );
+                createdTask.google_event_id = googleEventId;
+              }
+            }
+
             itemsCreated.push({
               type: item.type,
               id: createdTask.id,
               text: createdTask.text,
-              date: createdTask.date
+              date: createdTask.date,
+              google_synced: !!createdTask.google_event_id
             });
 
           } else if (item.type === 'note') {
