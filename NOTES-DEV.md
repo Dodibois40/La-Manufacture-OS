@@ -80,3 +80,31 @@ const tomorrowDate = tomorrow.toISOString().split('T')[0];
 **Règle** : Toujours fournir les dates calculées explicitement dans le prompt. Ne jamais demander à l'IA de faire des calculs de dates.
 
 ---
+
+### 4. Comparaison de dates Frontend vs API (Janvier 2026)
+
+**Problème** : Les tâches créées via le Quick Dump n'apparaissaient pas dans le calendrier, même si l'API confirmait leur création.
+
+**Cause** :
+- L'API retourne des dates au format ISO avec timezone : `"2026-01-19T00:00:00.000Z"`
+- Le frontend compare avec des dates simples : `"2026-01-19"`
+- La comparaison stricte `t.date === selectedDate` échoue car les formats diffèrent
+
+**Solution** :
+```javascript
+// AVANT (bugué)
+.filter(t => t.date === selectedDate)
+
+// APRÈS (corrigé)
+.filter(t => (t.date || '').split('T')[0] === selectedDate)
+```
+
+**Fichiers concernés** :
+- `la-manufacture-os/src/js/views.js` - renderDayDetail, renderDay, createCalendarDay
+- `la-manufacture-os/src/js/daily-review.js`
+- `la-manufacture-os/src/js/morning.js`
+- `la-manufacture-os/src/js/stats.js`
+
+**Règle** : Toujours normaliser les dates avec `.split('T')[0]` avant de comparer côté frontend.
+
+---
