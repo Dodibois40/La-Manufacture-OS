@@ -7,16 +7,16 @@ const MAX_POLL_INTERVAL = 5 * 60 * 1000; // Max 5 minutes
 const MIN_POLL_INTERVAL = 60000; // Min 1 minute
 
 // Format relative time
-const timeAgo = (date) => {
+const timeAgo = date => {
   const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-  if (seconds < 60) return 'A l\'instant';
+  if (seconds < 60) return "A l'instant";
   if (seconds < 3600) return `Il y a ${Math.floor(seconds / 60)} min`;
   if (seconds < 86400) return `Il y a ${Math.floor(seconds / 3600)}h`;
   return `Il y a ${Math.floor(seconds / 86400)}j`;
 };
 
 // Update badge count
-const updateBadge = (count) => {
+const updateBadge = count => {
   const badge = document.getElementById('notificationBadge');
   if (!badge) return;
 
@@ -26,7 +26,7 @@ const updateBadge = (count) => {
 };
 
 // Render notifications list
-const renderNotifications = (notifications) => {
+const renderNotifications = notifications => {
   const list = document.getElementById('notificationList');
   if (!list) return;
 
@@ -35,13 +35,17 @@ const renderNotifications = (notifications) => {
     return;
   }
 
-  list.innerHTML = notifications.map(n => `
+  list.innerHTML = notifications
+    .map(
+      n => `
     <div class="notification-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
       <div class="notification-item-title">${n.title}</div>
       <div class="notification-item-message">${n.message || ''}</div>
       <div class="notification-item-time">${timeAgo(n.created_at)}</div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Add click listeners to mark as read
   list.querySelectorAll('.notification-item').forEach(item => {
@@ -67,7 +71,7 @@ export const loadNotifications = async () => {
   try {
     const [countResult, notifResult] = await Promise.all([
       api.notifications.getUnreadCount(),
-      api.notifications.getAll()
+      api.notifications.getAll(),
     ]);
 
     const previousCount = notificationCount;
@@ -136,7 +140,7 @@ export const initNotifications = () => {
   if (!bell || !dropdown) return;
 
   // Toggle dropdown
-  bell.addEventListener('click', (e) => {
+  bell.addEventListener('click', e => {
     e.stopPropagation();
     dropdown.classList.toggle('hidden');
     if (!dropdown.classList.contains('hidden')) {
@@ -145,7 +149,7 @@ export const initNotifications = () => {
   });
 
   // Close on outside click
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', e => {
     if (!dropdown.contains(e.target) && e.target !== bell) {
       dropdown.classList.add('hidden');
     }

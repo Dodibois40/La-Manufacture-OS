@@ -4,9 +4,9 @@
   /* Backgrounds */
   --bg-app: #050505;
   /* Noir profond, mais pas #000 absolu */
-  --bg-card: rgba(28, 28, 30, 0.60);
+  --bg-card: rgba(28, 28, 30, 0.6);
   /* Translucide pour le glassmorphism */
-  --bg-card-hover: rgba(44, 44, 46, 0.70);
+  --bg-card-hover: rgba(44, 44, 46, 0.7);
   --bg-overlay: rgba(0, 0, 0, 0.85);
   /* Pour les focus modes */
 
@@ -16,33 +16,35 @@
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 
   /* Accents (Premium - Subtil et élégant) */
-  --accent: #0A84FF;
+  --accent: #0a84ff;
   /* Bleu iOS - propre et pro */
   --accent-glow: rgba(10, 132, 255, 0.3);
-  --gold: #D4AF37;
+  --gold: #d4af37;
   /* Or subtil - uniquement pour highlights spéciaux */
   --gold-glow: rgba(212, 175, 55, 0.25);
-  --danger: #FF453A;
+  --danger: #ff453a;
   /* Urgent / Delete */
-  --success: #30D158;
+  --success: #30d158;
   /* Terminé */
-  --warning: #FF9F0A;
+  --warning: #ff9f0a;
   /* Attention */
 
   /* Typography */
-  --text-main: #FFFFFF;
-  --text-sec: #8E8E93;
+  --text-main: #ffffff;
+  --text-sec: #8e8e93;
   /* Gris Apple */
-  --text-tert: #48484A;
+  --text-tert: #48484a;
 
-  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-stack:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
 
   /* Spacing & Radius - UNIFIED */
   --radius-xs: 6px;
   --radius-s: 10px;
-  --radius-m: 12px;   /* Standard buttons */
-  --radius-l: 16px;   /* Large buttons, cards */
-  --radius-xl: 24px;  /* Modals, large cards */
+  --radius-m: 12px; /* Standard buttons */
+  --radius-l: 16px; /* Large buttons, cards */
+  --radius-xl: 24px; /* Modals, large cards */
   --radius-full: 99px; /* Pills */
 
   --pad-page: 20px;
@@ -52,6 +54,6 @@
 :root {
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   /* Effet rebond */
-  --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   /* Apple default ease */
 }

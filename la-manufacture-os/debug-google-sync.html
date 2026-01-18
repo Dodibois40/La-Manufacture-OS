@@ -1,162 +1,170 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Debug Google Calendar Sync</title>
-  <style>
-    body {
-      font-family: monospace;
-      padding: 20px;
-      background: #1a1a1a;
-      color: #fff;
-    }
-    .section {
-      margin: 20px 0;
-      padding: 15px;
-      background: #2a2a2a;
-      border-radius: 8px;
-      border: 1px solid #3a3a3a;
-    }
-    .success { color: #4ade80; }
-    .error { color: #f87171; }
-    .warning { color: #fbbf24; }
-    button {
-      padding: 10px 20px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin: 5px;
-    }
-    button:hover { background: #2563eb; }
-    pre {
-      background: #1a1a1a;
-      padding: 10px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-  </style>
-</head>
-<body>
-  <h1>🔍 Diagnostic Google Calendar Sync</h1>
-
-  <div class="section">
-    <h2>1. Configuration</h2>
-    <div id="config-status">Vérification...</div>
-  </div>
-
-  <div class="section">
-    <h2>2. Statut Connexion Google</h2>
-    <div id="google-status">Vérification...</div>
-    <button onclick="checkGoogleStatus()">Rafraîchir</button>
-  </div>
-
-  <div class="section">
-    <h2>3. Liste des RDV (is_event = true)</h2>
-    <div id="events-list">Chargement...</div>
-    <button onclick="loadEvents()">Recharger</button>
-  </div>
-
-  <div class="section">
-    <h2>4. Test de Synchronisation</h2>
-    <p>Sélectionnez un RDV à synchroniser :</p>
-    <select id="event-select" style="padding: 8px; width: 100%; margin: 10px 0;">
-      <option>Chargement...</option>
-    </select>
-    <button onclick="syncSelectedEvent()">Synchroniser Manuellement</button>
-    <div id="sync-result"></div>
-  </div>
-
-  <div class="section">
-    <h2>5. Logs Console</h2>
-    <pre id="console-logs"></pre>
-    <button onclick="clearLogs()">Effacer</button>
-  </div>
-
-  <script type="module">
-    const API_URL = 'http://localhost:3333';
-    let token = localStorage.getItem('token');
-    let events = [];
-
-    const log = (msg, type = 'info') => {
-      const logsEl = document.getElementById('console-logs');
-      const timestamp = new Date().toLocaleTimeString();
-      const color = type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#fff';
-      logsEl.innerHTML += `<span style="color: ${color}">[${timestamp}] ${msg}</span>\n`;
-      logsEl.scrollTop = logsEl.scrollHeight;
-    };
-
-    window.clearLogs = () => {
-      document.getElementById('console-logs').innerHTML = '';
-    };
-
-    // Check config
-    async function checkConfig() {
-      const configEl = document.getElementById('config-status');
-      if (!token) {
-        configEl.innerHTML = '<span class="error">❌ Non connecté - Token manquant</span>';
-        log('Erreur: Token manquant. Connectez-vous sur l\'app principale.', 'error');
-        return false;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Debug Google Calendar Sync</title>
+    <style>
+      body {
+        font-family: monospace;
+        padding: 20px;
+        background: #1a1a1a;
+        color: #fff;
       }
-      configEl.innerHTML = '<span class="success">✅ Token trouvé</span>';
-      log('Token trouvé dans localStorage', 'success');
-      return true;
-    }
+      .section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        border: 1px solid #3a3a3a;
+      }
+      .success {
+        color: #4ade80;
+      }
+      .error {
+        color: #f87171;
+      }
+      .warning {
+        color: #fbbf24;
+      }
+      button {
+        padding: 10px 20px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #2563eb;
+      }
+      pre {
+        background: #1a1a1a;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔍 Diagnostic Google Calendar Sync</h1>
 
-    // Check Google status
-    window.checkGoogleStatus = async () => {
-      const statusEl = document.getElementById('google-status');
-      try {
-        const res = await fetch(`${API_URL}/api/google/status`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
+    <div class="section">
+      <h2>1. Configuration</h2>
+      <div id="config-status">Vérification...</div>
+    </div>
 
-        if (data.connected) {
-          statusEl.innerHTML = `
+    <div class="section">
+      <h2>2. Statut Connexion Google</h2>
+      <div id="google-status">Vérification...</div>
+      <button onclick="checkGoogleStatus()">Rafraîchir</button>
+    </div>
+
+    <div class="section">
+      <h2>3. Liste des RDV (is_event = true)</h2>
+      <div id="events-list">Chargement...</div>
+      <button onclick="loadEvents()">Recharger</button>
+    </div>
+
+    <div class="section">
+      <h2>4. Test de Synchronisation</h2>
+      <p>Sélectionnez un RDV à synchroniser :</p>
+      <select id="event-select" style="padding: 8px; width: 100%; margin: 10px 0">
+        <option>Chargement...</option>
+      </select>
+      <button onclick="syncSelectedEvent()">Synchroniser Manuellement</button>
+      <div id="sync-result"></div>
+    </div>
+
+    <div class="section">
+      <h2>5. Logs Console</h2>
+      <pre id="console-logs"></pre>
+      <button onclick="clearLogs()">Effacer</button>
+    </div>
+
+    <script type="module">
+      const API_URL = 'http://localhost:3333';
+      let token = localStorage.getItem('token');
+      let events = [];
+
+      const log = (msg, type = 'info') => {
+        const logsEl = document.getElementById('console-logs');
+        const timestamp = new Date().toLocaleTimeString();
+        const color = type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#fff';
+        logsEl.innerHTML += `<span style="color: ${color}">[${timestamp}] ${msg}</span>\n`;
+        logsEl.scrollTop = logsEl.scrollHeight;
+      };
+
+      window.clearLogs = () => {
+        document.getElementById('console-logs').innerHTML = '';
+      };
+
+      // Check config
+      async function checkConfig() {
+        const configEl = document.getElementById('config-status');
+        if (!token) {
+          configEl.innerHTML = '<span class="error">❌ Non connecté - Token manquant</span>';
+          log("Erreur: Token manquant. Connectez-vous sur l'app principale.", 'error');
+          return false;
+        }
+        configEl.innerHTML = '<span class="success">✅ Token trouvé</span>';
+        log('Token trouvé dans localStorage', 'success');
+        return true;
+      }
+
+      // Check Google status
+      window.checkGoogleStatus = async () => {
+        const statusEl = document.getElementById('google-status');
+        try {
+          const res = await fetch(`${API_URL}/api/google/status`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+
+          if (data.connected) {
+            statusEl.innerHTML = `
             <span class="success">✅ Google Calendar connecté</span><br>
             <small>Calendar ID: ${data.calendarId || 'primary'}</small><br>
             <small>Connecté le: ${new Date(data.connectedAt).toLocaleString('fr-FR')}</small>
           `;
-          log('Google Calendar connecté', 'success');
-        } else {
-          statusEl.innerHTML = '<span class="error">❌ Google Calendar non connecté</span>';
-          log('Google Calendar non connecté', 'error');
+            log('Google Calendar connecté', 'success');
+          } else {
+            statusEl.innerHTML = '<span class="error">❌ Google Calendar non connecté</span>';
+            log('Google Calendar non connecté', 'error');
+          }
+        } catch (error) {
+          statusEl.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
+          log(`Erreur status Google: ${error.message}`, 'error');
         }
-      } catch (error) {
-        statusEl.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
-        log(`Erreur status Google: ${error.message}`, 'error');
-      }
-    };
+      };
 
-    // Load events
-    window.loadEvents = async () => {
-      const listEl = document.getElementById('events-list');
-      const selectEl = document.getElementById('event-select');
+      // Load events
+      window.loadEvents = async () => {
+        const listEl = document.getElementById('events-list');
+        const selectEl = document.getElementById('event-select');
 
-      try {
-        const res = await fetch(`${API_URL}/api/tasks`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
+        try {
+          const res = await fetch(`${API_URL}/api/tasks`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
 
-        // Filter only events (is_event = true)
-        events = data.tasks.filter(t => t.is_event);
+          // Filter only events (is_event = true)
+          events = data.tasks.filter(t => t.is_event);
 
-        if (events.length === 0) {
-          listEl.innerHTML = '<span class="warning">⚠️ Aucun RDV trouvé (is_event = true)</span>';
-          selectEl.innerHTML = '<option>Aucun RDV disponible</option>';
-          log('Aucun RDV trouvé', 'warning');
-          return;
-        }
+          if (events.length === 0) {
+            listEl.innerHTML = '<span class="warning">⚠️ Aucun RDV trouvé (is_event = true)</span>';
+            selectEl.innerHTML = '<option>Aucun RDV disponible</option>';
+            log('Aucun RDV trouvé', 'warning');
+            return;
+          }
 
-        listEl.innerHTML = `<span class="success">✅ ${events.length} RDV trouvé(s)</span><ul>`;
-        selectEl.innerHTML = '';
+          listEl.innerHTML = `<span class="success">✅ ${events.length} RDV trouvé(s)</span><ul>`;
+          selectEl.innerHTML = '';
 
-        events.forEach((event, idx) => {
-          const syncStatus = event.google_event_id ? '✅ Synchronisé' : '❌ Non synchronisé';
-          listEl.innerHTML += `
+          events.forEach((event, idx) => {
+            const syncStatus = event.google_event_id ? '✅ Synchronisé' : '❌ Non synchronisé';
+            listEl.innerHTML += `
             <li>
               <strong>${event.text}</strong><br>
               Date: ${event.date} à ${event.start_time || '??'}<br>
@@ -164,91 +172,91 @@
               Status: <span class="${event.google_event_id ? 'success' : 'error'}">${syncStatus}</span>
             </li>
           `;
-          selectEl.innerHTML += `<option value="${idx}">${event.text} (${event.date})</option>`;
-        });
+            selectEl.innerHTML += `<option value="${idx}">${event.text} (${event.date})</option>`;
+          });
 
-        listEl.innerHTML += '</ul>';
-        log(`${events.length} RDV chargés`, 'success');
-      } catch (error) {
-        listEl.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
-        log(`Erreur chargement RDV: ${error.message}`, 'error');
-      }
-    };
+          listEl.innerHTML += '</ul>';
+          log(`${events.length} RDV chargés`, 'success');
+        } catch (error) {
+          listEl.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
+          log(`Erreur chargement RDV: ${error.message}`, 'error');
+        }
+      };
 
-    // Sync selected event
-    window.syncSelectedEvent = async () => {
-      const resultEl = document.getElementById('sync-result');
-      const selectEl = document.getElementById('event-select');
-      const idx = parseInt(selectEl.value);
+      // Sync selected event
+      window.syncSelectedEvent = async () => {
+        const resultEl = document.getElementById('sync-result');
+        const selectEl = document.getElementById('event-select');
+        const idx = parseInt(selectEl.value);
 
-      if (isNaN(idx) || !events[idx]) {
-        resultEl.innerHTML = '<span class="error">❌ Sélectionnez un RDV</span>';
-        return;
-      }
+        if (isNaN(idx) || !events[idx]) {
+          resultEl.innerHTML = '<span class="error">❌ Sélectionnez un RDV</span>';
+          return;
+        }
 
-      const event = events[idx];
-      resultEl.innerHTML = '<span class="warning">⏳ Synchronisation en cours...</span>';
-      log(`Tentative de sync: ${event.text}`, 'info');
+        const event = events[idx];
+        resultEl.innerHTML = '<span class="warning">⏳ Synchronisation en cours...</span>';
+        log(`Tentative de sync: ${event.text}`, 'info');
 
-      try {
-        const res = await fetch(`${API_URL}/api/google/sync-event`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            taskId: event.id,
-            title: event.text,
-            date: event.date,
-            startTime: event.start_time,
-            endTime: event.end_time,
-            location: event.location,
-            googleEventId: event.google_event_id
-          })
-        });
+        try {
+          const res = await fetch(`${API_URL}/api/google/sync-event`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              taskId: event.id,
+              title: event.text,
+              date: event.date,
+              startTime: event.start_time,
+              endTime: event.end_time,
+              location: event.location,
+              googleEventId: event.google_event_id,
+            }),
+          });
 
-        const data = await res.json();
+          const data = await res.json();
 
-        if (res.ok) {
-          resultEl.innerHTML = `
+          if (res.ok) {
+            resultEl.innerHTML = `
             <span class="success">✅ Synchronisé avec succès !</span><br>
             <small>Google Event ID: ${data.googleEventId}</small><br>
             <a href="${data.htmlLink}" target="_blank" style="color: #60a5fa">Voir dans Google Calendar</a>
           `;
-          log(`Sync réussie: ${data.googleEventId}`, 'success');
+            log(`Sync réussie: ${data.googleEventId}`, 'success');
 
-          // Update task with google_event_id
-          await fetch(`${API_URL}/api/tasks/${event.id}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ google_event_id: data.googleEventId })
-          });
+            // Update task with google_event_id
+            await fetch(`${API_URL}/api/tasks/${event.id}`, {
+              method: 'PUT',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ google_event_id: data.googleEventId }),
+            });
 
-          // Reload events
-          await loadEvents();
-        } else {
-          resultEl.innerHTML = `<span class="error">❌ Erreur: ${data.error || 'Inconnue'}</span>`;
-          log(`Erreur sync: ${data.error || 'Inconnue'}`, 'error');
+            // Reload events
+            await loadEvents();
+          } else {
+            resultEl.innerHTML = `<span class="error">❌ Erreur: ${data.error || 'Inconnue'}</span>`;
+            log(`Erreur sync: ${data.error || 'Inconnue'}`, 'error');
+          }
+        } catch (error) {
+          resultEl.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
+          log(`Erreur sync: ${error.message}`, 'error');
         }
-      } catch (error) {
-        resultEl.innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
-        log(`Erreur sync: ${error.message}`, 'error');
-      }
-    };
+      };
 
-    // Init
-    (async () => {
-      log('=== Diagnostic Google Calendar Sync ===', 'info');
-      const hasConfig = await checkConfig();
-      if (hasConfig) {
-        await checkGoogleStatus();
-        await loadEvents();
-      }
-    })();
-  </script>
-</body>
+      // Init
+      (async () => {
+        log('=== Diagnostic Google Calendar Sync ===', 'info');
+        const hasConfig = await checkConfig();
+        if (hasConfig) {
+          await checkGoogleStatus();
+          await loadEvents();
+        }
+      })();
+    </script>
+  </body>
 </html>

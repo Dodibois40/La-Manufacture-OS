@@ -60,7 +60,8 @@ export async function openShareModal(taskId, taskText) {
 
     // Si on a quand meme les utilisateurs, permettre la recherche
     if (allUsers.length > 0) {
-      currentSharesContainer.innerHTML += '<p class="share-empty">Recherchez un utilisateur ci-dessus</p>';
+      currentSharesContainer.innerHTML +=
+        '<p class="share-empty">Recherchez un utilisateur ci-dessus</p>';
     }
   }
 }
@@ -84,7 +85,9 @@ function renderCurrentShares() {
     return;
   }
 
-  container.innerHTML = currentShares.map(share => `
+  container.innerHTML = currentShares
+    .map(
+      share => `
     <div class="share-user-item">
       <div class="share-user-info">
         <span class="share-user-avatar">${getInitials(share.name)}</span>
@@ -100,11 +103,13 @@ function renderCurrentShares() {
         </svg>
       </button>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Event listeners pour les boutons de suppression
   container.querySelectorAll('.share-remove-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', async e => {
       const userId = parseInt(btn.dataset.userId);
       await removeShare(userId);
     });
@@ -122,19 +127,25 @@ export function handleShareSearch(query) {
 
   // Filtrer les utilisateurs (exclure ceux deja partages)
   const sharedUserIds = new Set(currentShares.map(s => s.shared_with_user_id));
-  const filtered = allUsers.filter(user => {
-    if (sharedUserIds.has(user.id)) return false;
-    const searchLower = query.toLowerCase();
-    return user.name.toLowerCase().includes(searchLower) ||
-           user.email.toLowerCase().includes(searchLower);
-  }).slice(0, 5);
+  const filtered = allUsers
+    .filter(user => {
+      if (sharedUserIds.has(user.id)) return false;
+      const searchLower = query.toLowerCase();
+      return (
+        user.name.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower)
+      );
+    })
+    .slice(0, 5);
 
   if (filtered.length === 0) {
     resultsContainer.innerHTML = '<p class="share-no-results">Aucun utilisateur trouve</p>';
     return;
   }
 
-  resultsContainer.innerHTML = filtered.map(user => `
+  resultsContainer.innerHTML = filtered
+    .map(
+      user => `
     <div class="share-search-result" data-user-id="${user.id}">
       <span class="share-user-avatar">${getInitials(user.name)}</span>
       <div class="share-user-details">
@@ -142,7 +153,9 @@ export function handleShareSearch(query) {
         <span class="share-user-email">${escapeHtml(user.email)}</span>
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Event listeners pour ajouter un partage
   resultsContainer.querySelectorAll('.share-search-result').forEach(item => {
@@ -168,7 +181,7 @@ async function addShare(targetUserId) {
       currentShares.push({
         shared_with_user_id: targetUserId,
         name: response.targetUser.name,
-        email: response.targetUser.email
+        email: response.targetUser.email,
       });
     }
 
@@ -176,7 +189,6 @@ async function addShare(targetUserId) {
     renderCurrentShares();
     searchInput.value = '';
     resultsContainer.innerHTML = '';
-
   } catch (error) {
     console.error('Error sharing task:', error);
     alert('Erreur lors du partage: ' + error.message);
@@ -195,7 +207,6 @@ async function removeShare(targetUserId) {
 
     // Rafraichir l'affichage
     renderCurrentShares();
-
   } catch (error) {
     console.error('Error removing share:', error);
     alert('Erreur lors de la suppression du partage: ' + error.message);
@@ -205,7 +216,12 @@ async function removeShare(targetUserId) {
 // Helpers
 function getInitials(name) {
   if (!name) return '?';
-  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
 }
 
 function escapeHtml(text) {
@@ -228,7 +244,7 @@ export function initShareModal() {
   }
 
   // Fermer en cliquant sur l'overlay
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener('click', e => {
     if (e.target === modal) {
       closeShareModal();
     }
@@ -236,13 +252,13 @@ export function initShareModal() {
 
   // Recherche en temps reel
   if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
+    searchInput.addEventListener('input', e => {
       handleShareSearch(e.target.value);
     });
   }
 
   // Fermer avec Escape
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
       closeShareModal();
     }

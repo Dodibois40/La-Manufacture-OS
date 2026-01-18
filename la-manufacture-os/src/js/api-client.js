@@ -4,7 +4,8 @@ import { getToken as getClerkToken } from './clerk-auth.js';
 const MODE = import.meta.env.VITE_MODE || 'local';
 const DEFAULT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 // If we are on a different host (like a local IP), try to use the same host for the API if not explicitly set
-const API_URL = import.meta.env.VITE_API_URL ||
+const API_URL =
+  import.meta.env.VITE_API_URL ||
   (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
     ? `http://${window.location.hostname}:3333`
     : 'http://localhost:3333');
@@ -33,7 +34,7 @@ export const tokenStorage = {
     } catch {
       // ignore
     }
-  }
+  },
 };
 
 // Helper pour les requêtes API
@@ -42,7 +43,7 @@ async function apiRequest(endpoint, options = {}) {
 
   // Get Clerk token for authentication
   const token = await getClerkToken();
-  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
 
   const headers = {
     ...authHeaders,
@@ -56,7 +57,7 @@ async function apiRequest(endpoint, options = {}) {
 
   const defaultOptions = {
     credentials: 'omit', // Changed from 'include' - fixes iOS Safari ITP blocking third-party cookies
-    headers
+    headers,
   };
 
   const response = await fetch(url, { ...defaultOptions, ...options });
@@ -324,7 +325,7 @@ export const api = {
 
     async uploadFile(formData) {
       const token = await getClerkToken();
-      const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await fetch(`${API_URL}/api/team/files`, {
         method: 'POST',

@@ -2,7 +2,7 @@ import { query } from '../db/connection.js';
 
 export default async function settingsRoutes(fastify) {
   // Get settings
-  fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query('SELECT * FROM settings WHERE user_id = $1', [userId]);

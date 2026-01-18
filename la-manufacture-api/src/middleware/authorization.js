@@ -9,10 +9,7 @@ export async function requireManager(request, reply) {
 
   try {
     // Check if user has role='manager' or role='admin'
-    const result = await query(
-      'SELECT role FROM users WHERE id = $1',
-      [userId]
-    );
+    const result = await query('SELECT role FROM users WHERE id = $1', [userId]);
 
     if (result.rows.length === 0) {
       return reply.status(404).send({ error: 'Utilisateur non trouvé' });
@@ -45,7 +42,7 @@ export async function requireMember(request, reply) {
     );
 
     if (result.rows.length === 0) {
-      return reply.status(403).send({ error: 'Accès réservé aux membres d\'équipe' });
+      return reply.status(403).send({ error: "Accès réservé aux membres d'équipe" });
     }
 
     // Attach team member info to request for use in route handlers
@@ -125,7 +122,7 @@ export async function canAccessProject(request, reply) {
     };
   } catch (error) {
     request.log.error(error);
-    return reply.status(500).send({ error: 'Erreur lors de la vérification de l\'accès au projet' });
+    return reply.status(500).send({ error: "Erreur lors de la vérification de l'accès au projet" });
   }
 }
 
@@ -166,7 +163,9 @@ export async function canAccessTask(request, reply) {
     };
   } catch (error) {
     request.log.error(error);
-    return reply.status(500).send({ error: 'Erreur lors de la vérification de l\'accès à la tâche' });
+    return reply
+      .status(500)
+      .send({ error: "Erreur lors de la vérification de l'accès à la tâche" });
   }
 }
 
@@ -178,10 +177,10 @@ export async function canAccessTask(request, reply) {
  */
 export async function userOwnsTeamMember(userId, memberId) {
   try {
-    const result = await query(
-      'SELECT id FROM team_members WHERE id = $1 AND user_id = $2',
-      [memberId, userId]
-    );
+    const result = await query('SELECT id FROM team_members WHERE id = $1 AND user_id = $2', [
+      memberId,
+      userId,
+    ]);
     return result.rows.length > 0;
   } catch (error) {
     console.error('Error checking team member ownership:', error);

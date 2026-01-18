@@ -26,26 +26,31 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
 ### Types de boutons
 
 #### Primary Button (Action principale)
+
 ```html
 <button class="btn btn-primary">Créer un projet</button>
 ```
 
 #### Secondary Button (Action secondaire)
+
 ```html
 <button class="btn btn-secondary">Annuler</button>
 ```
 
 #### Danger Button (Action destructive)
+
 ```html
 <button class="btn btn-danger">Supprimer</button>
 ```
 
 #### Success Button (Validation)
+
 ```html
 <button class="btn btn-success">Confirmer</button>
 ```
 
 #### Ghost Button (Transparent)
+
 ```html
 <button class="btn btn-ghost">En savoir plus</button>
 ```
@@ -90,9 +95,7 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
     <h3 class="card-title">Titre de la carte</h3>
     <p class="card-subtitle">Sous-titre optionnel</p>
   </div>
-  <div class="card-body">
-    Contenu de la carte
-  </div>
+  <div class="card-body">Contenu de la carte</div>
   <div class="card-footer">
     <button class="btn btn-secondary btn-sm">Action</button>
   </div>
@@ -103,9 +106,7 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
 
 ```html
 <div class="card card-clickable" onclick="handleClick()">
-  <div class="card-body">
-    Cliquez-moi !
-  </div>
+  <div class="card-body">Cliquez-moi !</div>
 </div>
 ```
 
@@ -118,7 +119,7 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
 ```html
 <div class="input-group">
   <label class="input-label">Nom du projet</label>
-  <input type="text" class="input" placeholder="Entrez un nom...">
+  <input type="text" class="input" placeholder="Entrez un nom..." />
   <span class="input-hint">Conseil: Choisissez un nom descriptif</span>
 </div>
 ```
@@ -128,7 +129,7 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
 ```html
 <div class="input-group">
   <label class="input-label">Email</label>
-  <input type="email" class="input input-error" value="invalid">
+  <input type="email" class="input input-error" value="invalid" />
   <span class="input-error-message">Email invalide</span>
 </div>
 ```
@@ -158,7 +159,7 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
 
 ```html
 <label class="checkbox-wrapper">
-  <input type="checkbox" hidden>
+  <input type="checkbox" hidden />
   <span class="checkbox-custom"></span>
   <span>Urgent</span>
 </label>
@@ -217,16 +218,14 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
 
 ```html
 <div class="avatar avatar-md">
-  <img src="/path/to/avatar.jpg" alt="Nicolas">
+  <img src="/path/to/avatar.jpg" alt="Nicolas" />
 </div>
 ```
 
 ### Avatar avec couleur custom
 
 ```html
-<div class="avatar avatar-md" style="background: #FF6B6B;">
-  E
-</div>
+<div class="avatar avatar-md" style="background: #FF6B6B;">E</div>
 ```
 
 ---
@@ -246,7 +245,7 @@ Guide complet des composants réutilisables pour une cohérence visuelle sur tou
       <!-- Contenu du modal -->
       <div class="input-group">
         <label class="input-label">Nom du projet</label>
-        <input type="text" class="input">
+        <input type="text" class="input" />
       </div>
     </div>
     <div class="modal-footer">
@@ -267,7 +266,7 @@ document.getElementById('myModal').classList.add('active');
 document.getElementById('myModal').classList.remove('active');
 
 // Fermer au clic sur l'overlay
-overlay.addEventListener('click', (e) => {
+overlay.addEventListener('click', e => {
   if (e.target === overlay) {
     overlay.classList.remove('active');
   }
@@ -288,15 +287,9 @@ overlay.addEventListener('click', (e) => {
 </div>
 
 <div class="tab-content">
-  <div class="tab-pane active" id="tab1">
-    Contenu Membres
-  </div>
-  <div class="tab-pane" id="tab2">
-    Contenu Projets
-  </div>
-  <div class="tab-pane" id="tab3">
-    Contenu Documents
-  </div>
+  <div class="tab-pane active" id="tab1">Contenu Membres</div>
+  <div class="tab-pane" id="tab2">Contenu Projets</div>
+  <div class="tab-pane" id="tab3">Contenu Documents</div>
 </div>
 ```
 
@@ -341,9 +334,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 
 ```html
 <ul class="list">
-  <li class="list-item list-item-clickable" onclick="handleClick()">
-    Cliquez-moi
-  </li>
+  <li class="list-item list-item-clickable" onclick="handleClick()">Cliquez-moi</li>
 </ul>
 ```
 
@@ -409,9 +400,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 
 ```html
 <div class="card" style="position: relative;">
-  <div class="card-body">
-    Contenu de la carte
-  </div>
+  <div class="card-body">Contenu de la carte</div>
   <div class="loading-overlay">
     <span class="spinner spinner-lg"></span>
   </div>
@@ -425,15 +414,13 @@ document.querySelectorAll('.tab').forEach(tab => {
 ### Divider simple
 
 ```html
-<hr class="divider">
+<hr class="divider" />
 ```
 
 ### Divider avec texte
 
 ```html
-<div class="divider-text">
-  OU
-</div>
+<div class="divider-text">OU</div>
 ```
 
 ---
@@ -446,9 +433,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 <div class="empty-state">
   <div class="empty-state-icon">📁</div>
   <div class="empty-state-title">Aucun projet</div>
-  <div class="empty-state-message">
-    Créez votre premier projet pour commencer
-  </div>
+  <div class="empty-state-message">Créez votre premier projet pour commencer</div>
   <button class="btn btn-primary">Créer un projet</button>
 </div>
 ```
@@ -460,9 +445,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 ### Tooltip simple
 
 ```html
-<button class="btn btn-primary" data-tooltip="Cliquez pour créer">
-  Créer
-</button>
+<button class="btn btn-primary" data-tooltip="Cliquez pour créer">Créer</button>
 ```
 
 ---
@@ -500,9 +483,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 ### Flexbox
 
 ```html
-<div class="d-flex flex-column align-center justify-between gap-2">
-  Flex container avec gap
-</div>
+<div class="d-flex flex-column align-center justify-between gap-2">Flex container avec gap</div>
 ```
 
 ### Text
@@ -535,22 +516,26 @@ document.querySelectorAll('.tab').forEach(tab => {
 Toutes les couleurs et valeurs sont définies dans `variables.css` :
 
 ### Couleurs principales
+
 - `--accent` : Bleu iOS (#0A84FF)
 - `--danger` : Rouge (#FF453A)
 - `--success` : Vert (#30D158)
 - `--warning` : Orange (#FF9F0A)
 
 ### Backgrounds
+
 - `--bg-app` : Fond de l'app
 - `--bg-card` : Fond des cartes
 - `--bg-card-hover` : Fond des cartes au survol
 
 ### Texte
+
 - `--text-main` : Texte principal
 - `--text-sec` : Texte secondaire
 - `--text-tert` : Texte tertiaire
 
 ### Border Radius
+
 - `--radius-xs` : 6px
 - `--radius-s` : 10px
 - `--radius-m` : 12px
@@ -559,6 +544,7 @@ Toutes les couleurs et valeurs sont définies dans `variables.css` :
 - `--radius-full` : 99px
 
 ### Animations
+
 - `--ease-spring` : Effet rebond
 - `--ease-smooth` : Transition douce
 
@@ -579,8 +565,8 @@ Toutes les couleurs et valeurs sont définies dans `variables.css` :
 Ajoutez le design system dans votre HTML :
 
 ```html
-<link rel="stylesheet" href="/src/css/variables.css">
-<link rel="stylesheet" href="/src/css/design-system.css">
+<link rel="stylesheet" href="/src/css/variables.css" />
+<link rel="stylesheet" href="/src/css/design-system.css" />
 ```
 
 Ou dans votre fichier CSS principal :

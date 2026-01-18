@@ -1,6 +1,15 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
-import { smartParseDate, smartParseUrgent, smartParseOwner, smartParseDuration, smartParseRecurrence, smartParseProject, smartParseTime, cleanTitle } from './parser.js';
+import {
+  smartParseDate,
+  smartParseUrgent,
+  smartParseOwner,
+  smartParseDuration,
+  smartParseRecurrence,
+  smartParseProject,
+  smartParseTime,
+  cleanTitle,
+} from './parser.js';
 import { isApiMode, api } from './api-client.js';
 import { isGoogleConnected, syncTaskToGoogle } from './google-calendar.js';
 
@@ -46,7 +55,7 @@ export const initCommandBar = (state, renderCallback) => {
   window.openCommandBar = open;
 
   // Toggle Command Bar (Ctrl+K or Ctrl+Space)
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === ' ')) {
       e.preventDefault();
       if (overlay.classList.contains('active')) close();
@@ -61,7 +70,7 @@ export const initCommandBar = (state, renderCallback) => {
   // Observer for dynamic changes if needed, but manual hook is fine for now
 
   // Live Parsing logic using unified Smart Parser
-  const analyze = (text) => {
+  const analyze = text => {
     const raw = String(text || '').trim();
     if (!raw) return null;
 
@@ -83,7 +92,7 @@ export const initCommandBar = (state, renderCallback) => {
   };
 
   // Format duration for display
-  const formatDuration = (minutes) => {
+  const formatDuration = minutes => {
     if (!minutes) return null;
     if (minutes >= 60) {
       const h = Math.floor(minutes / 60);
@@ -94,19 +103,19 @@ export const initCommandBar = (state, renderCallback) => {
   };
 
   // Format recurrence for display
-  const formatRecurrence = (rec) => {
+  const formatRecurrence = rec => {
     if (!rec) return null;
     const labels = {
-      'daily': 'Quotidien',
-      'weekly': 'Hebdo',
-      'weekly_0': 'Dim.',
-      'weekly_1': 'Lun.',
-      'weekly_2': 'Mar.',
-      'weekly_3': 'Mer.',
-      'weekly_4': 'Jeu.',
-      'weekly_5': 'Ven.',
-      'weekly_6': 'Sam.',
-      'monthly': 'Mensuel'
+      daily: 'Quotidien',
+      weekly: 'Hebdo',
+      weekly_0: 'Dim.',
+      weekly_1: 'Lun.',
+      weekly_2: 'Mar.',
+      weekly_3: 'Mer.',
+      weekly_4: 'Jeu.',
+      weekly_5: 'Ven.',
+      weekly_6: 'Sam.',
+      monthly: 'Mensuel',
     };
     return labels[rec] || rec;
   };
@@ -122,13 +131,15 @@ export const initCommandBar = (state, renderCallback) => {
 
     let html = `
       <span class="cmd-tag owner">👤 ${meta.owner}</span>
-      <span class="cmd-tag date">📅 ${meta.date === isoLocal() ? 'Aujourd\'hui' : meta.date}</span>
+      <span class="cmd-tag date">📅 ${meta.date === isoLocal() ? "Aujourd'hui" : meta.date}</span>
     `;
 
     if (meta.time) html += `<span class="cmd-tag time">🕐 ${meta.time}</span>`;
     if (meta.urgent) html += `<span class="cmd-tag urgent">🔥 Urgent</span>`;
-    if (meta.duration) html += `<span class="cmd-tag duration">⏱️ ${formatDuration(meta.duration)}</span>`;
-    if (meta.recurrence) html += `<span class="cmd-tag recurrence">🔄 ${formatRecurrence(meta.recurrence)}</span>`;
+    if (meta.duration)
+      html += `<span class="cmd-tag duration">⏱️ ${formatDuration(meta.duration)}</span>`;
+    if (meta.recurrence)
+      html += `<span class="cmd-tag recurrence">🔄 ${formatRecurrence(meta.recurrence)}</span>`;
     if (meta.project) html += `<span class="cmd-tag project"># ${meta.project}</span>`;
 
     preview.innerHTML = html;
@@ -136,25 +147,28 @@ export const initCommandBar = (state, renderCallback) => {
 
   input.addEventListener('input', updatePreview);
 
-  input.addEventListener('keydown', async (e) => {
+  input.addEventListener('keydown', async e => {
     if (e.key === 'Enter') {
       const meta = analyze(input.value);
       if (!meta || !meta.title) return;
 
-      const newTask = ensureTask({
-        text: meta.title,
-        owner: meta.owner,
-        urgent: meta.urgent,
-        date: meta.date,
-        done: false,
-        updatedAt: nowISO(),
-        // New fields
-        estimated_duration: meta.duration || null,
-        recurrence: meta.recurrence || null,
-        project: meta.project || null,
-        start_time: meta.time || null,
-        is_event: !!meta.time
-      }, 'Moi');
+      const newTask = ensureTask(
+        {
+          text: meta.title,
+          owner: meta.owner,
+          urgent: meta.urgent,
+          date: meta.date,
+          done: false,
+          updatedAt: nowISO(),
+          // New fields
+          estimated_duration: meta.duration || null,
+          recurrence: meta.recurrence || null,
+          project: meta.project || null,
+          start_time: meta.time || null,
+          is_event: !!meta.time,
+        },
+        'Moi'
+      );
 
       try {
         // Sync to API if in API mode
@@ -193,7 +207,7 @@ export const initCommandBar = (state, renderCallback) => {
     }
   });
 
-  overlay.addEventListener('click', (e) => {
+  overlay.addEventListener('click', e => {
     if (e.target === overlay) close();
   });
 };

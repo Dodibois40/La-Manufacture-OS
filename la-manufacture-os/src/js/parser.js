@@ -1,9 +1,20 @@
 import { isoLocal } from './utils.js';
 
 const DOW = {
-  lundi: 1, lun: 1, mardi: 2, mar: 2, mercredi: 3, mer: 3,
-  jeudi: 4, jeu: 4, vendredi: 5, ven: 5, samedi: 6, sam: 6,
-  dimanche: 0, dim: 0
+  lundi: 1,
+  lun: 1,
+  mardi: 2,
+  mar: 2,
+  mercredi: 3,
+  mer: 3,
+  jeudi: 4,
+  jeu: 4,
+  vendredi: 5,
+  ven: 5,
+  samedi: 6,
+  sam: 6,
+  dimanche: 0,
+  dim: 0,
 };
 
 const nextDow = (fromISO, dow) => {
@@ -17,15 +28,25 @@ const nextDow = (fromISO, dow) => {
 
 // Keywords that indicate urgency
 const URGENT_KEYWORDS = [
-  'urgent', 'asap', 'important', 'priorité', 'priorite', 'critique',
-  'deadline', 'rush', 'vite', 'rapidement', 'immédiat', 'immediat'
+  'urgent',
+  'asap',
+  'important',
+  'priorité',
+  'priorite',
+  'critique',
+  'deadline',
+  'rush',
+  'vite',
+  'rapidement',
+  'immédiat',
+  'immediat',
 ];
 
 // Recurrence patterns
 const RECURRENCE_PATTERNS = {
   'tous les jours': 'daily',
   'chaque jour': 'daily',
-  'quotidien': 'daily',
+  quotidien: 'daily',
   'tous les lundis': 'weekly_1',
   'tous les mardis': 'weekly_2',
   'tous les mercredis': 'weekly_3',
@@ -42,10 +63,10 @@ const RECURRENCE_PATTERNS = {
   'chaque dimanche': 'weekly_0',
   'toutes les semaines': 'weekly',
   'chaque semaine': 'weekly',
-  'hebdomadaire': 'weekly',
+  hebdomadaire: 'weekly',
   'tous les mois': 'monthly',
   'chaque mois': 'monthly',
-  'mensuel': 'monthly',
+  mensuel: 'monthly',
 };
 
 // Smart parse: extracts date from ANYWHERE in the text (not just prefix)
@@ -110,7 +131,7 @@ export const smartParseDate = (raw, baseToday) => {
 };
 
 // Smart parse: detect urgency from keywords ANYWHERE
-export const smartParseUrgent = (raw) => {
+export const smartParseUrgent = raw => {
   const s = String(raw || '').toLowerCase();
 
   // Check for !!! or !!
@@ -126,19 +147,19 @@ export const smartParseUrgent = (raw) => {
 };
 
 // Smart parse: extract duration in minutes
-export const smartParseDuration = (raw) => {
+export const smartParseDuration = raw => {
   const s = String(raw || '').toLowerCase();
 
   // Match patterns like "30min", "30 min", "1h", "1h30", "2 heures", "45 minutes"
   const patterns = [
     // "1h30" or "1h30min"
-    { regex: /(\d+)\s*h\s*(\d+)\s*(?:min)?/i, calc: (m) => parseInt(m[1]) * 60 + parseInt(m[2]) },
+    { regex: /(\d+)\s*h\s*(\d+)\s*(?:min)?/i, calc: m => parseInt(m[1]) * 60 + parseInt(m[2]) },
     // "1h" or "2 heures"
-    { regex: /(\d+)\s*(?:h|heure|heures)\b/i, calc: (m) => parseInt(m[1]) * 60 },
+    { regex: /(\d+)\s*(?:h|heure|heures)\b/i, calc: m => parseInt(m[1]) * 60 },
     // "30min" or "45 minutes"
-    { regex: /(\d+)\s*(?:min|minute|minutes)\b/i, calc: (m) => parseInt(m[1]) },
+    { regex: /(\d+)\s*(?:min|minute|minutes)\b/i, calc: m => parseInt(m[1]) },
     // "30m" (shorthand)
-    { regex: /(\d+)\s*m\b/i, calc: (m) => parseInt(m[1]) },
+    { regex: /(\d+)\s*m\b/i, calc: m => parseInt(m[1]) },
   ];
 
   for (const { regex, calc } of patterns) {
@@ -152,7 +173,7 @@ export const smartParseDuration = (raw) => {
 };
 
 // Smart parse: extract recurrence pattern
-export const smartParseRecurrence = (raw) => {
+export const smartParseRecurrence = raw => {
   const s = String(raw || '').toLowerCase();
 
   for (const [pattern, value] of Object.entries(RECURRENCE_PATTERNS)) {
@@ -165,7 +186,7 @@ export const smartParseRecurrence = (raw) => {
 };
 
 // Smart parse: extract project/context from #hashtag
-export const smartParseProject = (raw) => {
+export const smartParseProject = raw => {
   const s = String(raw || '');
 
   // Match #project or #project-name (alphanumeric + dashes)
@@ -178,17 +199,17 @@ export const smartParseProject = (raw) => {
 };
 
 // Smart parse: extract time (for events/meetings)
-export const smartParseTime = (raw) => {
+export const smartParseTime = raw => {
   const s = String(raw || '');
 
   // Match patterns like "à 14h", "14h30", "14:30", "à 9h"
   const patterns = [
     // "à 14h30" or "14h30"
-    { regex: /(?:à\s*)?(\d{1,2})\s*h\s*(\d{2})/i, format: (m) => `${m[1].padStart(2, '0')}:${m[2]}` },
+    { regex: /(?:à\s*)?(\d{1,2})\s*h\s*(\d{2})/i, format: m => `${m[1].padStart(2, '0')}:${m[2]}` },
     // "à 14h" or "14h"
-    { regex: /(?:à\s*)?(\d{1,2})\s*h\b/i, format: (m) => `${m[1].padStart(2, '0')}:00` },
+    { regex: /(?:à\s*)?(\d{1,2})\s*h\b/i, format: m => `${m[1].padStart(2, '0')}:00` },
     // "14:30"
-    { regex: /(\d{1,2}):(\d{2})/i, format: (m) => `${m[1].padStart(2, '0')}:${m[2]}` },
+    { regex: /(\d{1,2}):(\d{2})/i, format: m => `${m[1].padStart(2, '0')}:${m[2]}` },
   ];
 
   for (const { regex, format } of patterns) {
@@ -232,7 +253,10 @@ export const cleanTitle = (raw, owners) => {
     .replace(/\bcette\s+semaine\b/gi, '')
     .replace(/\bfin\s+de\s+semaine\b/gi, '')
     .replace(/\bsemaine\s+prochaine\b/gi, '')
-    .replace(/\b(lundi|lun|mardi|mar|mercredi|mer|jeudi|jeu|vendredi|ven|samedi|sam|dimanche|dim)\b/gi, '')
+    .replace(
+      /\b(lundi|lun|mardi|mar|mercredi|mer|jeudi|jeu|vendredi|ven|samedi|sam|dimanche|dim)\b/gi,
+      ''
+    )
     .replace(/\b\d{1,2}\/\d{1,2}(\/\d{2,4})?\b/g, '');
 
   // Remove urgent markers
@@ -253,7 +277,10 @@ export const cleanTitle = (raw, owners) => {
 
   // Remove recurrence patterns
   title = title
-    .replace(/\b(tous les|chaque|toutes les)\s+(jours?|lundis?|mardis?|mercredis?|jeudis?|vendredis?|samedis?|dimanches?|semaines?|mois)\b/gi, '')
+    .replace(
+      /\b(tous les|chaque|toutes les)\s+(jours?|lundis?|mardis?|mercredis?|jeudis?|vendredis?|samedis?|dimanches?|semaines?|mois)\b/gi,
+      ''
+    )
     .replace(/\b(quotidien|hebdomadaire|mensuel)\b/gi, '');
 
   // Remove time patterns
@@ -289,7 +316,9 @@ export const cleanTitle = (raw, owners) => {
 
 // Legacy exports for backward compatibility
 export const parseTarget = (raw, baseToday) => {
-  const s = String(raw || '').toLowerCase().trim();
+  const s = String(raw || '')
+    .toLowerCase()
+    .trim();
 
   if (s.startsWith('aujourd')) return baseToday;
 
@@ -316,13 +345,16 @@ export const parseTarget = (raw, baseToday) => {
   return null;
 };
 
-export const stripPrefix = (raw) => {
+export const stripPrefix = raw => {
   return String(raw || '')
     .replace(/^urgent\s*:?\s*/i, '')
     .replace(/^aujourd['']?hui\s*:?\s*/i, '')
     .replace(/^aujourd\s*:?\s*/i, '')
     .replace(/^demain\s*:?\s*/i, '')
-    .replace(/^(lundi|lun|mardi|mar|mercredi|mer|jeudi|jeu|vendredi|ven|samedi|sam|dimanche|dim)\s*:?\s*/i, '')
+    .replace(
+      /^(lundi|lun|mardi|mar|mercredi|mer|jeudi|jeu|vendredi|ven|samedi|sam|dimanche|dim)\s*:?\s*/i,
+      ''
+    )
     .trim();
 };
 

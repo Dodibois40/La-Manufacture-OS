@@ -40,7 +40,7 @@ const tabs = Array.from(document.querySelectorAll('.tab'));
 const tabPanes = Array.from(document.querySelectorAll('.tab-pane'));
 
 if (tabsContainer) {
-  tabsContainer.addEventListener('click', (e) => {
+  tabsContainer.addEventListener('click', e => {
     const tab = e.target.closest('.tab');
     if (!tab) return;
 
@@ -94,7 +94,9 @@ function renderMembers() {
     return;
   }
 
-  grid.innerHTML = members.map(member => `
+  grid.innerHTML = members
+    .map(
+      member => `
     <div class="team-card">
       <div class="team-card-header">
         <div class="avatar" style="background: ${member.avatar_color};">
@@ -114,14 +116,16 @@ function renderMembers() {
         </button>
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 // Add member - SUPPRIMÉ : utiliser le système d'invitation à la place
 // Les membres sont maintenant ajoutés uniquement via l'onglet "Invitations"
 
 // Delete member
-window.deleteMember = async (memberId) => {
+window.deleteMember = async memberId => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')) return;
 
   try {
@@ -166,17 +170,21 @@ function renderProjects() {
     return;
   }
 
-  grid.innerHTML = projects.map(project => {
-    const statusBadge = project.status === 'completed' ? 'badge-success' :
-                        project.status === 'archived' ? 'badge-neutral' : 'badge-primary';
+  grid.innerHTML = projects
+    .map(project => {
+      const statusBadge =
+        project.status === 'completed'
+          ? 'badge-success'
+          : project.status === 'archived'
+            ? 'badge-neutral'
+            : 'badge-primary';
 
-    // Format assigned members
-    const assignedMembers = project.assigned_members || [];
-    const membersText = assignedMembers.length > 0
-      ? assignedMembers.map(m => m.name).join(', ')
-      : 'Non assigné';
+      // Format assigned members
+      const assignedMembers = project.assigned_members || [];
+      const membersText =
+        assignedMembers.length > 0 ? assignedMembers.map(m => m.name).join(', ') : 'Non assigné';
 
-    return `
+      return `
       <div class="team-card">
         <div class="team-card-header">
           <div class="team-card-info">
@@ -188,11 +196,15 @@ function renderProjects() {
           <span class="badge ${statusBadge}">${project.status}</span>
         </div>
         ${project.description ? `<div class="team-card-desc">${project.description}</div>` : ''}
-        ${project.deadline ? `
+        ${
+          project.deadline
+            ? `
           <div class="team-card-meta" style="margin-top: 8px;">
             📅 ${new Date(project.deadline).toLocaleDateString('fr-FR')}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         <div class="team-card-actions">
           <button class="btn btn-secondary btn-sm" onclick="editProject('${project.id}')">
             Modifier
@@ -203,7 +215,8 @@ function renderProjects() {
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 // Helper function to populate member checkboxes
@@ -215,7 +228,9 @@ function populateMemberCheckboxes(selectedMemberIds = []) {
     return;
   }
 
-  container.innerHTML = members.map(member => `
+  container.innerHTML = members
+    .map(
+      member => `
     <div class="checkbox-item">
       <input
         type="checkbox"
@@ -228,12 +243,16 @@ function populateMemberCheckboxes(selectedMemberIds = []) {
       </div>
       <label for="member-${member.id}">${member.name}</label>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 // Helper function to get selected member IDs
 function getSelectedMemberIds() {
-  const checkboxes = document.querySelectorAll('#projectMembersList input[type="checkbox"]:checked');
+  const checkboxes = document.querySelectorAll(
+    '#projectMembersList input[type="checkbox"]:checked'
+  );
   return Array.from(checkboxes).map(cb => parseInt(cb.value));
 }
 
@@ -283,7 +302,7 @@ document.getElementById('saveProjectBtn').addEventListener('click', async () => 
 });
 
 // Edit project
-window.editProject = async (projectId) => {
+window.editProject = async projectId => {
   const project = projects.find(p => p.id === projectId);
   if (!project) return;
 
@@ -302,7 +321,7 @@ window.editProject = async (projectId) => {
 };
 
 // Delete project
-window.deleteProject = async (projectId) => {
+window.deleteProject = async projectId => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) return;
 
   try {
@@ -347,11 +366,12 @@ function renderFiles() {
     return;
   }
 
-  list.innerHTML = files.map(file => {
-    const size = (file.size / 1024).toFixed(1) + ' KB';
-    const date = new Date(file.created_at).toLocaleDateString('fr-FR');
+  list.innerHTML = files
+    .map(file => {
+      const size = (file.size / 1024).toFixed(1) + ' KB';
+      const date = new Date(file.created_at).toLocaleDateString('fr-FR');
 
-    return `
+      return `
       <div class="team-file-item">
         <div class="team-file-info">
           <div class="file-icon">📄</div>
@@ -370,14 +390,15 @@ function renderFiles() {
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 // Upload document
 document.getElementById('uploadDocBtn').addEventListener('click', () => {
   const input = document.createElement('input');
   input.type = 'file';
-  input.onchange = async (e) => {
+  input.onchange = async e => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -397,13 +418,13 @@ document.getElementById('uploadDocBtn').addEventListener('click', () => {
 });
 
 // Download file
-window.downloadFile = (filename) => {
+window.downloadFile = filename => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
   window.open(`${API_URL}/api/team/files/${filename}/download`, '_blank');
 };
 
 // Delete file
-window.deleteFile = async (fileId) => {
+window.deleteFile = async fileId => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?')) return;
 
   try {
@@ -474,13 +495,14 @@ function renderInvitations() {
     return;
   }
 
-  list.innerHTML = invitations.map(invite => {
-    const metadata = invite.metadata || {};
-    const statusBadge = getInvitationStatusBadge(invite.status);
-    const expiresAt = new Date(invite.expires_at);
-    const isExpired = expiresAt < new Date();
+  list.innerHTML = invitations
+    .map(invite => {
+      const metadata = invite.metadata || {};
+      const statusBadge = getInvitationStatusBadge(invite.status);
+      const expiresAt = new Date(invite.expires_at);
+      const isExpired = expiresAt < new Date();
 
-    return `
+      return `
       <div class="invitation-card">
         <div class="invitation-header">
           <div>
@@ -493,20 +515,29 @@ function renderInvitations() {
           <span>Envoyée: ${new Date(invite.invited_at).toLocaleDateString('fr-FR')}</span>
           <span>Expire: ${expiresAt.toLocaleDateString('fr-FR')}</span>
         </div>
-        ${invite.status === 'pending' && !isExpired ? `
+        ${
+          invite.status === 'pending' && !isExpired
+            ? `
           <div class="invitation-actions">
             <button class="btn btn-sm btn-secondary" onclick="resendInvitation(${invite.id})">Renvoyer</button>
             <button class="btn btn-sm btn-danger" onclick="revokeInvitation(${invite.id})">Révoquer</button>
           </div>
-        ` : ''}
-        ${invite.status === 'accepted' && invite.member_name ? `
+        `
+            : ''
+        }
+        ${
+          invite.status === 'accepted' && invite.member_name
+            ? `
           <div class="invitation-info">
             <span style="color: #10b981;">✓ Acceptée par ${invite.member_name}</span>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 function getInvitationStatusBadge(status) {
@@ -552,12 +583,12 @@ document.getElementById('sendInviteBtn')?.addEventListener('click', async () => 
     await loadInvitations();
   } catch (error) {
     console.error('Error sending invitation:', error);
-    toast(error.message || 'Erreur lors de l\'envoi de l\'invitation', 'danger');
+    toast(error.message || "Erreur lors de l'envoi de l'invitation", 'danger');
   }
 });
 
 // Revoke invitation
-window.revokeInvitation = async (invitationId) => {
+window.revokeInvitation = async invitationId => {
   if (!confirm('Êtes-vous sûr de vouloir révoquer cette invitation ?')) {
     return;
   }
@@ -573,7 +604,7 @@ window.revokeInvitation = async (invitationId) => {
 };
 
 // Resend invitation
-window.resendInvitation = async (invitationId) => {
+window.resendInvitation = async invitationId => {
   try {
     const response = await api.invitations.resend(invitationId);
 
@@ -605,12 +636,7 @@ async function init() {
   //   return;
   // }
 
-  await Promise.all([
-    loadMembers(),
-    loadInvitations(),
-    loadProjects(),
-    loadFiles()
-  ]);
+  await Promise.all([loadMembers(), loadInvitations(), loadProjects(), loadFiles()]);
 }
 
 init();

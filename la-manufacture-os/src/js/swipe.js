@@ -12,11 +12,11 @@ export const initSwipeGestures = (container, callbacks) => {
   let taskEl = null;
   let direction = null;
 
-  const getTaskElement = (target) => {
+  const getTaskElement = target => {
     return target.closest('.task-row');
   };
 
-  const handleTouchStart = (e) => {
+  const handleTouchStart = e => {
     const task = getTaskElement(e.target);
     if (!task) return;
 
@@ -32,7 +32,7 @@ export const initSwipeGestures = (container, callbacks) => {
     taskEl.style.transition = 'none';
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = e => {
     if (!isDragging || !taskEl) return;
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -91,7 +91,7 @@ export const initSwipeGestures = (container, callbacks) => {
     direction = null;
   };
 
-  const resetTask = (el) => {
+  const resetTask = el => {
     if (!el) return;
     el.style.transform = '';
     el.style.opacity = '';
@@ -135,7 +135,7 @@ export const initSwipeGestures = (container, callbacks) => {
     }
   };
 
-  const removeSwipeIndicator = (el) => {
+  const removeSwipeIndicator = el => {
     const indicator = el?.querySelector('.swipe-indicator');
     if (indicator) indicator.remove();
   };
@@ -147,7 +147,7 @@ export const initSwipeGestures = (container, callbacks) => {
 
   // Mouse support for desktop
   container.addEventListener('mousedown', handleTouchStart);
-  container.addEventListener('mousemove', (e) => {
+  container.addEventListener('mousemove', e => {
     if (isDragging) handleTouchMove(e);
   });
   container.addEventListener('mouseup', handleTouchEnd);

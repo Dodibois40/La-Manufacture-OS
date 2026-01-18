@@ -2,7 +2,7 @@ import { query } from '../db/connection.js';
 
 export default async function tasksRoutes(fastify) {
   // Get all tasks for user (owned + shared with user)
-  fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const { date, status, limit = 200, offset = 0 } = request.query;
 
@@ -56,9 +56,14 @@ export default async function tasksRoutes(fastify) {
 
     // Debug: Log events count
     const eventsCount = result.rows.filter(t => t.is_event).length;
-    console.log(`[GET /tasks] userId=${userId}, total=${result.rows.length}, events=${eventsCount}`);
+    console.log(
+      `[GET /tasks] userId=${userId}, total=${result.rows.length}, events=${eventsCount}`
+    );
     if (eventsCount > 0) {
-      console.log('[GET /tasks] Events:', result.rows.filter(t => t.is_event).map(t => ({ id: t.id, text: t.text, date: t.date })));
+      console.log(
+        '[GET /tasks] Events:',
+        result.rows.filter(t => t.is_event).map(t => ({ id: t.id, text: t.text, date: t.date }))
+      );
     }
 
     // Get total count for pagination metadata
@@ -78,14 +83,23 @@ export default async function tasksRoutes(fastify) {
 
     const countParams = [userId];
     if (date) {
-      countQuery = countQuery.replace('WHERE 1=1', 'JOIN tasks t2 ON all_tasks.id = t2.id WHERE t2.date = $2');
+      countQuery = countQuery.replace(
+        'WHERE 1=1',
+        'JOIN tasks t2 ON all_tasks.id = t2.id WHERE t2.date = $2'
+      );
       countParams.push(date);
     }
     if (status && !date) {
-      countQuery = countQuery.replace('WHERE 1=1', 'JOIN tasks t2 ON all_tasks.id = t2.id WHERE t2.status = $2');
+      countQuery = countQuery.replace(
+        'WHERE 1=1',
+        'JOIN tasks t2 ON all_tasks.id = t2.id WHERE t2.status = $2'
+      );
       countParams.push(status);
     } else if (status && date) {
-      countQuery = countQuery.replace('WHERE t2.date = $2', 'WHERE t2.date = $2 AND t2.status = $3');
+      countQuery = countQuery.replace(
+        'WHERE t2.date = $2',
+        'WHERE t2.date = $2 AND t2.status = $3'
+      );
       countParams.push(status);
     }
 
@@ -98,13 +112,13 @@ export default async function tasksRoutes(fastify) {
         total,
         limit: parseInt(limit, 10),
         offset: parseInt(offset, 10),
-        hasMore: offset + result.rows.length < total
-      }
+        hasMore: offset + result.rows.length < total,
+      },
     };
   });
 
   // Get tasks for today
-  fastify.get('/today', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/today', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const today = new Date().toISOString().split('T')[0];
 
@@ -117,7 +131,7 @@ export default async function tasksRoutes(fastify) {
   });
 
   // Get late tasks (carry-over candidates)
-  fastify.get('/late', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/late', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const today = new Date().toISOString().split('T')[0];
 
@@ -156,16 +170,18 @@ export default async function tasksRoutes(fastify) {
 
         // Log activity with batch INSERT
         if (lateTasks.rows.length > 0) {
-          const activityValues = lateTasks.rows.map((task, idx) => {
-            const baseIdx = idx * 4;
-            return `($${baseIdx + 1}, $${baseIdx + 2}, $${baseIdx + 3}, $${baseIdx + 4})`;
-          }).join(', ');
+          const activityValues = lateTasks.rows
+            .map((task, idx) => {
+              const baseIdx = idx * 4;
+              return `($${baseIdx + 1}, $${baseIdx + 2}, $${baseIdx + 3}, $${baseIdx + 4})`;
+            })
+            .join(', ');
 
           const activityParams = lateTasks.rows.flatMap(task => [
             userId,
             task.id,
             'carried_over',
-            JSON.stringify({ mode: 'move', from: task.date, to: today })
+            JSON.stringify({ mode: 'move', from: task.date, to: today }),
           ]);
 
           await query(
@@ -176,10 +192,12 @@ export default async function tasksRoutes(fastify) {
       } else if (mode === 'duplicate') {
         // Duplicate tasks with batch INSERT
         if (lateTasks.rows.length > 0) {
-          const taskValues = lateTasks.rows.map((task, idx) => {
-            const baseIdx = idx * 10;
-            return `($${baseIdx + 1}, $${baseIdx + 2}, $${baseIdx + 3}, $${baseIdx + 4}, $${baseIdx + 5}, $${baseIdx + 6}, $${baseIdx + 7}, $${baseIdx + 8}, $${baseIdx + 9}, $${baseIdx + 10})`;
-          }).join(', ');
+          const taskValues = lateTasks.rows
+            .map((task, idx) => {
+              const baseIdx = idx * 10;
+              return `($${baseIdx + 1}, $${baseIdx + 2}, $${baseIdx + 3}, $${baseIdx + 4}, $${baseIdx + 5}, $${baseIdx + 6}, $${baseIdx + 7}, $${baseIdx + 8}, $${baseIdx + 9}, $${baseIdx + 10})`;
+            })
+            .join(', ');
 
           const taskParams = lateTasks.rows.flatMap(task => [
             userId,
@@ -191,7 +209,7 @@ export default async function tasksRoutes(fastify) {
             'open',
             task.urgent,
             false,
-            0
+            0,
           ]);
 
           await query(
@@ -212,7 +230,18 @@ export default async function tasksRoutes(fastify) {
   // Create task
   fastify.post('/', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
-    const { text, date, owner, assignee, urgent, status, is_event, start_time, end_time, location } = request.body;
+    const {
+      text,
+      date,
+      owner,
+      assignee,
+      urgent,
+      status,
+      is_event,
+      start_time,
+      end_time,
+      location,
+    } = request.body;
 
     if (!text || !date || !owner) {
       return reply.status(400).send({ error: 'Missing required fields' });
@@ -223,8 +252,20 @@ export default async function tasksRoutes(fastify) {
         `INSERT INTO tasks (user_id, text, date, owner, assignee, urgent, status, done, is_event, start_time, end_time, location)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          RETURNING *`,
-        [userId, text, date, owner, assignee || owner, urgent || false, status || 'open', false,
-         is_event || false, start_time || null, end_time || null, location || null]
+        [
+          userId,
+          text,
+          date,
+          owner,
+          assignee || owner,
+          urgent || false,
+          status || 'open',
+          false,
+          is_event || false,
+          start_time || null,
+          end_time || null,
+          location || null,
+        ]
       );
 
       let task = result.rows[0];
@@ -232,10 +273,9 @@ export default async function tasksRoutes(fastify) {
       // If it's an event and Google Calendar is connected, sync it
       if (task.is_event && task.start_time) {
         try {
-          const googleTokens = await query(
-            'SELECT id FROM google_tokens WHERE user_id = $1',
-            [userId]
-          );
+          const googleTokens = await query('SELECT id FROM google_tokens WHERE user_id = $1', [
+            userId,
+          ]);
 
           if (googleTokens.rows.length > 0) {
             // Call the sync endpoint internally (we'll handle this in frontend instead)
@@ -248,10 +288,11 @@ export default async function tasksRoutes(fastify) {
       }
 
       // Log activity
-      await query(
-        'INSERT INTO activity_log (user_id, task_id, action) VALUES ($1, $2, $3)',
-        [userId, task.id, 'created']
-      );
+      await query('INSERT INTO activity_log (user_id, task_id, action) VALUES ($1, $2, $3)', [
+        userId,
+        task.id,
+        'created',
+      ]);
 
       return { task };
     } catch (error) {
@@ -268,7 +309,10 @@ export default async function tasksRoutes(fastify) {
 
     try {
       // Verify ownership
-      const checkResult = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
+      const checkResult = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [
+        id,
+        userId,
+      ]);
       if (checkResult.rows.length === 0) {
         return reply.status(404).send({ error: 'Task not found' });
       }
@@ -279,8 +323,23 @@ export default async function tasksRoutes(fastify) {
       let paramIndex = 1;
 
       for (const [key, value] of Object.entries(updates)) {
-        if (['text', 'date', 'owner', 'assignee', 'status', 'urgent', 'done', 'time_spent',
-             'is_event', 'start_time', 'end_time', 'location', 'google_event_id'].includes(key)) {
+        if (
+          [
+            'text',
+            'date',
+            'owner',
+            'assignee',
+            'status',
+            'urgent',
+            'done',
+            'time_spent',
+            'is_event',
+            'start_time',
+            'end_time',
+            'location',
+            'google_event_id',
+          ].includes(key)
+        ) {
           fields.push(`${key} = $${paramIndex}`);
           values.push(value);
           paramIndex++;
@@ -316,7 +375,10 @@ export default async function tasksRoutes(fastify) {
     const { id } = request.params;
 
     try {
-      const result = await query('DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING *', [id, userId]);
+      const result = await query('DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING *', [
+        id,
+        userId,
+      ]);
 
       if (result.rows.length === 0) {
         return reply.status(404).send({ error: 'Task not found' });
@@ -376,7 +438,10 @@ export default async function tasksRoutes(fastify) {
 
     try {
       // Verify ownership
-      const taskCheck = await query('SELECT id, text FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
+      const taskCheck = await query('SELECT id, text FROM tasks WHERE id = $1 AND user_id = $2', [
+        id,
+        userId,
+      ]);
       if (taskCheck.rows.length === 0) {
         return reply.status(403).send({ error: 'Cannot share a task you do not own' });
       }
@@ -398,7 +463,7 @@ export default async function tasksRoutes(fastify) {
 
       // Get sharer name for notification
       const sharerResult = await query('SELECT name FROM users WHERE id = $1', [userId]);
-      const sharerName = sharerResult.rows[0]?.name || 'Quelqu\'un';
+      const sharerName = sharerResult.rows[0]?.name || "Quelqu'un";
 
       // Create notification for target user
       const taskText = taskCheck.rows[0].text.substring(0, 50);
@@ -410,7 +475,7 @@ export default async function tasksRoutes(fastify) {
           'task_shared',
           'Nouvelle tache partagee',
           `${sharerName} a partage une tache avec vous: "${taskText}"`,
-          JSON.stringify({ task_id: id, shared_by_user_id: userId })
+          JSON.stringify({ task_id: id, shared_by_user_id: userId }),
         ]
       );
 
@@ -422,7 +487,7 @@ export default async function tasksRoutes(fastify) {
 
       return {
         sharing: result.rows[0],
-        targetUser: targetCheck.rows[0]
+        targetUser: targetCheck.rows[0],
       };
     } catch (error) {
       fastify.log.error('Share error:', error);
@@ -431,7 +496,7 @@ export default async function tasksRoutes(fastify) {
       const isTableMissing = errorMessage.includes('does not exist');
       return reply.status(500).send({
         error: isTableMissing ? 'Database tables not initialized. Run migrations.' : errorMessage,
-        details: error.message
+        details: error.message,
       });
     }
   });
@@ -443,7 +508,10 @@ export default async function tasksRoutes(fastify) {
 
     try {
       // Verify ownership
-      const taskCheck = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
+      const taskCheck = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [
+        id,
+        userId,
+      ]);
       if (taskCheck.rows.length === 0) {
         return reply.status(403).send({ error: 'Task not found or not owned' });
       }
@@ -464,26 +532,33 @@ export default async function tasksRoutes(fastify) {
   });
 
   // Remove a share
-  fastify.delete('/:id/share/:targetUserId', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id, targetUserId } = request.params;
+  fastify.delete(
+    '/:id/share/:targetUserId',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id, targetUserId } = request.params;
 
-    try {
-      // Verify ownership
-      const taskCheck = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
-      if (taskCheck.rows.length === 0) {
-        return reply.status(403).send({ error: 'Cannot unshare a task you do not own' });
+      try {
+        // Verify ownership
+        const taskCheck = await query('SELECT id FROM tasks WHERE id = $1 AND user_id = $2', [
+          id,
+          userId,
+        ]);
+        if (taskCheck.rows.length === 0) {
+          return reply.status(403).send({ error: 'Cannot unshare a task you do not own' });
+        }
+
+        await query(`DELETE FROM task_sharing WHERE task_id = $1 AND shared_with_user_id = $2`, [
+          id,
+          targetUserId,
+        ]);
+
+        return { success: true };
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.status(500).send({ error: 'Unsharing failed' });
       }
-
-      await query(
-        `DELETE FROM task_sharing WHERE task_id = $1 AND shared_with_user_id = $2`,
-        [id, targetUserId]
-      );
-
-      return { success: true };
-    } catch (error) {
-      fastify.log.error(error);
-      return reply.status(500).send({ error: 'Unsharing failed' });
     }
-  });
+  );
 }

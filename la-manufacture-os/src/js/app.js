@@ -2,13 +2,28 @@ import { toast } from './utils.js';
 import { loadState, saveState, initStorageUI, loadStateFromApi } from './storage.js';
 import { isApiMode, api } from './api-client.js';
 import { appCallbacks } from './app-callbacks.js';
-import { renderDay, renderWeek, initEditMode, initDayDetailEditMode, initPlanningControls } from './views.js';
+import {
+  renderDay,
+  renderWeek,
+  initEditMode,
+  initDayDetailEditMode,
+  initPlanningControls,
+} from './views.js';
 import { renderConfig, initConfig } from './config.js';
 import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
 import { initMorningBriefing, initFocusTimer } from './morning.js';
 // speech.js removed - speech recognition is now in quick-dump.js
-import { initClerk, isSignedIn, signInWithEmail, signUpWithEmail, verifyEmailCode, forgotPassword, resetPassword, completeEmailCode } from './clerk-auth.js';
+import {
+  initClerk,
+  isSignedIn,
+  signInWithEmail,
+  signUpWithEmail,
+  verifyEmailCode,
+  forgotPassword,
+  resetPassword,
+  completeEmailCode,
+} from './clerk-auth.js';
 import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
 import { initTeam } from './team.js';
@@ -66,7 +81,7 @@ const initDockMagnification = () => {
 const views = ['day', 'week', 'config', 'auth'];
 let currentView = 'day';
 
-export const setView = (name) => {
+export const setView = name => {
   const nav = document.querySelector('nav');
 
   if (name === 'auth') {
@@ -125,13 +140,13 @@ const initAuthUI = () => {
   const registerError = document.getElementById('registerError');
 
   // Toggle between login and register
-  showRegister?.addEventListener('click', (e) => {
+  showRegister?.addEventListener('click', e => {
     e.preventDefault();
     loginForm?.classList.add('hidden');
     registerForm?.classList.remove('hidden');
   });
 
-  showLogin?.addEventListener('click', (e) => {
+  showLogin?.addEventListener('click', e => {
     e.preventDefault();
     registerForm?.classList.add('hidden');
     loginForm?.classList.remove('hidden');
@@ -238,7 +253,8 @@ const initAuthUI = () => {
           }
         } else {
           // Show error with status if available for debugging
-          const errorMsg = result.error || (result.status ? `Status: ${result.status}` : 'Échec connexion');
+          const errorMsg =
+            result.error || (result.status ? `Status: ${result.status}` : 'Échec connexion');
           setStatus(errorMsg, true);
           if (loginBtn) {
             loginBtn.disabled = false;
@@ -323,7 +339,7 @@ const initAuthUI = () => {
   });
 
   // Back to register
-  document.getElementById('backToRegister')?.addEventListener('click', (e) => {
+  document.getElementById('backToRegister')?.addEventListener('click', e => {
     e.preventDefault();
     verifyForm?.classList.add('hidden');
     registerForm?.classList.remove('hidden');
@@ -331,15 +347,15 @@ const initAuthUI = () => {
   });
 
   // Enter key handlers
-  document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
+  document.getElementById('loginPassword')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') loginBtn?.click();
   });
 
-  document.getElementById('registerPassword')?.addEventListener('keypress', (e) => {
+  document.getElementById('registerPassword')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') registerBtn?.click();
   });
 
-  document.getElementById('verifyCode')?.addEventListener('keypress', (e) => {
+  document.getElementById('verifyCode')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') verifyBtn?.click();
   });
 
@@ -356,14 +372,14 @@ const initAuthUI = () => {
   let pendingResetSignIn = null;
 
   // Show forgot password form
-  document.getElementById('showForgotPassword')?.addEventListener('click', (e) => {
+  document.getElementById('showForgotPassword')?.addEventListener('click', e => {
     e.preventDefault();
     loginForm?.classList.add('hidden');
     forgotPasswordForm?.classList.remove('hidden');
   });
 
   // Back to login from forgot password
-  document.getElementById('backToLogin')?.addEventListener('click', (e) => {
+  document.getElementById('backToLogin')?.addEventListener('click', e => {
     e.preventDefault();
     forgotPasswordForm?.classList.add('hidden');
     loginForm?.classList.remove('hidden');
@@ -429,15 +445,15 @@ const initAuthUI = () => {
   });
 
   // Enter key handlers for forgot/reset
-  document.getElementById('forgotEmail')?.addEventListener('keypress', (e) => {
+  document.getElementById('forgotEmail')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') forgotBtn?.click();
   });
 
-  document.getElementById('resetCode')?.addEventListener('keypress', (e) => {
+  document.getElementById('resetCode')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') resetBtn?.click();
   });
 
-  document.getElementById('newPassword')?.addEventListener('keypress', (e) => {
+  document.getElementById('newPassword')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') resetBtn?.click();
   });
 };
@@ -462,10 +478,7 @@ const initApp = async () => {
 
     toast('Synchronisation...');
     try {
-      const [{ user }, apiState] = await Promise.all([
-        api.auth.me(),
-        loadStateFromApi()
-      ]);
+      const [{ user }, apiState] = await Promise.all([api.auth.me(), loadStateFromApi()]);
 
       if (apiState) {
         state.tasks = apiState.tasks;
@@ -500,7 +513,7 @@ const initApp = async () => {
       initDailyReview(state, render);
 
       // Quick dump handler for API mode
-      const handleTasksAdded = async (tasks) => {
+      const handleTasksAdded = async tasks => {
         console.log('[handleTasksAdded] Called with tasks.length:', tasks.length);
         // Si array vide = items créés via l'API (process-inbox), recharger le state
         if (tasks.length === 0) {
@@ -539,7 +552,10 @@ const initApp = async () => {
             }
           }
         }
-        console.log('[handleTasksAdded] About to saveState and render. state.tasks.length:', state.tasks.length);
+        console.log(
+          '[handleTasksAdded] About to saveState and render. state.tasks.length:',
+          state.tasks.length
+        );
         console.log('[handleTasksAdded] currentView:', currentView);
         saveState(state);
         render();
@@ -585,7 +601,8 @@ const initApp = async () => {
 
   // API Mode Logic
   // TEMP: Bypass auth for local testing
-  const bypassAuth = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const bypassAuth =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   if (isApiMode && !bypassAuth) {
     // Auth form is already visible via instant-auth-mode CSS
@@ -594,16 +611,18 @@ const initApp = async () => {
     setView('auth');
 
     // Start Clerk init in background (non-blocking) + check if already signed in
-    initClerk().then(() => {
-      console.log('[App] Clerk ready in background');
-      if (isSignedIn()) {
-        // Already logged in -> redirect to app
-        handlePostLogin();
-      }
-    }).catch(err => {
-      console.warn('[App] Background Clerk init failed:', err.message);
-      // User can still click login - it will retry init
-    });
+    initClerk()
+      .then(() => {
+        console.log('[App] Clerk ready in background');
+        if (isSignedIn()) {
+          // Already logged in -> redirect to app
+          handlePostLogin();
+        }
+      })
+      .catch(err => {
+        console.warn('[App] Background Clerk init failed:', err.message);
+        // User can still click login - it will retry init
+      });
 
     return; // Don't continue to local mode logic
   }
@@ -638,7 +657,7 @@ const initApp = async () => {
   initDailyReview(state, render);
 
   // Quick dump handler
-  const handleTasksAdded = async (tasks) => {
+  const handleTasksAdded = async tasks => {
     if (isApiMode && isSignedIn()) {
       // Si array vide = items créés via l'API (process-inbox), recharger le state
       if (tasks.length === 0) {

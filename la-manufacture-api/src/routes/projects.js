@@ -2,7 +2,7 @@ import { query } from '../db/connection.js';
 
 export default async function projectsRoutes(fastify) {
   // GET /api/projects - Liste des projets
-  fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const { status } = request.query;
 
@@ -109,10 +109,10 @@ export default async function projectsRoutes(fastify) {
         status: row.status,
         created_at: row.created_at,
         updated_at: row.updated_at,
-        assigned_members: row.assigned_members
+        assigned_members: row.assigned_members,
       },
       tasks: row.tasks,
-      files: row.files
+      files: row.files,
     };
   });
 
@@ -151,9 +151,7 @@ export default async function projectsRoutes(fastify) {
 
       // Assigner les membres
       if (member_ids && Array.isArray(member_ids) && member_ids.length > 0) {
-        const insertValues = member_ids.map((memberId, index) =>
-          `($1, $${index + 2})`
-        ).join(', ');
+        const insertValues = member_ids.map((memberId, index) => `($1, $${index + 2})`).join(', ');
 
         await query(
           `INSERT INTO project_members (project_id, team_member_id)
@@ -175,12 +173,14 @@ export default async function projectsRoutes(fastify) {
       return {
         project: {
           ...project,
-          assigned_members: membersResult.rows
-        }
+          assigned_members: membersResult.rows,
+        },
       };
     } catch (error) {
       fastify.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la creation du projet', details: error.message });
+      return reply
+        .status(500)
+        .send({ error: 'Erreur lors de la creation du projet', details: error.message });
     }
   });
 
@@ -191,10 +191,10 @@ export default async function projectsRoutes(fastify) {
     const { name, description, member_ids, deadline, status } = request.body;
 
     // Verifier que le projet appartient a l'utilisateur
-    const check = await query(
-      'SELECT id FROM projects WHERE id = $1 AND user_id = $2',
-      [id, userId]
-    );
+    const check = await query('SELECT id FROM projects WHERE id = $1 AND user_id = $2', [
+      id,
+      userId,
+    ]);
 
     if (check.rows.length === 0) {
       return reply.status(404).send({ error: 'Projet non trouve ou acces refuse' });
@@ -249,16 +249,13 @@ export default async function projectsRoutes(fastify) {
       // Mettre a jour les membres assignes si fourni
       if (member_ids !== undefined) {
         // Supprimer les anciennes assignations
-        await query(
-          'DELETE FROM project_members WHERE project_id = $1',
-          [id]
-        );
+        await query('DELETE FROM project_members WHERE project_id = $1', [id]);
 
         // Ajouter les nouvelles assignations
         if (Array.isArray(member_ids) && member_ids.length > 0) {
-          const insertValues = member_ids.map((memberId, index) =>
-            `($1, $${index + 2})`
-          ).join(', ');
+          const insertValues = member_ids
+            .map((memberId, index) => `($1, $${index + 2})`)
+            .join(', ');
 
           await query(
             `INSERT INTO project_members (project_id, team_member_id)
@@ -269,10 +266,10 @@ export default async function projectsRoutes(fastify) {
       }
 
       // Recuperer le projet mis a jour avec les membres assignes
-      const projectResult = await query(
-        'SELECT * FROM projects WHERE id = $1 AND user_id = $2',
-        [id, userId]
-      );
+      const projectResult = await query('SELECT * FROM projects WHERE id = $1 AND user_id = $2', [
+        id,
+        userId,
+      ]);
 
       const membersResult = await query(
         `SELECT tm.id, tm.name, tm.avatar_color
@@ -286,12 +283,14 @@ export default async function projectsRoutes(fastify) {
       return {
         project: {
           ...projectResult.rows[0],
-          assigned_members: membersResult.rows
-        }
+          assigned_members: membersResult.rows,
+        },
       };
     } catch (error) {
       reply.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la mise a jour du projet', details: error.message });
+      return reply
+        .status(500)
+        .send({ error: 'Erreur lors de la mise a jour du projet', details: error.message });
     }
   });
 
@@ -307,13 +306,17 @@ export default async function projectsRoutes(fastify) {
       );
 
       if (result.rows.length === 0) {
-        return reply.status(404).send({ error: 'Projet non trouve (deja supprime ou acces refuse)' });
+        return reply
+          .status(404)
+          .send({ error: 'Projet non trouve (deja supprime ou acces refuse)' });
       }
 
       return { success: true };
     } catch (error) {
       reply.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la suppression du projet', details: error.message });
+      return reply
+        .status(500)
+        .send({ error: 'Erreur lors de la suppression du projet', details: error.message });
     }
   });
 }

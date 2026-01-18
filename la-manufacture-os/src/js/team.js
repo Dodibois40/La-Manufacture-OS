@@ -11,7 +11,7 @@ let onMembersChangeCallbacks = [];
 export const getTeamMembers = () => teamMembers;
 
 // Register callback when members list changes
-export const onTeamMembersChange = (callback) => {
+export const onTeamMembersChange = callback => {
   onMembersChangeCallbacks.push(callback);
 };
 
@@ -23,7 +23,12 @@ const notifyMembersChange = () => {
 // Helpers
 function getInitials(name) {
   if (!name) return '?';
-  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
 }
 
 function formatFileSize(bytes) {
@@ -46,7 +51,9 @@ function renderMembers() {
   if (teamMembers.length === 0) {
     list.innerHTML = '<div class="team-members-empty">Aucun membre. Cliquez sur "+ Ajouter"</div>';
   } else {
-    list.innerHTML = teamMembers.map(member => `
+    list.innerHTML = teamMembers
+      .map(
+        member => `
       <div class="team-member-item" data-id="${member.id}">
         <div class="team-member-avatar" style="background-color: ${member.avatar_color}">${getInitials(member.name)}</div>
         <span class="team-member-name">${member.name}</span>
@@ -57,11 +64,13 @@ function renderMembers() {
           </svg>
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Delete handlers
     list.querySelectorAll('.team-member-delete').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+      btn.addEventListener('click', async e => {
         e.stopPropagation();
         const id = btn.dataset.id;
         await deleteMember(id);
@@ -70,12 +79,14 @@ function renderMembers() {
   }
 
   // Update selects
-  const options = '<option value="">Selectionner un membre...</option>' +
+  const options =
+    '<option value="">Selectionner un membre...</option>' +
     teamMembers.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
 
   if (select) select.innerHTML = options;
   if (fileSelect) {
-    fileSelect.innerHTML = '<option value="">Ou choisir un membre...</option>' +
+    fileSelect.innerHTML =
+      '<option value="">Ou choisir un membre...</option>' +
       teamMembers.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
   }
 }
@@ -89,26 +100,31 @@ function renderFiles() {
     return;
   }
 
-  list.innerHTML = teamFiles.map(file => {
-    const isPdf = file.mime_type === 'application/pdf';
-    const iconClass = isPdf ? '' : 'image';
-    const memberName = file.member_name || 'Global';
+  list.innerHTML = teamFiles
+    .map(file => {
+      const isPdf = file.mime_type === 'application/pdf';
+      const iconClass = isPdf ? '' : 'image';
+      const memberName = file.member_name || 'Global';
 
-    return `
+      return `
       <div class="team-file-item" data-id="${file.id}">
         <div class="team-file-icon ${iconClass}">
-          ${isPdf ? `
+          ${
+            isPdf
+              ? `
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
-          ` : `
+          `
+              : `
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
               <polyline points="21 15 16 10 5 21"/>
             </svg>
-          `}
+          `
+          }
         </div>
         <div class="team-file-info">
           <div class="team-file-name">${file.original_name}</div>
@@ -122,11 +138,12 @@ function renderFiles() {
         </button>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   // Delete handlers
   list.querySelectorAll('.team-file-delete').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation();
       const id = btn.dataset.id;
       await deleteFile(id);
@@ -257,13 +274,16 @@ export async function initTeam(userId) {
   document.getElementById('copyLinkBtn')?.addEventListener('click', () => {
     const link = document.getElementById('atelierLink');
     if (link) {
-      navigator.clipboard.writeText(link.value).then(() => {
-        toast('Lien copie !');
-      }).catch(() => {
-        link.select();
-        document.execCommand('copy');
-        toast('Lien copie !');
-      });
+      navigator.clipboard
+        .writeText(link.value)
+        .then(() => {
+          toast('Lien copie !');
+        })
+        .catch(() => {
+          link.select();
+          document.execCommand('copy');
+          toast('Lien copie !');
+        });
     }
   });
 
@@ -318,7 +338,7 @@ export async function initTeam(userId) {
     fileInput?.click();
   });
 
-  fileInput?.addEventListener('change', async (e) => {
+  fileInput?.addEventListener('change', async e => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -339,9 +359,9 @@ export async function initTeam(userId) {
   fileGlobal?.addEventListener('change', syncFileTargetState);
 
   // Help user if they click disabled select
-  fileTargetMember?.addEventListener('mousedown', (e) => {
+  fileTargetMember?.addEventListener('mousedown', e => {
     if (fileTargetMember.disabled) {
-      toast("Décoche 'Global' pour choisir un membre", "info");
+      toast("Décoche 'Global' pour choisir un membre", 'info');
     }
   });
 

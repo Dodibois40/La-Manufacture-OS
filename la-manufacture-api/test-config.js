@@ -11,7 +11,7 @@ console.log('\n🔍 Test de Configuration - La Manufacture OS\n');
 console.log('='.repeat(50));
 
 // Test 1: Variables d'environnement
-console.log('\n1️⃣  Variables d\'environnement');
+console.log("\n1️⃣  Variables d'environnement");
 console.log('-'.repeat(50));
 
 const requiredVars = [
@@ -22,14 +22,16 @@ const requiredVars = [
   'SMTP_PORT',
   'SMTP_USER',
   'SMTP_PASS',
-  'FRONTEND_URL'
+  'FRONTEND_URL',
 ];
 
 let missingVars = [];
 requiredVars.forEach(varName => {
   const value = process.env[varName];
   const status = value && value !== 'A_REMPLIR' && value !== 'A_REMPLIRE' ? '✅' : '❌';
-  console.log(`${status} ${varName}: ${value ? (value.includes('REMPLIR') ? 'À CONFIGURER' : '✓ Configuré') : 'Manquant'}`);
+  console.log(
+    `${status} ${varName}: ${value ? (value.includes('REMPLIR') ? 'À CONFIGURER' : '✓ Configuré') : 'Manquant'}`
+  );
   if (!value || value.includes('REMPLIR')) {
     missingVars.push(varName);
   }
@@ -55,12 +57,14 @@ async function testDatabase() {
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.DATABASE_URL.includes('sslmode=require')
         ? { rejectUnauthorized: false }
-        : false
+        : false,
     });
 
     const result = await pool.query('SELECT version(), current_database()');
     console.log('✅ Connexion réussie');
-    console.log(`   Version: ${result.rows[0].version.split(' ')[0]} ${result.rows[0].version.split(' ')[1]}`);
+    console.log(
+      `   Version: ${result.rows[0].version.split(' ')[0]} ${result.rows[0].version.split(' ')[1]}`
+    );
     console.log(`   Database: ${result.rows[0].current_database}`);
 
     // Vérifier si les tables existent
@@ -140,7 +144,9 @@ async function runTests() {
   console.log('='.repeat(50));
   console.log(`Base de données: ${dbOk ? '✅ OK' : '❌ À configurer'}`);
   console.log(`Email (SMTP):    ${emailOk ? '✅ OK' : '❌ À configurer'}`);
-  console.log(`Variables:       ${missingVars.length === 0 ? '✅ OK' : `❌ ${missingVars.length} manquante(s)`}`);
+  console.log(
+    `Variables:       ${missingVars.length === 0 ? '✅ OK' : `❌ ${missingVars.length} manquante(s)`}`
+  );
 
   if (dbOk && emailOk && missingVars.length === 0) {
     console.log('\n🎉 Configuration complète ! Vous pouvez démarrer le serveur:');
@@ -163,7 +169,7 @@ if (args[0] === '--send-test-email' && args[1]) {
         console.log(`   Message ID: ${result.messageId}`);
         console.log('   Vérifiez votre boîte mail.');
       } else {
-        console.log('❌ Erreur d\'envoi');
+        console.log("❌ Erreur d'envoi");
         console.log(`   ${result.error}`);
       }
       process.exit(result.success ? 0 : 1);

@@ -14,6 +14,7 @@ todo/
 ## 🎯 Démarrage Rapide
 
 ### Frontend (la-manufacture-os)
+
 ```bash
 cd la-manufacture-os
 npm install
@@ -21,6 +22,7 @@ npm run dev
 ```
 
 ### Backend (la-manufacture-api)
+
 ```bash
 cd la-manufacture-api
 npm install
@@ -48,11 +50,13 @@ npm start
 ## 🛠️ Technologies
 
 ### Frontend
+
 - Vite + Vanilla JavaScript
 - CSS moderne (iOS-style)
 - Service Workers (PWA)
 
 ### Backend
+
 - Node.js + Fastify
 - PostgreSQL
 - Google Calendar API
@@ -75,6 +79,7 @@ Configurez vos variables d'environnement (voir les fichiers `.env.example`).
 ## 🚀 Déploiement
 
 Consultez le [Guide de Déploiement](docs/DEPLOIEMENT.md) pour déployer sur :
+
 - **Frontend** : Netlify
 - **Backend** : Railway
 - **Base de données** : Railway PostgreSQL

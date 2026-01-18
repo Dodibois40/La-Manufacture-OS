@@ -163,15 +163,18 @@ Ou plus simple : utiliser Zapier/Make pour connecter Gmail → API
 ### Protection du site
 
 **Option 1 : Auth simple dans l'app**
+
 - L'API a déjà JWT
 - Frontend demande login/password
 
 **Option 2 : Netlify Password Protection** (très simple)
+
 1. Dans Netlify → **Site settings** → **Access control**
 2. Activer **"Password protection"**
 3. Définir un mot de passe
 
 **Option 3 : Cloudflare Access** (pro)
+
 - Ajouter site à Cloudflare
 - Activer **Access** avec authentification email
 
@@ -188,6 +191,7 @@ Ou plus simple : utiliser Zapier/Make pour connecter Gmail → API
 **Automatique** : Railway fait des backups quotidiens
 
 **Manuel** :
+
 ```bash
 railway backup create
 railway backup list
@@ -197,16 +201,19 @@ railway backup restore <backup-id>
 ### Monitoring
 
 **Railway** :
+
 - Logs en temps réel dans le Dashboard
 - Métriques CPU/RAM/Network
 
 **Netlify** :
+
 - Analytics intégré
 - Logs de build et déploiement
 
 ### Alertes
 
 Configurer dans Railway :
+
 - **Settings** → **Notifications**
 - Ajouter webhook ou email pour alertes
 
@@ -246,6 +253,7 @@ Configurer dans Railway :
 ## 🆘 Troubleshooting
 
 ### API ne répond pas
+
 ```bash
 # Dans Railway Terminal
 npm start
@@ -253,12 +261,15 @@ npm start
 ```
 
 ### CORS errors
+
 Vérifier que `FRONTEND_URL` est correct dans Railway
 
 ### Database connection error
+
 Vérifier `DATABASE_URL` dans Railway
 
 ### Build Netlify fail
+
 ```bash
 # Tester en local
 npm run build
@@ -277,5 +288,6 @@ npm run build
 **C'est prêt ! 🎉**
 
 Une fois déployé, l'app sera accessible sur :
+
 - **Frontend** : https://app.lamanufacture64.com
 - **API** : https://la-manufacture-api.up.railway.app

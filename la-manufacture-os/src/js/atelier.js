@@ -36,13 +36,31 @@ function showToast(message, type = 'info') {
 
 function getInitials(name) {
   if (!name) return '?';
-  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
 }
 
 function formatDate(date) {
   const d = new Date(date);
   const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  const months = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre'];
+  const months = [
+    'janvier',
+    'fevrier',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'aout',
+    'septembre',
+    'octobre',
+    'novembre',
+    'decembre',
+  ];
   return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
 }
 
@@ -64,7 +82,7 @@ function switchView(viewName) {
 
 async function fetchMembers() {
   if (!managerId) {
-    throw new Error('ID equipe manquant. Ajouter ?team=ID a l\'URL');
+    throw new Error("ID equipe manquant. Ajouter ?team=ID a l'URL");
   }
 
   const response = await fetch(`${API_URL}/api/team/atelier/${managerId}`);
@@ -87,7 +105,7 @@ async function toggleTaskDone(taskId, done) {
   const response = await fetch(`${API_URL}/api/team/tasks/${taskId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ done })
+    body: JSON.stringify({ done }),
   });
   if (!response.ok) {
     throw new Error('Erreur mise a jour');
@@ -96,7 +114,9 @@ async function toggleTaskDone(taskId, done) {
 }
 
 async function fetchFiles(memberId) {
-  const response = await fetch(`${API_URL}/api/team/atelier/${managerId}/files?member_id=${memberId || ''}`);
+  const response = await fetch(
+    `${API_URL}/api/team/atelier/${managerId}/files?member_id=${memberId || ''}`
+  );
   if (!response.ok) {
     throw new Error('Erreur chargement fichiers');
   }
@@ -115,12 +135,16 @@ function renderMembers(members) {
     return;
   }
 
-  grid.innerHTML = members.map(member => `
+  grid.innerHTML = members
+    .map(
+      member => `
     <div class="member-card" data-id="${member.id}">
       <div class="avatar" style="background-color: ${member.avatar_color}">${getInitials(member.name)}</div>
       <div class="name">${member.name}</div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Event listeners
   grid.querySelectorAll('.member-card').forEach(card => {
@@ -148,7 +172,9 @@ function renderTasks(tasks) {
     return 0;
   });
 
-  list.innerHTML = sorted.map(task => `
+  list.innerHTML = sorted
+    .map(
+      task => `
     <div class="task-item ${task.done ? 'completed' : ''}" data-id="${task.id}">
       <div class="task-check">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -160,7 +186,9 @@ function renderTasks(tasks) {
         ${task.urgent ? '<span class="task-urgent">URGENT</span>' : ''}
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   // Event listeners
   list.querySelectorAll('.task-item').forEach(item => {
@@ -199,25 +227,30 @@ function renderFiles(files) {
     return;
   }
 
-  list.innerHTML = filtered.map(file => {
-    const isPdf = file.mime_type === 'application/pdf';
-    const iconClass = isPdf ? 'pdf' : 'image';
+  list.innerHTML = filtered
+    .map(file => {
+      const isPdf = file.mime_type === 'application/pdf';
+      const iconClass = isPdf ? 'pdf' : 'image';
 
-    return `
+      return `
       <div class="file-item" data-id="${file.id}">
         <div class="file-icon ${iconClass}">
-          ${isPdf ? `
+          ${
+            isPdf
+              ? `
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
-          ` : `
+          `
+              : `
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
               <polyline points="21 15 16 10 5 21"/>
             </svg>
-          `}
+          `
+          }
         </div>
         <div class="file-info">
           <div class="file-name">${file.original_name}</div>
@@ -229,7 +262,8 @@ function renderFiles(files) {
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 // ============================================

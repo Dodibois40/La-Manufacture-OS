@@ -10,97 +10,102 @@ function generateInvitationToken() {
 
 export default async function invitationsRoutes(fastify) {
   // POST /api/invitations - Create invitation and send email
-  fastify.post('/', { preHandler: [fastify.authenticate, requireManager] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { email, name, avatar_color } = request.body;
+  fastify.post(
+    '/',
+    { preHandler: [fastify.authenticate, requireManager] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { email, name, avatar_color } = request.body;
 
-    // Validate input
-    if (!email || !email.trim()) {
-      return reply.status(400).send({ error: 'Email requis' });
-    }
-
-    if (!name || !name.trim()) {
-      return reply.status(400).send({ error: 'Nom requis' });
-    }
-
-    const emailLower = email.trim().toLowerCase();
-    const nameTrimmed = name.trim();
-
-    try {
-      // Check if there's already a pending invitation for this email from this manager
-      const existingInvitation = await query(
-        `SELECT id, status, expires_at FROM team_invitations
-         WHERE manager_id = $1 AND email = $2 AND status IN ('pending', 'accepted')`,
-        [userId, emailLower]
-      );
-
-      if (existingInvitation.rows.length > 0) {
-        const existing = existingInvitation.rows[0];
-        if (existing.status === 'accepted') {
-          return reply.status(400).send({ error: 'Cet email est déjà lié à un membre actif' });
-        }
-        if (existing.status === 'pending') {
-          // Check if still valid
-          if (new Date(existing.expires_at) > new Date()) {
-            return reply.status(400).send({ error: 'Une invitation est déjà en cours pour cet email' });
-          }
-        }
+      // Validate input
+      if (!email || !email.trim()) {
+        return reply.status(400).send({ error: 'Email requis' });
       }
 
-      // Generate secure token
-      const token = generateInvitationToken();
+      if (!name || !name.trim()) {
+        return reply.status(400).send({ error: 'Nom requis' });
+      }
 
-      // Set expiration to 7 days from now
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+      const emailLower = email.trim().toLowerCase();
+      const nameTrimmed = name.trim();
 
-      // Get manager name for email
-      const managerResult = await query(
-        'SELECT name FROM users WHERE id = $1',
-        [userId]
-      );
-      const managerName = managerResult.rows[0]?.name || 'Un manager';
+      try {
+        // Check if there's already a pending invitation for this email from this manager
+        const existingInvitation = await query(
+          `SELECT id, status, expires_at FROM team_invitations
+         WHERE manager_id = $1 AND email = $2 AND status IN ('pending', 'accepted')`,
+          [userId, emailLower]
+        );
 
-      // Create invitation in database
-      const result = await query(
-        `INSERT INTO team_invitations
+        if (existingInvitation.rows.length > 0) {
+          const existing = existingInvitation.rows[0];
+          if (existing.status === 'accepted') {
+            return reply.status(400).send({ error: 'Cet email est déjà lié à un membre actif' });
+          }
+          if (existing.status === 'pending') {
+            // Check if still valid
+            if (new Date(existing.expires_at) > new Date()) {
+              return reply
+                .status(400)
+                .send({ error: 'Une invitation est déjà en cours pour cet email' });
+            }
+          }
+        }
+
+        // Generate secure token
+        const token = generateInvitationToken();
+
+        // Set expiration to 7 days from now
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        // Get manager name for email
+        const managerResult = await query('SELECT name FROM users WHERE id = $1', [userId]);
+        const managerName = managerResult.rows[0]?.name || 'Un manager';
+
+        // Create invitation in database
+        const result = await query(
+          `INSERT INTO team_invitations
          (manager_id, email, token, expires_at, metadata)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
-        [
-          userId,
-          emailLower,
-          token,
-          expiresAt,
-          JSON.stringify({ invited_name: nameTrimmed, avatar_color: avatar_color || '#3b82f6' })
-        ]
-      );
+          [
+            userId,
+            emailLower,
+            token,
+            expiresAt,
+            JSON.stringify({ invited_name: nameTrimmed, avatar_color: avatar_color || '#3b82f6' }),
+          ]
+        );
 
-      const invitation = result.rows[0];
+        const invitation = result.rows[0];
 
-      // Send invitation email
-      const emailResult = await sendInvitationEmail(emailLower, token, managerName, nameTrimmed);
+        // Send invitation email
+        const emailResult = await sendInvitationEmail(emailLower, token, managerName, nameTrimmed);
 
-      return {
-        invitation: {
-          id: invitation.id,
-          email: invitation.email,
-          status: invitation.status,
-          invited_at: invitation.invited_at,
-          expires_at: invitation.expires_at,
-          metadata: invitation.metadata,
-        },
-        emailSent: emailResult.success,
-        emailError: emailResult.error,
-      };
-    } catch (error) {
-      request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la création de l\'invitation', details: error.message });
+        return {
+          invitation: {
+            id: invitation.id,
+            email: invitation.email,
+            status: invitation.status,
+            invited_at: invitation.invited_at,
+            expires_at: invitation.expires_at,
+            metadata: invitation.metadata,
+          },
+          emailSent: emailResult.success,
+          emailError: emailResult.error,
+        };
+      } catch (error) {
+        request.log.error(error);
+        return reply
+          .status(500)
+          .send({ error: "Erreur lors de la création de l'invitation", details: error.message });
+      }
     }
-  });
+  );
 
   // GET /api/invitations - List invitations
-  fastify.get('/', { preHandler: [fastify.authenticate, requireManager] }, async (request) => {
+  fastify.get('/', { preHandler: [fastify.authenticate, requireManager] }, async request => {
     const { userId } = request.user;
     const { status } = request.query;
 
@@ -134,100 +139,110 @@ export default async function invitationsRoutes(fastify) {
   });
 
   // DELETE /api/invitations/:id - Revoke invitation
-  fastify.delete('/:id', { preHandler: [fastify.authenticate, requireManager] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id } = request.params;
+  fastify.delete(
+    '/:id',
+    { preHandler: [fastify.authenticate, requireManager] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id } = request.params;
 
-    try {
-      // Verify ownership
-      const owns = await userOwnsInvitation(userId, id);
-      if (!owns) {
-        return reply.status(404).send({ error: 'Invitation non trouvée' });
+      try {
+        // Verify ownership
+        const owns = await userOwnsInvitation(userId, id);
+        if (!owns) {
+          return reply.status(404).send({ error: 'Invitation non trouvée' });
+        }
+
+        // Check current status
+        const check = await query('SELECT status FROM team_invitations WHERE id = $1', [id]);
+
+        if (check.rows.length === 0) {
+          return reply.status(404).send({ error: 'Invitation non trouvée' });
+        }
+
+        const currentStatus = check.rows[0].status;
+        if (currentStatus === 'accepted') {
+          return reply
+            .status(400)
+            .send({ error: 'Impossible de révoquer une invitation acceptée' });
+        }
+
+        if (currentStatus === 'revoked') {
+          return reply.status(400).send({ error: 'Invitation déjà révoquée' });
+        }
+
+        // Revoke invitation
+        await query(
+          'UPDATE team_invitations SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+          ['revoked', id]
+        );
+
+        return { success: true };
+      } catch (error) {
+        request.log.error(error);
+        return reply
+          .status(500)
+          .send({ error: 'Erreur lors de la révocation', details: error.message });
       }
-
-      // Check current status
-      const check = await query(
-        'SELECT status FROM team_invitations WHERE id = $1',
-        [id]
-      );
-
-      if (check.rows.length === 0) {
-        return reply.status(404).send({ error: 'Invitation non trouvée' });
-      }
-
-      const currentStatus = check.rows[0].status;
-      if (currentStatus === 'accepted') {
-        return reply.status(400).send({ error: 'Impossible de révoquer une invitation acceptée' });
-      }
-
-      if (currentStatus === 'revoked') {
-        return reply.status(400).send({ error: 'Invitation déjà révoquée' });
-      }
-
-      // Revoke invitation
-      await query(
-        'UPDATE team_invitations SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-        ['revoked', id]
-      );
-
-      return { success: true };
-    } catch (error) {
-      request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la révocation', details: error.message });
     }
-  });
+  );
 
   // POST /api/invitations/:id/resend - Resend invitation email
-  fastify.post('/:id/resend', { preHandler: [fastify.authenticate, requireManager] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id } = request.params;
+  fastify.post(
+    '/:id/resend',
+    { preHandler: [fastify.authenticate, requireManager] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id } = request.params;
 
-    try {
-      // Verify ownership and get invitation
-      const result = await query(
-        'SELECT * FROM team_invitations WHERE id = $1 AND manager_id = $2',
-        [id, userId]
-      );
+      try {
+        // Verify ownership and get invitation
+        const result = await query(
+          'SELECT * FROM team_invitations WHERE id = $1 AND manager_id = $2',
+          [id, userId]
+        );
 
-      if (result.rows.length === 0) {
-        return reply.status(404).send({ error: 'Invitation non trouvée' });
+        if (result.rows.length === 0) {
+          return reply.status(404).send({ error: 'Invitation non trouvée' });
+        }
+
+        const invitation = result.rows[0];
+
+        if (invitation.status !== 'pending') {
+          return reply
+            .status(400)
+            .send({ error: 'Seules les invitations en attente peuvent être renvoyées' });
+        }
+
+        // Get manager name
+        const managerResult = await query('SELECT name FROM users WHERE id = $1', [userId]);
+        const managerName = managerResult.rows[0]?.name || 'Un manager';
+
+        // Parse metadata to get invited name
+        const metadata = invitation.metadata || {};
+        const invitedName = metadata.invited_name || 'Membre';
+
+        // Resend email
+        const emailResult = await sendInvitationEmail(
+          invitation.email,
+          invitation.token,
+          managerName,
+          invitedName
+        );
+
+        return {
+          success: true,
+          emailSent: emailResult.success,
+          emailError: emailResult.error,
+        };
+      } catch (error) {
+        request.log.error(error);
+        return reply
+          .status(500)
+          .send({ error: "Erreur lors du renvoi de l'invitation", details: error.message });
       }
-
-      const invitation = result.rows[0];
-
-      if (invitation.status !== 'pending') {
-        return reply.status(400).send({ error: 'Seules les invitations en attente peuvent être renvoyées' });
-      }
-
-      // Get manager name
-      const managerResult = await query(
-        'SELECT name FROM users WHERE id = $1',
-        [userId]
-      );
-      const managerName = managerResult.rows[0]?.name || 'Un manager';
-
-      // Parse metadata to get invited name
-      const metadata = invitation.metadata || {};
-      const invitedName = metadata.invited_name || 'Membre';
-
-      // Resend email
-      const emailResult = await sendInvitationEmail(
-        invitation.email,
-        invitation.token,
-        managerName,
-        invitedName
-      );
-
-      return {
-        success: true,
-        emailSent: emailResult.success,
-        emailError: emailResult.error,
-      };
-    } catch (error) {
-      request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors du renvoi de l\'invitation', details: error.message });
     }
-  });
+  );
 
   // GET /api/invitations/validate/:token - Validate invitation token (PUBLIC)
   fastify.get('/validate/:token', async (request, reply) => {
@@ -257,7 +272,9 @@ export default async function invitationsRoutes(fastify) {
 
       // Check status
       if (invitation.status === 'accepted') {
-        return reply.status(400).send({ error: 'Cette invitation a déjà été acceptée', valid: false });
+        return reply
+          .status(400)
+          .send({ error: 'Cette invitation a déjà été acceptée', valid: false });
       }
 
       if (invitation.status === 'revoked') {
@@ -271,10 +288,10 @@ export default async function invitationsRoutes(fastify) {
       // Check expiration
       if (new Date(invitation.expires_at) < new Date()) {
         // Mark as expired
-        await query(
-          'UPDATE team_invitations SET status = $1 WHERE id = $2',
-          ['expired', invitation.id]
-        );
+        await query('UPDATE team_invitations SET status = $1 WHERE id = $2', [
+          'expired',
+          invitation.id,
+        ]);
         return reply.status(400).send({ error: 'Cette invitation a expiré', valid: false });
       }
 
@@ -289,7 +306,9 @@ export default async function invitationsRoutes(fastify) {
       };
     } catch (error) {
       request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la validation', details: error.message });
+      return reply
+        .status(500)
+        .send({ error: 'Erreur lors de la validation', details: error.message });
     }
   });
 
@@ -319,8 +338,8 @@ export default async function invitationsRoutes(fastify) {
       // Verify email matches
       if (userEmail !== invitationEmail) {
         return reply.status(403).send({
-          error: 'L\'email de votre compte ne correspond pas à l\'invitation',
-          details: `Invitation pour: ${invitationEmail}, Votre email: ${userEmail}`
+          error: "L'email de votre compte ne correspond pas à l'invitation",
+          details: `Invitation pour: ${invitationEmail}, Votre email: ${userEmail}`,
         });
       }
 
@@ -373,16 +392,10 @@ export default async function invitationsRoutes(fastify) {
       );
 
       // Update user role to 'member'
-      await query(
-        'UPDATE users SET role = $1 WHERE id = $2',
-        ['member', userId]
-      );
+      await query('UPDATE users SET role = $1 WHERE id = $2', ['member', userId]);
 
       // Get the complete team member info
-      const member = await query(
-        'SELECT * FROM team_members WHERE id = $1',
-        [teamMemberId]
-      );
+      const member = await query('SELECT * FROM team_members WHERE id = $1', [teamMemberId]);
 
       return {
         success: true,
@@ -391,7 +404,9 @@ export default async function invitationsRoutes(fastify) {
       };
     } catch (error) {
       request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de l\'acceptation', details: error.message });
+      return reply
+        .status(500)
+        .send({ error: "Erreur lors de l'acceptation", details: error.message });
     }
   });
 }

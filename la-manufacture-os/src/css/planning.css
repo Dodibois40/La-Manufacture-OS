@@ -91,7 +91,7 @@
 
 /* Jour actuel - cercle rouge comme Apple Calendar */
 .calendar-day.today .calendar-day-number {
-  background: #FF3B30;
+  background: #ff3b30;
   color: #fff;
   font-weight: 600;
   width: 36px;

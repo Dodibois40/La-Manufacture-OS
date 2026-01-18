@@ -62,12 +62,14 @@ L'app fonctionne comme la V6.5 (localStorage).
 ### Option 2 : Mode API (backend requis)
 
 Terminal 1 - Backend :
+
 ```bash
 cd ../la-manufacture-api
 npm run dev
 ```
 
 Terminal 2 - Frontend :
+
 ```bash
 # Créer .env
 echo "VITE_MODE=api" > .env
@@ -87,6 +89,7 @@ npm run build  # Output dans dist/
 Voir [GUIDE-DORIAN.md](../GUIDE-DORIAN.md) pour les instructions complètes.
 
 **Résumé :**
+
 1. Push sur GitHub
 2. Connecter à Netlify
 3. Configurer variables d'environnement :

@@ -6,7 +6,7 @@ export default async function notesRoutes(fastify) {
   // ==========================================
 
   // GET /api/notes - Liste des notes de l'utilisateur (avec filtres)
-  fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const { q, project_id, task_id, is_pinned, archived, limit = 50, offset = 0 } = request.query;
 
@@ -82,10 +82,7 @@ export default async function notesRoutes(fastify) {
     const { userId } = request.user;
     const { id } = request.params;
 
-    const result = await query(
-      `SELECT * FROM notes WHERE id = $1 AND user_id = $2`,
-      [id, userId]
-    );
+    const result = await query(`SELECT * FROM notes WHERE id = $1 AND user_id = $2`, [id, userId]);
 
     if (result.rows.length === 0) {
       return reply.status(404).send({ error: 'Note non trouvée' });
@@ -109,7 +106,15 @@ export default async function notesRoutes(fastify) {
         `INSERT INTO notes (user_id, title, content, color, is_pinned, project_id, task_id)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
-        [userId, title.trim(), content || '', color || null, is_pinned || false, project_id || null, task_id || null]
+        [
+          userId,
+          title.trim(),
+          content || '',
+          color || null,
+          is_pinned || false,
+          project_id || null,
+          task_id || null,
+        ]
       );
 
       return { note: result.rows[0] };
@@ -135,7 +140,9 @@ export default async function notesRoutes(fastify) {
     );
 
     if (ownershipResult.rows.length === 0) {
-      return reply.status(403).send({ error: 'Vous n\'avez pas la permission de modifier cette note' });
+      return reply
+        .status(403)
+        .send({ error: "Vous n'avez pas la permission de modifier cette note" });
     }
 
     // Construire UPDATE dynamique
@@ -188,13 +195,15 @@ export default async function notesRoutes(fastify) {
     const { id } = request.params;
 
     // Vérifier ownership (seul le owner peut supprimer)
-    const result = await query(
-      'DELETE FROM notes WHERE id = $1 AND user_id = $2 RETURNING id',
-      [id, userId]
-    );
+    const result = await query('DELETE FROM notes WHERE id = $1 AND user_id = $2 RETURNING id', [
+      id,
+      userId,
+    ]);
 
     if (result.rows.length === 0) {
-      return reply.status(403).send({ error: 'Note non trouvée ou vous n\'êtes pas autorisé à la supprimer' });
+      return reply
+        .status(403)
+        .send({ error: "Note non trouvée ou vous n'êtes pas autorisé à la supprimer" });
     }
 
     return { success: true };
@@ -219,13 +228,15 @@ export default async function notesRoutes(fastify) {
     }
 
     // Vérifier ownership
-    const noteCheck = await query(
-      'SELECT id FROM notes WHERE id = $1 AND user_id = $2',
-      [id, userId]
-    );
+    const noteCheck = await query('SELECT id FROM notes WHERE id = $1 AND user_id = $2', [
+      id,
+      userId,
+    ]);
 
     if (noteCheck.rows.length === 0) {
-      return reply.status(403).send({ error: 'Note non trouvée ou vous n\'êtes pas le propriétaire' });
+      return reply
+        .status(403)
+        .send({ error: "Note non trouvée ou vous n'êtes pas le propriétaire" });
     }
 
     try {
@@ -250,10 +261,10 @@ export default async function notesRoutes(fastify) {
     const { id } = request.params;
 
     // Vérifier ownership
-    const noteCheck = await query(
-      'SELECT id FROM notes WHERE id = $1 AND user_id = $2',
-      [id, userId]
-    );
+    const noteCheck = await query('SELECT id FROM notes WHERE id = $1 AND user_id = $2', [
+      id,
+      userId,
+    ]);
 
     if (noteCheck.rows.length === 0) {
       return reply.status(403).send({ error: 'Note non trouvée' });
@@ -275,25 +286,29 @@ export default async function notesRoutes(fastify) {
   });
 
   // DELETE /api/notes/:id/share/:targetUserId - Révoquer un partage
-  fastify.delete('/:id/share/:targetUserId', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id, targetUserId } = request.params;
+  fastify.delete(
+    '/:id/share/:targetUserId',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id, targetUserId } = request.params;
 
-    // Vérifier ownership
-    const noteCheck = await query(
-      'SELECT id FROM notes WHERE id = $1 AND user_id = $2',
-      [id, userId]
-    );
+      // Vérifier ownership
+      const noteCheck = await query('SELECT id FROM notes WHERE id = $1 AND user_id = $2', [
+        id,
+        userId,
+      ]);
 
-    if (noteCheck.rows.length === 0) {
-      return reply.status(403).send({ error: 'Note non trouvée' });
+      if (noteCheck.rows.length === 0) {
+        return reply.status(403).send({ error: 'Note non trouvée' });
+      }
+
+      await query('DELETE FROM note_shares WHERE note_id = $1 AND shared_with_user_id = $2', [
+        id,
+        targetUserId,
+      ]);
+
+      return { success: true };
     }
-
-    await query(
-      'DELETE FROM note_shares WHERE note_id = $1 AND shared_with_user_id = $2',
-      [id, targetUserId]
-    );
-
-    return { success: true };
-  });
+  );
 }

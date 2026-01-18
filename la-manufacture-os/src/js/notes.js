@@ -12,10 +12,10 @@ const state = {
   filters: {
     search: '',
     pinned: false,
-    projectId: null
+    projectId: null,
   },
   currentNote: null,
-  searchTimeout: null
+  searchTimeout: null,
 };
 
 // =====================================================
@@ -35,11 +35,7 @@ async function init() {
     }
 
     // Load data
-    await Promise.all([
-      loadNotes(),
-      loadProjects(),
-      loadTeamMembers()
-    ]);
+    await Promise.all([loadNotes(), loadProjects(), loadTeamMembers()]);
 
     // Setup event listeners
     setupEventListeners();
@@ -62,9 +58,7 @@ async function loadNotes() {
     if (state.filters.projectId) params.append('project_id', state.filters.projectId);
 
     // Use search endpoint if search query
-    const endpoint = state.filters.search
-      ? `/api/notes/search?${params}`
-      : `/api/notes?${params}`;
+    const endpoint = state.filters.search ? `/api/notes/search?${params}` : `/api/notes?${params}`;
 
     const response = await api.request(endpoint);
     state.notes = response.notes || [];
@@ -152,7 +146,7 @@ function renderNotes() {
 
   // Add event listeners
   container.querySelectorAll('.note-card').forEach(card => {
-    card.addEventListener('click', (e) => {
+    card.addEventListener('click', e => {
       // Don't open modal if clicking action buttons
       if (e.target.closest('.note-action-btn')) return;
 
@@ -164,7 +158,7 @@ function renderNotes() {
 
   // Pin button listeners
   container.querySelectorAll('.pin-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation();
       const noteId = btn.closest('.note-card').dataset.noteId;
       await togglePin(noteId);
@@ -173,7 +167,7 @@ function renderNotes() {
 
   // Delete button listeners
   container.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation();
       const noteId = btn.closest('.note-card').dataset.noteId;
       await quickDelete(noteId);
@@ -195,7 +189,7 @@ function renderNoteCard(note) {
 
   const date = new Date(note.created_at).toLocaleDateString('fr-FR', {
     day: 'numeric',
-    month: 'short'
+    month: 'short',
   });
 
   const preview = note.content ? note.content.substring(0, 500) : '';
@@ -258,17 +252,20 @@ async function quickDelete(noteId) {
 
 function updateProjectSelects() {
   const projectFilter = document.getElementById('projectFilter');
-  projectFilter.innerHTML = '<option value="">Tous les projets</option>' +
+  projectFilter.innerHTML =
+    '<option value="">Tous les projets</option>' +
     state.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 
   const noteProject = document.getElementById('noteProject');
-  noteProject.innerHTML = '<option value="">Aucun projet</option>' +
+  noteProject.innerHTML =
+    '<option value="">Aucun projet</option>' +
     state.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 }
 
 function updateMemberSelects() {
   const shareMember = document.getElementById('shareMember');
-  shareMember.innerHTML = '<option value="">Sélectionner un membre</option>' +
+  shareMember.innerHTML =
+    '<option value="">Sélectionner un membre</option>' +
     state.teamMembers.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
 }
 
@@ -316,7 +313,9 @@ async function loadNoteShares(noteId) {
     const shares = response.shares || [];
 
     const container = document.getElementById('sharesList');
-    container.innerHTML = shares.map(share => `
+    container.innerHTML = shares
+      .map(
+        share => `
       <div class="share-item">
         <div class="share-info">
           <div class="share-name">${share.shared_with_name}</div>
@@ -326,7 +325,9 @@ async function loadNoteShares(noteId) {
           Retirer
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Remove share listeners
     container.querySelectorAll('.share-remove').forEach(btn => {
@@ -360,7 +361,7 @@ async function saveNote() {
       color: color || null,
       is_pinned: document.getElementById('notePinned').checked,
       project_id: document.getElementById('noteProject').value || null,
-      task_id: document.getElementById('noteTask').value || null
+      task_id: document.getElementById('noteTask').value || null,
     };
 
     if (noteId) {
@@ -377,7 +378,7 @@ async function saveNote() {
     await loadNotes();
   } catch (error) {
     console.error('Save note error:', error);
-    toast('Erreur lors de l\'enregistrement', 'danger');
+    toast("Erreur lors de l'enregistrement", 'danger');
   }
 }
 
@@ -404,7 +405,7 @@ async function deleteNote() {
 function openShareModal() {
   const noteId = document.getElementById('noteId').value;
   if (!noteId) {
-    toast('Enregistrez d\'abord la note', 'warning');
+    toast("Enregistrez d'abord la note", 'warning');
     return;
   }
 
@@ -425,7 +426,7 @@ async function shareNote() {
   try {
     await api.notes.shares.create(noteId, {
       target_user_id: parseInt(memberId),
-      permission
+      permission,
     });
 
     toast('Note partagée', 'success');
@@ -506,7 +507,7 @@ function handleFilterChip(filter) {
 
 function setupEventListeners() {
   // Search
-  document.getElementById('searchInput').addEventListener('input', (e) => {
+  document.getElementById('searchInput').addEventListener('input', e => {
     handleSearch(e.target.value.trim());
   });
 
@@ -518,7 +519,7 @@ function setupEventListeners() {
   });
 
   // Filter selects
-  document.getElementById('projectFilter').addEventListener('change', (e) => {
+  document.getElementById('projectFilter').addEventListener('change', e => {
     state.filters.projectId = e.target.value || null;
     loadNotes();
   });
@@ -576,7 +577,7 @@ function setupEventListeners() {
 }
 
 // Global modal close function
-window.closeModal = function(modalId) {
+window.closeModal = function (modalId) {
   const modal = document.getElementById(modalId);
   modal.classList.remove('active');
 };

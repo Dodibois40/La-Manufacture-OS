@@ -1,444 +1,659 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="FLOW - Master your time" />
+    <title>FLOW</title>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="FLOW - Master your time">
-  <title>FLOW</title>
-  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="/src/css/variables.css" />
+    <link rel="stylesheet" href="/src/css/reset.css" />
+    <link rel="stylesheet" href="/src/css/components.css" />
+    <link rel="stylesheet" href="/src/css/commandbar.css" />
+    <link rel="stylesheet" href="/src/css/morning.css" />
+    <link rel="stylesheet" href="/src/css/planning.css" />
+    <link rel="stylesheet" href="/src/css/app.css" />
+    <link rel="stylesheet" href="/src/css/quick-dump.css" />
 
-  <!-- CSS imports -->
-  <link rel="stylesheet" href="/src/css/variables.css">
-  <link rel="stylesheet" href="/src/css/reset.css">
-  <link rel="stylesheet" href="/src/css/components.css">
-  <link rel="stylesheet" href="/src/css/commandbar.css">
-  <link rel="stylesheet" href="/src/css/morning.css">
-  <link rel="stylesheet" href="/src/css/planning.css">
-  <link rel="stylesheet" href="/src/css/app.css">
-  <link rel="stylesheet" href="/src/css/quick-dump.css">
-
-  <!-- CRITICAL: Show auth form INSTANTLY on non-localhost (before any JS loads) -->
-  <style id="instant-auth-style">
-    /* On production (non-localhost), hide loader and show auth immediately */
-    .instant-auth-mode #appLoader { display: none !important; opacity: 0 !important; }
-    .instant-auth-mode #view-day { display: none !important; opacity: 0 !important; }
-    .instant-auth-mode #view-auth { display: block !important; opacity: 1 !important; }
-    .instant-auth-mode nav { display: none !important; }
-    .instant-auth-mode .container { opacity: 1 !important; pointer-events: auto !important; }
-  </style>
-</head>
-
-<body>
-  <script>
-    // INSTANT AUTH: Show login form immediately on production (no waiting for JS modules)
-    (function() {
-      var isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      if (!isLocalhost) {
-        document.body.classList.add('instant-auth-mode');
-        // Skip briefing check - user needs to login first
-        return;
+    <!-- CRITICAL: Show auth form INSTANTLY on non-localhost (before any JS loads) -->
+    <style id="instant-auth-style">
+      /* On production (non-localhost), hide loader and show auth immediately */
+      .instant-auth-mode #appLoader {
+        display: none !important;
+        opacity: 0 !important;
       }
+      .instant-auth-mode #view-day {
+        display: none !important;
+        opacity: 0 !important;
+      }
+      .instant-auth-mode #view-auth {
+        display: block !important;
+        opacity: 1 !important;
+      }
+      .instant-auth-mode nav {
+        display: none !important;
+      }
+      .instant-auth-mode .container {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    </style>
+  </head>
 
-      // Only check briefing on localhost (local dev mode)
-      try {
-        var today = new Date().toISOString().slice(0, 10);
-        var lastBriefing = localStorage.getItem('last_briefing');
-        if (lastBriefing !== today) {
-          document.body.classList.add('briefing-active');
+  <body>
+    <script>
+      // INSTANT AUTH: Show login form immediately on production (no waiting for JS modules)
+      (function () {
+        var isLocalhost =
+          window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (!isLocalhost) {
+          document.body.classList.add('instant-auth-mode');
+          // Skip briefing check - user needs to login first
+          return;
         }
-      } catch (e) {
-        // localStorage indisponible (nav privee iOS) - skip briefing
-      }
-    })();
-  </script>
 
-  <!-- Loading screen -->
-  <div id="appLoader" class="app-loader">
-    <div class="loader-content">
-      <div class="loader-logo">
-        <span>F</span><span>L</span><span>O</span><span>W</span>
-      </div>
-      <div class="loader-spinner"></div>
-      <div class="loader-text">Connexion...</div>
-    </div>
-  </div>
+        // Only check briefing on localhost (local dev mode)
+        try {
+          var today = new Date().toISOString().slice(0, 10);
+          var lastBriefing = localStorage.getItem('last_briefing');
+          if (lastBriefing !== today) {
+            document.body.classList.add('briefing-active');
+          }
+        } catch (e) {
+          // localStorage indisponible (nav privee iOS) - skip briefing
+        }
+      })();
+    </script>
 
-  <div class="container" id="app">
-    <header>
-      <div class="brand">
-        <div class="header-logo">
-          <span class="header-logo-letter">F</span>
-          <span class="header-logo-letter">L</span>
-          <span class="header-logo-letter">O</span>
-          <span class="header-logo-letter">W</span>
-        </div>
-      </div>
-      <div class="topStatus">
-        <span class="badge">SECOND BRAIN</span>
-        <span class="badge" id="storageBadge">Storage...</span>
-        <span class="badge hidden" id="googleBadge">G</span>
-        <span class="badge" id="progressBadge">—</span>
-        <!-- Notification Bell -->
-        <div class="notification-container" id="notificationContainer">
-          <button class="notification-bell" id="notificationBell">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            <span class="notification-badge hidden" id="notificationBadge">0</span>
-          </button>
-          <div class="notification-dropdown hidden" id="notificationDropdown">
-            <div class="notification-header">
-              <span>Notifications</span>
-              <button id="markAllReadBtn">Tout lire</button>
-            </div>
-            <div class="notification-list" id="notificationList">
-              <div class="notification-empty">Aucune notification</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="storageWarn"></div>
-    </header>
-
-    <!-- Vue: AUTH - Custom UI with Clerk backend -->
-    <div class="view" id="view-auth">
-      <div class="auth-fullscreen">
-        <div class="auth-bg"></div>
-        <div class="auth-content">
-          <div class="auth-logo">
-            <span class="logo-letter">F</span>
-            <span class="logo-letter">L</span>
-            <span class="logo-letter">O</span>
-            <span class="logo-letter">W</span>
-          </div>
-          <p class="auth-tagline">MASTER YOUR TIME</p>
-
-          <div class="auth-forms-wrapper">
-            <!-- Connexion -->
-            <div class="auth-form-minimal" id="loginForm">
-              <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" class="input-minimal">
-              <div class="password-wrapper-minimal">
-                <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password"
-                  class="input-minimal">
-                <button type="button" class="password-toggle-minimal" data-target="loginPassword">
-                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                  <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <path
-                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                </button>
-              </div>
-              <button class="btn-minimal" id="loginBtn">Sign In</button>
-              <p class="auth-switch-minimal">No account? <a href="#" id="showRegister">Create one</a></p>
-              <p class="auth-forgot-minimal"><a href="#" id="showForgotPassword">Forgot password?</a></p>
-              <div class="auth-error" id="loginError"></div>
-            </div>
-
-            <!-- Inscription -->
-            <div class="auth-form-minimal hidden" id="registerForm">
-              <input type="text" id="registerName" placeholder="Name" autocomplete="name" class="input-minimal">
-              <input type="email" id="registerEmail" placeholder="Email" autocomplete="email" class="input-minimal">
-              <div class="password-wrapper-minimal">
-                <input type="password" id="registerPassword" placeholder="Password" autocomplete="new-password"
-                  class="input-minimal">
-                <button type="button" class="password-toggle-minimal" data-target="registerPassword">
-                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                  <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <path
-                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                </button>
-              </div>
-              <button class="btn-minimal" id="registerBtn">Create Account</button>
-              <p class="auth-switch-minimal">Already have an account? <a href="#" id="showLogin">Sign in</a></p>
-              <div class="auth-error" id="registerError"></div>
-            </div>
-
-            <!-- Verification Code -->
-            <div class="auth-form-minimal hidden" id="verifyForm">
-              <p class="verify-message">Enter the verification code sent to your email</p>
-              <input type="text" id="verifyCode" placeholder="Verification code" autocomplete="one-time-code"
-                class="input-minimal" maxlength="6">
-              <button class="btn-minimal" id="verifyBtn">Verify</button>
-              <p class="auth-switch-minimal"><a href="#" id="backToRegister">Back</a></p>
-              <div class="auth-error" id="verifyError"></div>
-            </div>
-
-            <!-- Forgot Password -->
-            <div class="auth-form-minimal hidden" id="forgotPasswordForm">
-              <p class="verify-message">Enter your email to reset your password</p>
-              <input type="email" id="forgotEmail" placeholder="Email" autocomplete="email" class="input-minimal">
-              <button class="btn-minimal" id="forgotBtn">Send Reset Code</button>
-              <p class="auth-switch-minimal"><a href="#" id="backToLogin">Back to login</a></p>
-              <div class="auth-error" id="forgotError"></div>
-            </div>
-
-            <!-- Reset Password -->
-            <div class="auth-form-minimal hidden" id="resetPasswordForm">
-              <p class="verify-message">Enter the code and your new password</p>
-              <input type="text" id="resetCode" placeholder="Reset code" autocomplete="one-time-code"
-                class="input-minimal" maxlength="6">
-              <div class="password-wrapper-minimal">
-                <input type="password" id="newPassword" placeholder="New password" autocomplete="new-password"
-                  class="input-minimal">
-                <button type="button" class="password-toggle-minimal" data-target="newPassword">
-                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                  <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                </button>
-              </div>
-              <button class="btn-minimal" id="resetBtn">Reset Password</button>
-              <div class="auth-error" id="resetError"></div>
-            </div>
-          </div>
-        </div>
+    <!-- Loading screen -->
+    <div id="appLoader" class="app-loader">
+      <div class="loader-content">
+        <div class="loader-logo"><span>F</span><span>L</span><span>O</span><span>W</span></div>
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Connexion...</div>
       </div>
     </div>
 
-    <!-- Vue: JOUR -->
-    <div class="view active" id="view-day">
-      <div class="view-header">
-        <div class="date-sub" id="dayLabel">—</div>
-        <h1 id="dayNum">—</h1>
-      </div>
-      <div id="lateBox"></div>
-
-      <!-- Barre d'édition (hidden par défaut) -->
-      <div class="edit-bar" id="editBar">
-        <span id="selectedCount">0 sélectionnée(s)</span>
-        <button class="edit-bar-btn" id="selectAllBtn">Tout</button>
-        <button class="edit-bar-btn danger" id="deleteSelectedBtn">
-          <svg class="edit-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          </svg>
-          Supprimer
-        </button>
-        <button class="edit-bar-btn" id="cancelEditBtn">Annuler</button>
-      </div>
-
-      <div class="list" id="dayList"></div>
-
-      <div class="day-actions">
-        <button class="btn btn-secondary btn-small" id="editModeBtn">Éditer</button>
-        <button class="btn btn-secondary btn-icon-small" id="manualAddBtn" title="Ajout manuel (Ctrl+K)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Vue: PLANNING -->
-    <div class="view" id="view-week">
-      <div class="planning-container">
-        <div class="planning-header">
-          <button class="month-nav" id="prevMonth">‹</button>
-          <h2 class="month-title" id="monthTitle">Janvier 2026</h2>
-          <button class="month-nav" id="nextMonth">›</button>
-        </div>
-
-        <div class="calendar-grid" id="calendarGrid">
-          <!-- Calendar will be generated here -->
-        </div>
-
-        <div class="day-detail" id="dayDetail">
-          <div class="day-detail-header">
-            <h3 id="selectedDayTitle">Sélectionne un jour</h3>
-            <div class="day-detail-actions">
-              <button class="btn-link hidden" id="editDayDetailBtn">Éditer</button>
-              <button class="btn-link hidden" id="addTaskToDay">+ Ajouter</button>
-            </div>
+    <div class="container" id="app">
+      <header>
+        <div class="brand">
+          <div class="header-logo">
+            <span class="header-logo-letter">F</span>
+            <span class="header-logo-letter">L</span>
+            <span class="header-logo-letter">O</span>
+            <span class="header-logo-letter">W</span>
           </div>
-          <!-- Barre d'édition day detail -->
-          <div class="edit-bar edit-bar-detail" id="editBarDetail">
-            <span id="selectedCountDetail">0 sélectionnée(s)</span>
-            <button class="edit-bar-btn" id="selectAllDetailBtn">Tout</button>
-            <button class="edit-bar-btn danger" id="deleteSelectedDetailBtn">
-              <svg class="edit-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </div>
+        <div class="topStatus">
+          <span class="badge">SECOND BRAIN</span>
+          <span class="badge" id="storageBadge">Storage...</span>
+          <span class="badge hidden" id="googleBadge">G</span>
+          <span class="badge" id="progressBadge">—</span>
+          <!-- Notification Bell -->
+          <div class="notification-container" id="notificationContainer">
+            <button class="notification-bell" id="notificationBell">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              Supprimer
+              <span class="notification-badge hidden" id="notificationBadge">0</span>
             </button>
-            <button class="edit-bar-btn" id="cancelEditDetailBtn">Annuler</button>
+            <div class="notification-dropdown hidden" id="notificationDropdown">
+              <div class="notification-header">
+                <span>Notifications</span>
+                <button id="markAllReadBtn">Tout lire</button>
+              </div>
+              <div class="notification-list" id="notificationList">
+                <div class="notification-empty">Aucune notification</div>
+              </div>
+            </div>
           </div>
-          <div class="day-tasks-list" id="dayTasksList"></div>
+        </div>
+        <div id="storageWarn"></div>
+      </header>
+
+      <!-- Vue: AUTH - Custom UI with Clerk backend -->
+      <div class="view" id="view-auth">
+        <div class="auth-fullscreen">
+          <div class="auth-bg"></div>
+          <div class="auth-content">
+            <div class="auth-logo">
+              <span class="logo-letter">F</span>
+              <span class="logo-letter">L</span>
+              <span class="logo-letter">O</span>
+              <span class="logo-letter">W</span>
+            </div>
+            <p class="auth-tagline">MASTER YOUR TIME</p>
+
+            <div class="auth-forms-wrapper">
+              <!-- Connexion -->
+              <div class="auth-form-minimal" id="loginForm">
+                <input
+                  type="email"
+                  id="loginEmail"
+                  placeholder="Email"
+                  autocomplete="email"
+                  class="input-minimal"
+                />
+                <div class="password-wrapper-minimal">
+                  <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    class="input-minimal"
+                  />
+                  <button type="button" class="password-toggle-minimal" data-target="loginPassword">
+                    <svg
+                      class="eye-icon eye-open"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg
+                      class="eye-icon eye-closed hidden"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  </button>
+                </div>
+                <button class="btn-minimal" id="loginBtn">Sign In</button>
+                <p class="auth-switch-minimal">
+                  No account? <a href="#" id="showRegister">Create one</a>
+                </p>
+                <p class="auth-forgot-minimal">
+                  <a href="#" id="showForgotPassword">Forgot password?</a>
+                </p>
+                <div class="auth-error" id="loginError"></div>
+              </div>
+
+              <!-- Inscription -->
+              <div class="auth-form-minimal hidden" id="registerForm">
+                <input
+                  type="text"
+                  id="registerName"
+                  placeholder="Name"
+                  autocomplete="name"
+                  class="input-minimal"
+                />
+                <input
+                  type="email"
+                  id="registerEmail"
+                  placeholder="Email"
+                  autocomplete="email"
+                  class="input-minimal"
+                />
+                <div class="password-wrapper-minimal">
+                  <input
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Password"
+                    autocomplete="new-password"
+                    class="input-minimal"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle-minimal"
+                    data-target="registerPassword"
+                  >
+                    <svg
+                      class="eye-icon eye-open"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg
+                      class="eye-icon eye-closed hidden"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  </button>
+                </div>
+                <button class="btn-minimal" id="registerBtn">Create Account</button>
+                <p class="auth-switch-minimal">
+                  Already have an account? <a href="#" id="showLogin">Sign in</a>
+                </p>
+                <div class="auth-error" id="registerError"></div>
+              </div>
+
+              <!-- Verification Code -->
+              <div class="auth-form-minimal hidden" id="verifyForm">
+                <p class="verify-message">Enter the verification code sent to your email</p>
+                <input
+                  type="text"
+                  id="verifyCode"
+                  placeholder="Verification code"
+                  autocomplete="one-time-code"
+                  class="input-minimal"
+                  maxlength="6"
+                />
+                <button class="btn-minimal" id="verifyBtn">Verify</button>
+                <p class="auth-switch-minimal"><a href="#" id="backToRegister">Back</a></p>
+                <div class="auth-error" id="verifyError"></div>
+              </div>
+
+              <!-- Forgot Password -->
+              <div class="auth-form-minimal hidden" id="forgotPasswordForm">
+                <p class="verify-message">Enter your email to reset your password</p>
+                <input
+                  type="email"
+                  id="forgotEmail"
+                  placeholder="Email"
+                  autocomplete="email"
+                  class="input-minimal"
+                />
+                <button class="btn-minimal" id="forgotBtn">Send Reset Code</button>
+                <p class="auth-switch-minimal"><a href="#" id="backToLogin">Back to login</a></p>
+                <div class="auth-error" id="forgotError"></div>
+              </div>
+
+              <!-- Reset Password -->
+              <div class="auth-form-minimal hidden" id="resetPasswordForm">
+                <p class="verify-message">Enter the code and your new password</p>
+                <input
+                  type="text"
+                  id="resetCode"
+                  placeholder="Reset code"
+                  autocomplete="one-time-code"
+                  class="input-minimal"
+                  maxlength="6"
+                />
+                <div class="password-wrapper-minimal">
+                  <input
+                    type="password"
+                    id="newPassword"
+                    placeholder="New password"
+                    autocomplete="new-password"
+                    class="input-minimal"
+                  />
+                  <button type="button" class="password-toggle-minimal" data-target="newPassword">
+                    <svg
+                      class="eye-icon eye-open"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg
+                      class="eye-icon eye-closed hidden"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  </button>
+                </div>
+                <button class="btn-minimal" id="resetBtn">Reset Password</button>
+                <div class="auth-error" id="resetError"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Vue: CONFIG -->
-    <div class="view" id="view-config">
-      <div class="view-header">
-        <h2 class="settings-title">SETTINGS</h2>
-      </div>
+      <!-- Vue: JOUR -->
+      <div class="view active" id="view-day">
+        <div class="view-header">
+          <div class="date-sub" id="dayLabel">—</div>
+          <h1 id="dayNum">—</h1>
+        </div>
+        <div id="lateBox"></div>
 
-      <div class="settings-section">
-        <label class="settings-label">
-          <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            <line x1="10" y1="11" x2="10" y2="17" />
-            <line x1="14" y1="11" x2="14" y2="17" />
-          </svg>
-          Zone de danger
-        </label>
-        <div class="btn-group">
-          <button class="btn btn-danger" id="wipeBtn">
-            <span>Vider les données</span>
+        <!-- Barre d'édition (hidden par défaut) -->
+        <div class="edit-bar" id="editBar">
+          <span id="selectedCount">0 sélectionnée(s)</span>
+          <button class="edit-bar-btn" id="selectAllBtn">Tout</button>
+          <button class="edit-bar-btn danger" id="deleteSelectedBtn">
+            <svg
+              class="edit-bar-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6" />
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              />
+            </svg>
+            Supprimer
           </button>
-          <button class="btn btn-secondary" id="resetUiBtn">
-            <span>Reset UI</span>
+          <button class="edit-bar-btn" id="cancelEditBtn">Annuler</button>
+        </div>
+
+        <div class="list" id="dayList"></div>
+
+        <div class="day-actions">
+          <button class="btn btn-secondary btn-small" id="editModeBtn">Éditer</button>
+          <button
+            class="btn btn-secondary btn-icon-small"
+            id="manualAddBtn"
+            title="Ajout manuel (Ctrl+K)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="18"
+              height="18"
+            >
+              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
           </button>
         </div>
       </div>
 
-      <!-- Google Calendar Integration -->
-      <div class="settings-section hidden" id="googleCalendarSection">
-        <label class="settings-label">
-          <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-          Google Calendar
-        </label>
-        <div id="googleStatus">
-          <!-- Genere dynamiquement -->
+      <!-- Vue: PLANNING -->
+      <div class="view" id="view-week">
+        <div class="planning-container">
+          <div class="planning-header">
+            <button class="month-nav" id="prevMonth">‹</button>
+            <h2 class="month-title" id="monthTitle">Janvier 2026</h2>
+            <button class="month-nav" id="nextMonth">›</button>
+          </div>
+
+          <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar will be generated here -->
+          </div>
+
+          <div class="day-detail" id="dayDetail">
+            <div class="day-detail-header">
+              <h3 id="selectedDayTitle">Sélectionne un jour</h3>
+              <div class="day-detail-actions">
+                <button class="btn-link hidden" id="editDayDetailBtn">Éditer</button>
+                <button class="btn-link hidden" id="addTaskToDay">+ Ajouter</button>
+              </div>
+            </div>
+            <!-- Barre d'édition day detail -->
+            <div class="edit-bar edit-bar-detail" id="editBarDetail">
+              <span id="selectedCountDetail">0 sélectionnée(s)</span>
+              <button class="edit-bar-btn" id="selectAllDetailBtn">Tout</button>
+              <button class="edit-bar-btn danger" id="deleteSelectedDetailBtn">
+                <svg
+                  class="edit-bar-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  />
+                </svg>
+                Supprimer
+              </button>
+              <button class="edit-bar-btn" id="cancelEditDetailBtn">Annuler</button>
+            </div>
+            <div class="day-tasks-list" id="dayTasksList"></div>
+          </div>
         </div>
       </div>
 
-      <div class="settings-section" id="logoutSection">
-        <label class="settings-label">
-          <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Compte
-        </label>
-        <button class="btn btn-secondary btn-full" id="logoutBtn">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          <span>Se déconnecter</span>
-        </button>
+      <!-- Vue: CONFIG -->
+      <div class="view" id="view-config">
+        <div class="view-header">
+          <h2 class="settings-title">SETTINGS</h2>
+        </div>
+
+        <div class="settings-section">
+          <label class="settings-label">
+            <svg
+              class="label-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6" />
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+            Zone de danger
+          </label>
+          <div class="btn-group">
+            <button class="btn btn-danger" id="wipeBtn">
+              <span>Vider les données</span>
+            </button>
+            <button class="btn btn-secondary" id="resetUiBtn">
+              <span>Reset UI</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Google Calendar Integration -->
+        <div class="settings-section hidden" id="googleCalendarSection">
+          <label class="settings-label">
+            <svg
+              class="label-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            Google Calendar
+          </label>
+          <div id="googleStatus">
+            <!-- Genere dynamiquement -->
+          </div>
+        </div>
+
+        <div class="settings-section" id="logoutSection">
+          <label class="settings-label">
+            <svg
+              class="label-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Compte
+          </label>
+          <button class="btn btn-secondary btn-full" id="logoutBtn">
+            <svg
+              class="btn-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Se déconnecter</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Navigation Dock - Minimal SpaceX style -->
-  <nav>
-    <button class="active" id="nav-day">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="4" />
-        <path
-          d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-      </svg>
-      <span class="nav-label">Today</span>
-    </button>
-    <button id="nav-week">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <path d="M3 10h18M8 2v4M16 2v4" />
-      </svg>
-      <span class="nav-label">Plan</span>
-    </button>
-    <button id="nav-inbox">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-      <span class="nav-label">Add</span>
-    </button>
-    <button id="nav-notes">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-      </svg>
-      <span class="nav-label">Notes</span>
-    </button>
-    <button id="nav-team">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-      <span class="nav-label">Team</span>
-    </button>
-    <button id="nav-config">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      <span class="nav-label">Menu</span>
-    </button>
-  </nav>
+    <!-- Navigation Dock - Minimal SpaceX style -->
+    <nav>
+      <button class="active" id="nav-day">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path
+            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          />
+        </svg>
+        <span class="nav-label">Today</span>
+      </button>
+      <button id="nav-week">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <path d="M3 10h18M8 2v4M16 2v4" />
+        </svg>
+        <span class="nav-label">Plan</span>
+      </button>
+      <button id="nav-inbox">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span class="nav-label">Add</span>
+      </button>
+      <button id="nav-notes">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+          />
+        </svg>
+        <span class="nav-label">Notes</span>
+      </button>
+      <button id="nav-team">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span class="nav-label">Team</span>
+      </button>
+      <button id="nav-config">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span class="nav-label">Menu</span>
+      </button>
+    </nav>
 
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
-  <!-- Share Modal -->
-  <div class="share-modal hidden" id="shareModal">
-    <div class="share-modal-content">
-      <div class="share-modal-header">
-        <h3>Partager la tache</h3>
-        <button class="share-modal-close" id="shareModalClose">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-      <p class="share-task-title" id="shareTaskTitle"></p>
-      <div class="share-search-section">
-        <input type="text" id="shareUserSearch" placeholder="Rechercher un utilisateur..." class="share-search-input">
-        <div class="share-search-results" id="shareSearchResults"></div>
-      </div>
-      <div class="share-current-section">
-        <h4>Partage avec</h4>
-        <div class="share-current-list" id="currentShares"></div>
+    <!-- Share Modal -->
+    <div class="share-modal hidden" id="shareModal">
+      <div class="share-modal-content">
+        <div class="share-modal-header">
+          <h3>Partager la tache</h3>
+          <button class="share-modal-close" id="shareModalClose">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <p class="share-task-title" id="shareTaskTitle"></p>
+        <div class="share-search-section">
+          <input
+            type="text"
+            id="shareUserSearch"
+            placeholder="Rechercher un utilisateur..."
+            class="share-search-input"
+          />
+          <div class="share-search-results" id="shareSearchResults"></div>
+        </div>
+        <div class="share-current-section">
+          <h4>Partage avec</h4>
+          <div class="share-current-list" id="currentShares"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Main App -->
-  <script type="module" src="/src/js/app.js"></script>
-</body>
-
+    <!-- Main App -->
+    <script type="module" src="/src/js/app.js"></script>
+  </body>
 </html>

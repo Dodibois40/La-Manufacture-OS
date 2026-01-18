@@ -61,12 +61,14 @@ function showSuccess() {
 // Validate token
 async function validateToken() {
   if (!token) {
-    showError('Aucun token d\'invitation trouvé dans l\'URL.');
+    showError("Aucun token d'invitation trouvé dans l'URL.");
     return;
   }
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/invitations/validate/${token}`);
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/invitations/validate/${token}`
+    );
     const data = await response.json();
 
     if (!response.ok || !data.valid) {
@@ -78,7 +80,7 @@ async function validateToken() {
     showInvite(data.invitation);
   } catch (error) {
     console.error('Error validating token:', error);
-    showError('Erreur lors de la validation de l\'invitation.');
+    showError("Erreur lors de la validation de l'invitation.");
   }
 }
 
@@ -104,13 +106,13 @@ async function acceptInvitation() {
     if (result.success) {
       showSuccess();
     } else {
-      showError('Erreur lors de l\'acceptation de l\'invitation.');
+      showError("Erreur lors de l'acceptation de l'invitation.");
       acceptBtn.disabled = false;
-      acceptBtn.textContent = 'Accepter l\'invitation';
+      acceptBtn.textContent = "Accepter l'invitation";
     }
   } catch (error) {
     console.error('Error accepting invitation:', error);
-    let errorMsg = 'Erreur lors de l\'acceptation de l\'invitation.';
+    let errorMsg = "Erreur lors de l'acceptation de l'invitation.";
 
     // Check if error response has details
     if (error.message) {
@@ -119,7 +121,7 @@ async function acceptInvitation() {
 
     showError(errorMsg);
     acceptBtn.disabled = false;
-    acceptBtn.textContent = 'Accepter l\'invitation';
+    acceptBtn.textContent = "Accepter l'invitation";
   }
 }
 

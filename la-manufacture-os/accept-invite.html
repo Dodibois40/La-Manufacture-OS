@@ -1,86 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="FLOW - Accepter votre invitation" />
+    <title>Invitation - FLOW</title>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="FLOW - Accepter votre invitation">
-  <title>Invitation - FLOW</title>
-  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="/src/css/variables.css" />
+    <link rel="stylesheet" href="/src/css/reset.css" />
+    <link rel="stylesheet" href="/src/css/accept-invite.css" />
+  </head>
 
-  <!-- CSS imports -->
-  <link rel="stylesheet" href="/src/css/variables.css">
-  <link rel="stylesheet" href="/src/css/reset.css">
-  <link rel="stylesheet" href="/src/css/accept-invite.css">
-</head>
+  <body>
+    <div class="invite-container">
+      <div class="invite-card">
+        <div class="invite-logo">
+          <h1>FLOW</h1>
+          <p>La Manufacture OS</p>
+        </div>
 
-<body>
-  <div class="invite-container">
-    <div class="invite-card">
-      <div class="invite-logo">
-        <h1>FLOW</h1>
-        <p>La Manufacture OS</p>
-      </div>
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-spinner">
+          <div class="spinner"></div>
+          <p class="loading-text">Validation de votre invitation...</p>
+        </div>
 
-      <!-- Loading State -->
-      <div id="loadingState" class="loading-spinner">
-        <div class="spinner"></div>
-        <p class="loading-text">Validation de votre invitation...</p>
-      </div>
+        <!-- Error State -->
+        <div id="errorState" class="hidden">
+          <div class="error-message" id="errorMessage"></div>
+          <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+        </div>
 
-      <!-- Error State -->
-      <div id="errorState" class="hidden">
-        <div class="error-message" id="errorMessage"></div>
-        <a href="/" class="btn btn-primary">Retour à l'accueil</a>
-      </div>
+        <!-- Valid Invitation State -->
+        <div id="inviteState" class="hidden">
+          <div class="invite-content">
+            <h2>Vous êtes invité !</h2>
+            <p>Vous avez été invité à rejoindre une équipe sur FLOW.</p>
 
-      <!-- Valid Invitation State -->
-      <div id="inviteState" class="hidden">
-        <div class="invite-content">
-          <h2>Vous êtes invité !</h2>
-          <p>Vous avez été invité à rejoindre une équipe sur FLOW.</p>
-
-          <div class="invite-info">
-            <div class="invite-info-row">
-              <span class="invite-info-label">Invité par</span>
-              <span class="invite-info-value" id="managerName">—</span>
+            <div class="invite-info">
+              <div class="invite-info-row">
+                <span class="invite-info-label">Invité par</span>
+                <span class="invite-info-value" id="managerName">—</span>
+              </div>
+              <div class="invite-info-row">
+                <span class="invite-info-label">Votre email</span>
+                <span class="invite-info-value" id="inviteEmail">—</span>
+              </div>
+              <div class="invite-info-row">
+                <span class="invite-info-label">Expire le</span>
+                <span class="invite-info-value" id="expiresAt">—</span>
+              </div>
             </div>
-            <div class="invite-info-row">
-              <span class="invite-info-label">Votre email</span>
-              <span class="invite-info-value" id="inviteEmail">—</span>
-            </div>
-            <div class="invite-info-row">
-              <span class="invite-info-label">Expire le</span>
-              <span class="invite-info-value" id="expiresAt">—</span>
-            </div>
-          </div>
 
-          <div class="invite-actions">
-            <button id="acceptBtn" class="btn btn-primary">Accepter l'invitation</button>
+            <div class="invite-actions">
+              <button id="acceptBtn" class="btn btn-primary">Accepter l'invitation</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Success State -->
-      <div id="successState" class="hidden">
-        <div class="invite-content">
-          <h2>✓ Invitation acceptée !</h2>
-          <p>Bienvenue dans l'équipe. Vous allez être redirigé vers votre espace membre...</p>
-          <div class="loading-spinner">
-            <div class="spinner"></div>
+        <!-- Success State -->
+        <div id="successState" class="hidden">
+          <div class="invite-content">
+            <h2>✓ Invitation acceptée !</h2>
+            <p>Bienvenue dans l'équipe. Vous allez être redirigé vers votre espace membre...</p>
+            <div class="loading-spinner">
+              <div class="spinner"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script type="module" src="/src/js/accept-invite.js"></script>
-</body>
-
+    <script type="module" src="/src/js/accept-invite.js"></script>
+  </body>
 </html>

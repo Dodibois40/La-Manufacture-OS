@@ -14,7 +14,7 @@ export const defaultState = () => ({
     updatedAt: nowISO(),
     rev: 0,
     schema: 'v65',
-  }
+  },
 });
 
 // Auth state
@@ -32,7 +32,7 @@ export const loadAuth = () => {
       authToken = auth.token;
       return auth;
     }
-  } catch (_) { }
+  } catch (_) {}
   return null;
 };
 
@@ -79,7 +79,7 @@ export const authApi = {
   async logout() {
     try {
       await api.auth.logout();
-    } catch (_) { }
+    } catch (_) {}
     clearAuth();
   },
 
@@ -90,10 +90,10 @@ export const authApi = {
         currentUser = result.user;
         return true;
       }
-    } catch (_) { }
+    } catch (_) {}
     clearAuth();
     return false;
-  }
+  },
 };
 
 // Load state - from API or localStorage
@@ -111,7 +111,7 @@ export const loadState = () => {
         state.settings = cached.settings || state.settings;
         state.meta = cached.meta || state.meta;
       }
-    } catch (_) { }
+    } catch (_) {}
   }
 
   return state;
@@ -123,7 +123,16 @@ export const loadStateFromApi = async () => {
   const clerkSignedIn = isSignedIn();
   const legacyLoggedIn = isLoggedIn();
   const isAuthenticated = legacyLoggedIn || clerkSignedIn;
-  console.log('[loadStateFromApi] isApiMode:', isApiMode, 'legacyLoggedIn:', legacyLoggedIn, 'clerkSignedIn:', clerkSignedIn, 'isAuthenticated:', isAuthenticated);
+  console.log(
+    '[loadStateFromApi] isApiMode:',
+    isApiMode,
+    'legacyLoggedIn:',
+    legacyLoggedIn,
+    'clerkSignedIn:',
+    clerkSignedIn,
+    'isAuthenticated:',
+    isAuthenticated
+  );
   if (!isApiMode || !isAuthenticated) {
     console.log('[loadStateFromApi] Falling back to local storage');
     return loadState();
@@ -132,11 +141,15 @@ export const loadStateFromApi = async () => {
   try {
     const [tasksResult, settingsResult] = await Promise.all([
       api.tasks.getAll(),
-      api.settings.get().catch(() => null)
+      api.settings.get().catch(() => null),
     ]);
 
     const state = defaultState();
-    state.tasks = Array.isArray(tasksResult.tasks) ? tasksResult.tasks : (Array.isArray(tasksResult) ? tasksResult : []);
+    state.tasks = Array.isArray(tasksResult.tasks)
+      ? tasksResult.tasks
+      : Array.isArray(tasksResult)
+        ? tasksResult
+        : [];
     if (settingsResult) {
       state.settings = { ...state.settings, ...settingsResult };
     }
@@ -152,18 +165,18 @@ export const loadStateFromApi = async () => {
 };
 
 // Save state locally only
-const saveStateLocal = (state) => {
+const saveStateLocal = state => {
   state.meta.updatedAt = nowISO();
   state.meta.rev = (state.meta.rev || 0) + 1;
   if (okStorage) {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(state));
-    } catch (_) { }
+    } catch (_) {}
   }
 };
 
 // Save state - to API and localStorage
-export const saveState = (state) => {
+export const saveState = state => {
   saveStateLocal(state);
 };
 
@@ -213,7 +226,7 @@ export const taskApi = {
 
   async toggle(id, done) {
     return this.update(id, { done });
-  }
+  },
 };
 
 export function initStorageUI() {
@@ -236,7 +249,7 @@ export function initStorageUI() {
   if (!okStorage && storageWarn && !isApiMode) {
     const w = document.createElement('div');
     w.className = 'warn';
-    w.textContent = "Ton navigateur bloque le stockage local.";
+    w.textContent = 'Ton navigateur bloque le stockage local.';
     storageWarn.appendChild(w);
   }
 }

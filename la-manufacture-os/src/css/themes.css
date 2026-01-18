@@ -17,11 +17,11 @@
   --border-color: rgba(255, 255, 255, 0.15);
   --border-hover: rgba(255, 255, 255, 0.3);
 
-  --accent-primary: #0A84FF;
-  --accent-secondary: #BF5AF2;
-  --accent-success: #30D158;
-  --accent-warning: #FF9F0A;
-  --accent-danger: #FF453A;
+  --accent-primary: #0a84ff;
+  --accent-secondary: #bf5af2;
+  --accent-success: #30d158;
+  --accent-warning: #ff9f0a;
+  --accent-danger: #ff453a;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -29,7 +29,7 @@
 }
 
 /* Light Theme */
-[data-theme="light"] {
+[data-theme='light'] {
   --bg-primary: #f5f5f7;
   --bg-secondary: rgba(0, 0, 0, 0.03);
   --bg-card: rgba(255, 255, 255, 0.8);
@@ -42,11 +42,11 @@
   --border-color: rgba(0, 0, 0, 0.1);
   --border-hover: rgba(0, 0, 0, 0.2);
 
-  --accent-primary: #007AFF;
-  --accent-secondary: #AF52DE;
-  --accent-success: #34C759;
-  --accent-warning: #FF9500;
-  --accent-danger: #FF3B30;
+  --accent-primary: #007aff;
+  --accent-secondary: #af52de;
+  --accent-success: #34c759;
+  --accent-warning: #ff9500;
+  --accent-danger: #ff3b30;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -54,7 +54,7 @@
 }
 
 /* Sunset Theme */
-[data-theme="sunset"] {
+[data-theme='sunset'] {
   --bg-primary: #1a0f1f;
   --bg-secondary: rgba(255, 107, 107, 0.08);
   --bg-card: rgba(255, 107, 107, 0.12);
@@ -79,7 +79,7 @@
 }
 
 /* Ocean Theme */
-[data-theme="ocean"] {
+[data-theme='ocean'] {
   --bg-primary: #0a1929;
   --bg-secondary: rgba(58, 123, 213, 0.08);
   --bg-card: rgba(58, 123, 213, 0.12);
@@ -107,7 +107,9 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* Update existing styles to use CSS variables */
@@ -128,11 +130,18 @@ body {
   border-color: var(--border-hover);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-primary);
 }
 
-p, span, div {
+p,
+span,
+div {
   color: var(--text-secondary);
 }
 
@@ -171,11 +180,21 @@ textarea:focus {
 }
 
 /* Accent colors */
-.accent-primary { color: var(--accent-primary); }
-.accent-secondary { color: var(--accent-secondary); }
-.accent-success { color: var(--accent-success); }
-.accent-warning { color: var(--accent-warning); }
-.accent-danger { color: var(--accent-danger); }
+.accent-primary {
+  color: var(--accent-primary);
+}
+.accent-secondary {
+  color: var(--accent-secondary);
+}
+.accent-success {
+  color: var(--accent-success);
+}
+.accent-warning {
+  color: var(--accent-warning);
+}
+.accent-danger {
+  color: var(--accent-danger);
+}
 
 /* Theme Selector */
 .theme-selector {

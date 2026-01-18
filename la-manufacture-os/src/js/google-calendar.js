@@ -27,10 +27,18 @@ export async function initGoogleCalendar() {
   if (urlParams.get('google') === 'connected') {
     toast('Google Calendar connecte !');
     // Clean URL
-    window.history.replaceState({}, '', window.location.pathname + window.location.hash.split('?')[0]);
+    window.history.replaceState(
+      {},
+      '',
+      window.location.pathname + window.location.hash.split('?')[0]
+    );
   } else if (urlParams.get('google') === 'error') {
     toast('Erreur de connexion Google');
-    window.history.replaceState({}, '', window.location.pathname + window.location.hash.split('?')[0]);
+    window.history.replaceState(
+      {},
+      '',
+      window.location.pathname + window.location.hash.split('?')[0]
+    );
   }
 
   await updateGoogleStatus();

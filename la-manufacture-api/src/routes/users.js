@@ -2,7 +2,7 @@ import { query } from '../db/connection.js';
 
 export default async function usersRoutes(fastify) {
   // Get all users (except current user) - for sharing dropdown
-  fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query(
@@ -14,7 +14,7 @@ export default async function usersRoutes(fastify) {
   });
 
   // Search users (autocomplete)
-  fastify.get('/search', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/search', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const { q } = request.query;
 

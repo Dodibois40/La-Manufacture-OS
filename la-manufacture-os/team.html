@@ -1,251 +1,346 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Équipe - FLOW</title>
-  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Équipe - FLOW</title>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg" />
 
-  <!-- CSS imports -->
-  <link rel="stylesheet" href="/src/css/variables.css">
-  <link rel="stylesheet" href="/src/css/reset.css">
-  <link rel="stylesheet" href="/src/css/design-system.css">
-  <link rel="stylesheet" href="/src/css/components.css">
-  <link rel="stylesheet" href="/src/css/app.css">
-  <link rel="stylesheet" href="/src/css/team.css">
-</head>
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="/src/css/variables.css" />
+    <link rel="stylesheet" href="/src/css/reset.css" />
+    <link rel="stylesheet" href="/src/css/design-system.css" />
+    <link rel="stylesheet" href="/src/css/components.css" />
+    <link rel="stylesheet" href="/src/css/app.css" />
+    <link rel="stylesheet" href="/src/css/team.css" />
+  </head>
 
-<body>
-  <div class="container" id="app">
-    <header>
-      <div class="brand">
-        <div class="header-logo">
-          <span class="header-logo-letter">F</span>
-          <span class="header-logo-letter">L</span>
-          <span class="header-logo-letter">O</span>
-          <span class="header-logo-letter">W</span>
+  <body>
+    <div class="container" id="app">
+      <header>
+        <div class="brand">
+          <div class="header-logo">
+            <span class="header-logo-letter">F</span>
+            <span class="header-logo-letter">L</span>
+            <span class="header-logo-letter">O</span>
+            <span class="header-logo-letter">W</span>
+          </div>
         </div>
-      </div>
-      <div class="topStatus">
-        <span class="badge">SECOND BRAIN</span>
-      </div>
-    </header>
-
-    <!-- Team Management View -->
-    <div class="view active">
-      <div class="view-header">
-        <h2 class="settings-title">ÉQUIPE</h2>
-      </div>
-
-      <!-- Tabs Navigation -->
-      <div class="tabs-wrapper">
-        <div class="tabs">
-          <button class="tab active" data-tab="membres">Membres</button>
-          <button class="tab" data-tab="invitations">Invitations</button>
-          <button class="tab" data-tab="projets">Projets</button>
-          <button class="tab" data-tab="documents">Documents</button>
+        <div class="topStatus">
+          <span class="badge">SECOND BRAIN</span>
         </div>
-      </div>
+      </header>
 
-      <!-- Tab Content -->
-      <div class="tab-content">
-        <!-- Membres Tab -->
-        <div class="tab-pane active" id="membres">
-          <div class="settings-section">
-            <div class="settings-section-header">
-              <label class="settings-label">
-                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-                Membres de l'équipe
-              </label>
-              <p class="help-text">Pour ajouter un membre, utilisez l'onglet "Invitations"</p>
-            </div>
-            <div class="team-grid" id="membersGrid">
-              <!-- Généré dynamiquement -->
-            </div>
+      <!-- Team Management View -->
+      <div class="view active">
+        <div class="view-header">
+          <h2 class="settings-title">ÉQUIPE</h2>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-wrapper">
+          <div class="tabs">
+            <button class="tab active" data-tab="membres">Membres</button>
+            <button class="tab" data-tab="invitations">Invitations</button>
+            <button class="tab" data-tab="projets">Projets</button>
+            <button class="tab" data-tab="documents">Documents</button>
           </div>
         </div>
 
-        <!-- Invitations Tab -->
-        <div class="tab-pane" id="invitations">
-          <div class="settings-section">
-            <div class="settings-section-header">
-              <label class="settings-label">
-                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
-                </svg>
-                Invitations envoyées
-              </label>
-              <button class="btn btn-primary" id="inviteMemberBtn">+ Inviter</button>
-            </div>
-            <div class="invitations-list" id="invitationsList">
-              <!-- Généré dynamiquement -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Projets Tab -->
-        <div class="tab-pane" id="projets">
-          <div class="settings-section">
-            <div class="settings-section-header">
-              <label class="settings-label">
-                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                </svg>
-                Projets
-              </label>
-              <button class="btn btn-primary" id="addProjectBtn">+ Créer</button>
-            </div>
-            <div class="team-grid" id="projectsGrid">
-              <!-- Généré dynamiquement -->
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- Membres Tab -->
+          <div class="tab-pane active" id="membres">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Membres de l'équipe
+                </label>
+                <p class="help-text">Pour ajouter un membre, utilisez l'onglet "Invitations"</p>
+              </div>
+              <div class="team-grid" id="membersGrid">
+                <!-- Généré dynamiquement -->
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Documents Tab -->
-        <div class="tab-pane" id="documents">
-          <div class="settings-section">
-            <div class="settings-section-header">
-              <label class="settings-label">
-                <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-                  <polyline points="13 2 13 9 20 9" />
-                </svg>
-                Documents partagés
-              </label>
-              <button class="btn btn-primary" id="uploadDocBtn">+ Upload</button>
+          <!-- Invitations Tab -->
+          <div class="tab-pane" id="invitations">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                    ></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  Invitations envoyées
+                </label>
+                <button class="btn btn-primary" id="inviteMemberBtn">+ Inviter</button>
+              </div>
+              <div class="invitations-list" id="invitationsList">
+                <!-- Généré dynamiquement -->
+              </div>
             </div>
-            <div class="files-list" id="filesList">
-              <!-- Généré dynamiquement -->
+          </div>
+
+          <!-- Projets Tab -->
+          <div class="tab-pane" id="projets">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                    />
+                  </svg>
+                  Projets
+                </label>
+                <button class="btn btn-primary" id="addProjectBtn">+ Créer</button>
+              </div>
+              <div class="team-grid" id="projectsGrid">
+                <!-- Généré dynamiquement -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Documents Tab -->
+          <div class="tab-pane" id="documents">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                    <polyline points="13 2 13 9 20 9" />
+                  </svg>
+                  Documents partagés
+                </label>
+                <button class="btn btn-primary" id="uploadDocBtn">+ Upload</button>
+              </div>
+              <div class="files-list" id="filesList">
+                <!-- Généré dynamiquement -->
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Navigation Dock -->
-  <nav>
-    <button id="nav-day">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-      </svg>
-      <span class="nav-label">Today</span>
-    </button>
-    <button id="nav-week">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <path d="M3 10h18M8 2v4M16 2v4" />
-      </svg>
-      <span class="nav-label">Plan</span>
-    </button>
-    <button id="nav-inbox">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-      <span class="nav-label">Add</span>
-    </button>
-    <button id="nav-notes">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-      </svg>
-      <span class="nav-label">Notes</span>
-    </button>
-    <button class="active" id="nav-team">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-      <span class="nav-label">Team</span>
-    </button>
-    <button id="nav-config">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      <span class="nav-label">Menu</span>
-    </button>
-  </nav>
+    <!-- Navigation Dock -->
+    <nav>
+      <button id="nav-day">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path
+            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          />
+        </svg>
+        <span class="nav-label">Today</span>
+      </button>
+      <button id="nav-week">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <path d="M3 10h18M8 2v4M16 2v4" />
+        </svg>
+        <span class="nav-label">Plan</span>
+      </button>
+      <button id="nav-inbox">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span class="nav-label">Add</span>
+      </button>
+      <button id="nav-notes">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+          />
+        </svg>
+        <span class="nav-label">Notes</span>
+      </button>
+      <button class="active" id="nav-team">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span class="nav-label">Team</span>
+      </button>
+      <button id="nav-config">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span class="nav-label">Menu</span>
+      </button>
+    </nav>
 
-  <!-- Modal "Add Member" supprimé - utiliser le système d'invitation à la place -->
+    <!-- Modal "Add Member" supprimé - utiliser le système d'invitation à la place -->
 
-  <!-- Modal: Invite Member (with email) -->
-  <div class="modal-overlay" id="inviteMemberModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Inviter un membre</h2>
-        <button class="modal-close" onclick="closeModal('inviteMemberModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
-          Le membre recevra un email avec un lien d'invitation pour créer son compte et accéder à ses tâches.
-        </p>
-        <div class="input-group">
-          <label class="input-label">Email du membre *</label>
-          <input type="email" class="input" id="inviteEmail" placeholder="membre@example.com" required>
+    <!-- Modal: Invite Member (with email) -->
+    <div class="modal-overlay" id="inviteMemberModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Inviter un membre</h2>
+          <button class="modal-close" onclick="closeModal('inviteMemberModal')">×</button>
         </div>
-        <div class="input-group">
-          <label class="input-label">Nom du membre *</label>
-          <input type="text" class="input" id="inviteName" placeholder="Ex: Nicolas Dupont" required>
-        </div>
-        <div class="input-group">
-          <label class="input-label">Couleur d'avatar (optionnel)</label>
-          <input type="color" class="input" id="inviteColor" value="#3b82f6">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('inviteMemberModal')">Annuler</button>
-        <button class="btn btn-primary" id="sendInviteBtn">Envoyer l'invitation</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Add/Edit Project -->
-  <div class="modal-overlay" id="projectModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title" id="projectModalTitle">Créer un projet</h2>
-        <button class="modal-close" onclick="closeModal('projectModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="projectId">
-        <div class="input-group">
-          <label class="input-label">Nom du projet</label>
-          <input type="text" class="input" id="projectName" placeholder="Ex: Fabrication ligne Nord">
-        </div>
-        <div class="input-group">
-          <label class="input-label">Description</label>
-          <textarea class="input textarea" id="projectDescription" placeholder="Décrivez le projet..."></textarea>
-        </div>
-        <div class="input-group">
-          <label class="input-label">Assigné à (plusieurs membres possibles)</label>
-          <div class="checkbox-list" id="projectMembersList">
-            <!-- Généré dynamiquement -->
+        <div class="modal-body">
+          <p style="color: #666; margin-bottom: 20px; font-size: 14px">
+            Le membre recevra un email avec un lien d'invitation pour créer son compte et accéder à
+            ses tâches.
+          </p>
+          <div class="input-group">
+            <label class="input-label">Email du membre *</label>
+            <input
+              type="email"
+              class="input"
+              id="inviteEmail"
+              placeholder="membre@example.com"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Nom du membre *</label>
+            <input
+              type="text"
+              class="input"
+              id="inviteName"
+              placeholder="Ex: Nicolas Dupont"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Couleur d'avatar (optionnel)</label>
+            <input type="color" class="input" id="inviteColor" value="#3b82f6" />
           </div>
         </div>
-        <div class="input-group">
-          <label class="input-label">Date limite</label>
-          <input type="date" class="input" id="projectDeadline">
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('inviteMemberModal')">
+            Annuler
+          </button>
+          <button class="btn btn-primary" id="sendInviteBtn">Envoyer l'invitation</button>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('projectModal')">Annuler</button>
-        <button class="btn btn-primary" id="saveProjectBtn">Créer</button>
+    </div>
+
+    <!-- Modal: Add/Edit Project -->
+    <div class="modal-overlay" id="projectModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title" id="projectModalTitle">Créer un projet</h2>
+          <button class="modal-close" onclick="closeModal('projectModal')">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="projectId" />
+          <div class="input-group">
+            <label class="input-label">Nom du projet</label>
+            <input
+              type="text"
+              class="input"
+              id="projectName"
+              placeholder="Ex: Fabrication ligne Nord"
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Description</label>
+            <textarea
+              class="input textarea"
+              id="projectDescription"
+              placeholder="Décrivez le projet..."
+            ></textarea>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Assigné à (plusieurs membres possibles)</label>
+            <div class="checkbox-list" id="projectMembersList">
+              <!-- Généré dynamiquement -->
+            </div>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Date limite</label>
+            <input type="date" class="input" id="projectDeadline" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('projectModal')">Annuler</button>
+          <button class="btn btn-primary" id="saveProjectBtn">Créer</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Scripts -->
-  <script type="module" src="/src/js/team-page.js"></script>
-</body>
+    <!-- Scripts -->
+    <script type="module" src="/src/js/team-page.js"></script>
+  </body>
 </html>

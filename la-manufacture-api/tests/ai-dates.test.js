@@ -27,7 +27,7 @@ function calculateDates() {
     currentDayName,
     tomorrowDate,
     tomorrowDayName,
-    afterTomorrowDate
+    afterTomorrowDate,
   };
 }
 
@@ -49,48 +49,48 @@ const testCases = [
   {
     input: "demain j'ai un rdv",
     expected: { type: 'event', dateShouldBeTomorrow: true },
-    reason: "Contains 'rdv' (event keyword) + 'demain' (date)"
+    reason: "Contains 'rdv' (event keyword) + 'demain' (date)",
   },
   {
-    input: "rdv dentiste demain 14h",
+    input: 'rdv dentiste demain 14h',
     expected: { type: 'event', dateShouldBeTomorrow: true, time: '14:00' },
-    reason: "Contains 'rdv' + 'demain' + explicit time '14h'"
+    reason: "Contains 'rdv' + 'demain' + explicit time '14h'",
   },
   {
-    input: "demain appeler Marie",
+    input: 'demain appeler Marie',
     expected: { type: 'task', dateShouldBeTomorrow: true },
-    reason: "Action verb 'appeler' without time = task"
+    reason: "Action verb 'appeler' without time = task",
   },
   {
     input: "aujourd'hui j'ai une réunion à 15h",
     expected: { type: 'event', dateShouldBeToday: true, time: '15:00' },
-    reason: "Contains 'réunion' (event keyword) + time"
+    reason: "Contains 'réunion' (event keyword) + time",
   },
   {
-    input: "lundi rdv avec le client",
+    input: 'lundi rdv avec le client',
     expected: { type: 'event', hasDate: true },
-    reason: "Contains 'rdv' = event"
+    reason: "Contains 'rdv' = event",
   },
   {
-    input: "demain matin réunion équipe",
+    input: 'demain matin réunion équipe',
     expected: { type: 'event', dateShouldBeTomorrow: true, time: '09:00' },
-    reason: "Contains 'réunion' + 'matin' = 09:00"
+    reason: "Contains 'réunion' + 'matin' = 09:00",
   },
   {
     input: "j'ai un rdv demain",
     expected: { type: 'event', dateShouldBeTomorrow: true },
-    reason: "Contains 'rdv' = event"
+    reason: "Contains 'rdv' = event",
   },
   {
-    input: "faut que je fasse ça demain",
+    input: 'faut que je fasse ça demain',
     expected: { type: 'task', dateShouldBeTomorrow: true },
-    reason: "Implicit action, no event keyword = task"
+    reason: 'Implicit action, no event keyword = task',
   },
   {
-    input: "après-demain meeting avec Paul 10h",
+    input: 'après-demain meeting avec Paul 10h',
     expected: { type: 'event', dateShouldBeAfterTomorrow: true, time: '10:00' },
-    reason: "Contains 'meeting' + 'après-demain' + time"
-  }
+    reason: "Contains 'meeting' + 'après-demain' + time",
+  },
 ];
 
 // Run tests

@@ -10,97 +10,222 @@ import { isGoogleConnected, syncTaskToGoogle, deleteGoogleEvent } from './google
 // Inspirational quotes collection - 60+ citations pour ne jamais voir les memes
 const QUOTES = [
   // Classiques
-  { text: "La simplicité est la sophistication suprême.", author: "Léonard de Vinci" },
-  { text: "Le seul moyen de faire du bon travail est d'aimer ce que vous faites.", author: "Steve Jobs" },
-  { text: "Commencez là où vous êtes. Utilisez ce que vous avez. Faites ce que vous pouvez.", author: "Arthur Ashe" },
-  { text: "Le succès c'est d'aller d'échec en échec sans perdre son enthousiasme.", author: "Winston Churchill" },
-  { text: "La meilleure façon de prédire l'avenir est de le créer.", author: "Peter Drucker" },
-  { text: "Un voyage de mille lieues commence par un seul pas.", author: "Lao Tseu" },
-  { text: "Ce n'est pas le vent qui décide de votre destination, c'est l'orientation que vous donnez à votre voile.", author: "Jim Rohn" },
-  { text: "L'excellence n'est pas un acte, mais une habitude.", author: "Aristote" },
-  { text: "La discipline est le pont entre les objectifs et l'accomplissement.", author: "Jim Rohn" },
+  { text: 'La simplicité est la sophistication suprême.', author: 'Léonard de Vinci' },
+  {
+    text: "Le seul moyen de faire du bon travail est d'aimer ce que vous faites.",
+    author: 'Steve Jobs',
+  },
+  {
+    text: 'Commencez là où vous êtes. Utilisez ce que vous avez. Faites ce que vous pouvez.',
+    author: 'Arthur Ashe',
+  },
+  {
+    text: "Le succès c'est d'aller d'échec en échec sans perdre son enthousiasme.",
+    author: 'Winston Churchill',
+  },
+  { text: "La meilleure façon de prédire l'avenir est de le créer.", author: 'Peter Drucker' },
+  { text: 'Un voyage de mille lieues commence par un seul pas.', author: 'Lao Tseu' },
+  {
+    text: "Ce n'est pas le vent qui décide de votre destination, c'est l'orientation que vous donnez à votre voile.",
+    author: 'Jim Rohn',
+  },
+  { text: "L'excellence n'est pas un acte, mais une habitude.", author: 'Aristote' },
+  {
+    text: "La discipline est le pont entre les objectifs et l'accomplissement.",
+    author: 'Jim Rohn',
+  },
 
   // Productivité & Focus
-  { text: "Concentrez tous vos efforts sur un seul point, et vous serez étonné du résultat.", author: "Swami Vivekananda" },
-  { text: "Ce qui se mesure s'améliore.", author: "Peter Drucker" },
-  { text: "Le temps est la ressource la plus rare. Si on ne le gère pas, rien d'autre ne peut être géré.", author: "Peter Drucker" },
-  { text: "Fais ce que tu peux, avec ce que tu as, là où tu es.", author: "Theodore Roosevelt" },
-  { text: "Une tâche commencée est une tâche à moitié terminée.", author: "Proverbe" },
-  { text: "Le secret pour avancer est de commencer.", author: "Mark Twain" },
-  { text: "Ne remettez jamais à demain ce que vous pouvez faire aujourd'hui.", author: "Benjamin Franklin" },
-  { text: "La productivité n'est jamais un accident. C'est toujours le résultat d'un engagement vers l'excellence.", author: "Paul J. Meyer" },
+  {
+    text: 'Concentrez tous vos efforts sur un seul point, et vous serez étonné du résultat.',
+    author: 'Swami Vivekananda',
+  },
+  { text: "Ce qui se mesure s'améliore.", author: 'Peter Drucker' },
+  {
+    text: "Le temps est la ressource la plus rare. Si on ne le gère pas, rien d'autre ne peut être géré.",
+    author: 'Peter Drucker',
+  },
+  { text: 'Fais ce que tu peux, avec ce que tu as, là où tu es.', author: 'Theodore Roosevelt' },
+  { text: 'Une tâche commencée est une tâche à moitié terminée.', author: 'Proverbe' },
+  { text: 'Le secret pour avancer est de commencer.', author: 'Mark Twain' },
+  {
+    text: "Ne remettez jamais à demain ce que vous pouvez faire aujourd'hui.",
+    author: 'Benjamin Franklin',
+  },
+  {
+    text: "La productivité n'est jamais un accident. C'est toujours le résultat d'un engagement vers l'excellence.",
+    author: 'Paul J. Meyer',
+  },
 
   // Motivation & Action
-  { text: "Le moment présent est le seul moment sur lequel nous avons du contrôle.", author: "Bouddha" },
-  { text: "Les grands accomplissements sont le résultat de petits efforts quotidiens.", author: "Robert Collier" },
-  { text: "Agissez comme s'il était impossible d'échouer.", author: "Dorothea Brande" },
-  { text: "Ce n'est pas parce que les choses sont difficiles que nous n'osons pas, c'est parce que nous n'osons pas qu'elles sont difficiles.", author: "Sénèque" },
-  { text: "La seule limite à notre épanouissement de demain sera nos doutes d'aujourd'hui.", author: "Franklin D. Roosevelt" },
-  { text: "Croyez que vous pouvez et vous êtes déjà à mi-chemin.", author: "Theodore Roosevelt" },
-  { text: "L'action est la clé fondamentale de tout succès.", author: "Pablo Picasso" },
-  { text: "Il n'y a qu'une façon d'éviter les critiques: ne rien faire, ne rien dire et n'être rien.", author: "Aristote" },
+  {
+    text: 'Le moment présent est le seul moment sur lequel nous avons du contrôle.',
+    author: 'Bouddha',
+  },
+  {
+    text: 'Les grands accomplissements sont le résultat de petits efforts quotidiens.',
+    author: 'Robert Collier',
+  },
+  { text: "Agissez comme s'il était impossible d'échouer.", author: 'Dorothea Brande' },
+  {
+    text: "Ce n'est pas parce que les choses sont difficiles que nous n'osons pas, c'est parce que nous n'osons pas qu'elles sont difficiles.",
+    author: 'Sénèque',
+  },
+  {
+    text: "La seule limite à notre épanouissement de demain sera nos doutes d'aujourd'hui.",
+    author: 'Franklin D. Roosevelt',
+  },
+  { text: 'Croyez que vous pouvez et vous êtes déjà à mi-chemin.', author: 'Theodore Roosevelt' },
+  { text: "L'action est la clé fondamentale de tout succès.", author: 'Pablo Picasso' },
+  {
+    text: "Il n'y a qu'une façon d'éviter les critiques: ne rien faire, ne rien dire et n'être rien.",
+    author: 'Aristote',
+  },
 
   // Persévérance
-  { text: "Je n'ai pas échoué. J'ai simplement trouvé 10 000 solutions qui ne fonctionnent pas.", author: "Thomas Edison" },
-  { text: "Le succès n'est pas final, l'échec n'est pas fatal: c'est le courage de continuer qui compte.", author: "Winston Churchill" },
-  { text: "Les obstacles sont ces choses effrayantes que vous voyez quand vous quittez votre objectif des yeux.", author: "Henry Ford" },
-  { text: "La persévérance n'est pas une longue course; c'est plusieurs petites courses les unes après les autres.", author: "Walter Elliot" },
-  { text: "Notre plus grande gloire n'est pas de ne jamais tomber, mais de nous relever chaque fois.", author: "Confucius" },
-  { text: "Le succès est la somme de petits efforts répétés jour après jour.", author: "Robert Collier" },
+  {
+    text: "Je n'ai pas échoué. J'ai simplement trouvé 10 000 solutions qui ne fonctionnent pas.",
+    author: 'Thomas Edison',
+  },
+  {
+    text: "Le succès n'est pas final, l'échec n'est pas fatal: c'est le courage de continuer qui compte.",
+    author: 'Winston Churchill',
+  },
+  {
+    text: 'Les obstacles sont ces choses effrayantes que vous voyez quand vous quittez votre objectif des yeux.',
+    author: 'Henry Ford',
+  },
+  {
+    text: "La persévérance n'est pas une longue course; c'est plusieurs petites courses les unes après les autres.",
+    author: 'Walter Elliot',
+  },
+  {
+    text: "Notre plus grande gloire n'est pas de ne jamais tomber, mais de nous relever chaque fois.",
+    author: 'Confucius',
+  },
+  {
+    text: 'Le succès est la somme de petits efforts répétés jour après jour.',
+    author: 'Robert Collier',
+  },
 
   // Créativité & Innovation
-  { text: "La créativité, c'est l'intelligence qui s'amuse.", author: "Albert Einstein" },
-  { text: "L'innovation distingue un leader d'un suiveur.", author: "Steve Jobs" },
-  { text: "Soyez vous-même, tous les autres sont déjà pris.", author: "Oscar Wilde" },
-  { text: "La logique vous mènera de A à B. L'imagination vous mènera partout.", author: "Albert Einstein" },
-  { text: "Les esprits créatifs survivent à tout.", author: "Anna Freud" },
+  { text: "La créativité, c'est l'intelligence qui s'amuse.", author: 'Albert Einstein' },
+  { text: "L'innovation distingue un leader d'un suiveur.", author: 'Steve Jobs' },
+  { text: 'Soyez vous-même, tous les autres sont déjà pris.', author: 'Oscar Wilde' },
+  {
+    text: "La logique vous mènera de A à B. L'imagination vous mènera partout.",
+    author: 'Albert Einstein',
+  },
+  { text: 'Les esprits créatifs survivent à tout.', author: 'Anna Freud' },
 
   // Leadership & Travail d'équipe
-  { text: "Le talent gagne des matchs, mais le travail d'équipe et l'intelligence gagnent des championnats.", author: "Michael Jordan" },
-  { text: "Seul on va plus vite, ensemble on va plus loin.", author: "Proverbe africain" },
-  { text: "Un leader est quelqu'un qui connaît le chemin, montre le chemin et emprunte le chemin.", author: "John C. Maxwell" },
-  { text: "Le meilleur moyen de diriger est de montrer l'exemple.", author: "Jack Welch" },
+  {
+    text: "Le talent gagne des matchs, mais le travail d'équipe et l'intelligence gagnent des championnats.",
+    author: 'Michael Jordan',
+  },
+  { text: 'Seul on va plus vite, ensemble on va plus loin.', author: 'Proverbe africain' },
+  {
+    text: "Un leader est quelqu'un qui connaît le chemin, montre le chemin et emprunte le chemin.",
+    author: 'John C. Maxwell',
+  },
+  { text: "Le meilleur moyen de diriger est de montrer l'exemple.", author: 'Jack Welch' },
 
   // Sagesse & Philosophie
-  { text: "Celui qui déplace une montagne commence par déplacer de petites pierres.", author: "Confucius" },
-  { text: "La vie est ce qui arrive quand vous êtes occupé à faire d'autres projets.", author: "John Lennon" },
-  { text: "Nous sommes ce que nous faisons de manière répétée. L'excellence n'est donc pas un acte, mais une habitude.", author: "Will Durant" },
-  { text: "Le bonheur n'est pas quelque chose de tout fait. Il vient de vos propres actions.", author: "Dalaï Lama" },
-  { text: "La connaissance parle, mais la sagesse écoute.", author: "Jimi Hendrix" },
-  { text: "Votre temps est limité, ne le gâchez pas en vivant la vie de quelqu'un d'autre.", author: "Steve Jobs" },
+  {
+    text: 'Celui qui déplace une montagne commence par déplacer de petites pierres.',
+    author: 'Confucius',
+  },
+  {
+    text: "La vie est ce qui arrive quand vous êtes occupé à faire d'autres projets.",
+    author: 'John Lennon',
+  },
+  {
+    text: "Nous sommes ce que nous faisons de manière répétée. L'excellence n'est donc pas un acte, mais une habitude.",
+    author: 'Will Durant',
+  },
+  {
+    text: "Le bonheur n'est pas quelque chose de tout fait. Il vient de vos propres actions.",
+    author: 'Dalaï Lama',
+  },
+  { text: 'La connaissance parle, mais la sagesse écoute.', author: 'Jimi Hendrix' },
+  {
+    text: "Votre temps est limité, ne le gâchez pas en vivant la vie de quelqu'un d'autre.",
+    author: 'Steve Jobs',
+  },
 
   // Ambition & Rêves
-  { text: "Visez la lune. Même si vous la manquez, vous atterrirez parmi les étoiles.", author: "Oscar Wilde" },
-  { text: "Le futur appartient à ceux qui croient à la beauté de leurs rêves.", author: "Eleanor Roosevelt" },
-  { text: "N'attendez pas d'être parfait pour commencer. Commencez et vous serez parfait.", author: "Proverbe" },
-  { text: "Les grandes choses ne sont jamais faites par une seule personne. Elles sont faites par une équipe.", author: "Steve Jobs" },
-  { text: "Faites de votre vie un rêve, et d'un rêve, une réalité.", author: "Antoine de Saint-Exupéry" },
+  {
+    text: 'Visez la lune. Même si vous la manquez, vous atterrirez parmi les étoiles.',
+    author: 'Oscar Wilde',
+  },
+  {
+    text: 'Le futur appartient à ceux qui croient à la beauté de leurs rêves.',
+    author: 'Eleanor Roosevelt',
+  },
+  {
+    text: "N'attendez pas d'être parfait pour commencer. Commencez et vous serez parfait.",
+    author: 'Proverbe',
+  },
+  {
+    text: 'Les grandes choses ne sont jamais faites par une seule personne. Elles sont faites par une équipe.',
+    author: 'Steve Jobs',
+  },
+  {
+    text: "Faites de votre vie un rêve, et d'un rêve, une réalité.",
+    author: 'Antoine de Saint-Exupéry',
+  },
 
   // Changement & Adaptation
-  { text: "Le changement est la loi de la vie. Et ceux qui ne regardent que le passé ou le présent manqueront certainement l'avenir.", author: "John F. Kennedy" },
-  { text: "Si vous voulez des résultats différents, ne faites pas toujours la même chose.", author: "Albert Einstein" },
-  { text: "L'adaptabilité n'est pas une imitation. Cela signifie le pouvoir de résistance et d'assimilation.", author: "Mahatma Gandhi" },
-  { text: "Tout ce que l'esprit peut concevoir et croire, il peut le réaliser.", author: "Napoleon Hill" },
+  {
+    text: "Le changement est la loi de la vie. Et ceux qui ne regardent que le passé ou le présent manqueront certainement l'avenir.",
+    author: 'John F. Kennedy',
+  },
+  {
+    text: 'Si vous voulez des résultats différents, ne faites pas toujours la même chose.',
+    author: 'Albert Einstein',
+  },
+  {
+    text: "L'adaptabilité n'est pas une imitation. Cela signifie le pouvoir de résistance et d'assimilation.",
+    author: 'Mahatma Gandhi',
+  },
+  {
+    text: "Tout ce que l'esprit peut concevoir et croire, il peut le réaliser.",
+    author: 'Napoleon Hill',
+  },
 
   // Minimalisme & Essentialisme
-  { text: "La perfection est atteinte, non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer.", author: "Antoine de Saint-Exupéry" },
-  { text: "Moins mais mieux.", author: "Dieter Rams" },
-  { text: "Celui qui sait qu'il en a assez est riche.", author: "Lao Tseu" },
-  { text: "L'essentiel est invisible pour les yeux.", author: "Antoine de Saint-Exupéry" },
+  {
+    text: "La perfection est atteinte, non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer.",
+    author: 'Antoine de Saint-Exupéry',
+  },
+  { text: 'Moins mais mieux.', author: 'Dieter Rams' },
+  { text: "Celui qui sait qu'il en a assez est riche.", author: 'Lao Tseu' },
+  { text: "L'essentiel est invisible pour les yeux.", author: 'Antoine de Saint-Exupéry' },
 
   // Sport & Performance
-  { text: "Je ne perds jamais. Soit je gagne, soit j'apprends.", author: "Nelson Mandela" },
-  { text: "La douleur que vous ressentez aujourd'hui sera la force que vous ressentirez demain.", author: "Arnold Schwarzenegger" },
-  { text: "Les champions continuent de jouer jusqu'à ce qu'ils réussissent.", author: "Billie Jean King" },
-  { text: "La différence entre l'impossible et le possible réside dans la détermination.", author: "Tommy Lasorda" }
+  { text: "Je ne perds jamais. Soit je gagne, soit j'apprends.", author: 'Nelson Mandela' },
+  {
+    text: "La douleur que vous ressentez aujourd'hui sera la force que vous ressentirez demain.",
+    author: 'Arnold Schwarzenegger',
+  },
+  {
+    text: "Les champions continuent de jouer jusqu'à ce qu'ils réussissent.",
+    author: 'Billie Jean King',
+  },
+  {
+    text: "La différence entre l'impossible et le possible réside dans la détermination.",
+    author: 'Tommy Lasorda',
+  },
 ];
 
 // Shuffle array using Fisher-Yates algorithm (seeded for consistency within 2min windows)
 const shuffleWithSeed = (array, seed) => {
   const shuffled = [...array];
-  let m = shuffled.length, t, i;
+  let m = shuffled.length,
+    t,
+    i;
   while (m) {
-    i = Math.floor(((seed * 9301 + 49297) % 233280) / 233280 * m--);
+    i = Math.floor((((seed * 9301 + 49297) % 233280) / 233280) * m--);
     seed = (seed * 9301 + 49297) % 233280;
     t = shuffled[m];
     shuffled[m] = shuffled[i];
@@ -124,23 +249,26 @@ const getQuoteOfDay = () => {
 let quoteInterval = null;
 const startQuoteRotation = () => {
   if (quoteInterval) return;
-  quoteInterval = setInterval(() => {
-    const quoteEl = document.querySelector('.daily-inspiration');
-    if (quoteEl) {
-      const quote = getQuoteOfDay();
-      quoteEl.innerHTML = `
+  quoteInterval = setInterval(
+    () => {
+      const quoteEl = document.querySelector('.daily-inspiration');
+      if (quoteEl) {
+        const quote = getQuoteOfDay();
+        quoteEl.innerHTML = `
         <p class="inspiration-text">"${quote.text}"</p>
         <p class="inspiration-author">— ${quote.author}</p>
       `;
-      // Add fade animation
-      quoteEl.classList.remove('fade-in');
-      void quoteEl.offsetWidth; // Trigger reflow
-      quoteEl.classList.add('fade-in');
-    } else {
-      // If element not found (view changed), stop rotation
-      stopQuoteRotation();
-    }
-  }, 2 * 60 * 1000); // Every 2 minutes
+        // Add fade animation
+        quoteEl.classList.remove('fade-in');
+        void quoteEl.offsetWidth; // Trigger reflow
+        quoteEl.classList.add('fade-in');
+      } else {
+        // If element not found (view changed), stop rotation
+        stopQuoteRotation();
+      }
+    },
+    2 * 60 * 1000
+  ); // Every 2 minutes
 };
 
 // Stop quote rotation and cleanup interval
@@ -194,7 +322,7 @@ const taskRow = (t, state, options = {}) => {
     });
   } else {
     // Double-tap/double-click to mark as done
-    el.addEventListener('dblclick', (e) => {
+    el.addEventListener('dblclick', e => {
       if (task.done) return; // Already done
 
       // Mark as done with animation
@@ -217,7 +345,7 @@ const taskRow = (t, state, options = {}) => {
   // iOS Style Checkbox
   const c = document.createElement('div');
   c.className = 'check' + (task.done ? ' done' : '');
-  c.addEventListener('click', (e) => {
+  c.addEventListener('click', e => {
     e.stopPropagation();
     if (editMode) return; // Disable in edit mode
 
@@ -243,7 +371,7 @@ const taskRow = (t, state, options = {}) => {
 
   // Handle uncheck separately to be clearer
   if (task.done) {
-    c.addEventListener('click', async (e) => {
+    c.addEventListener('click', async e => {
       e.stopPropagation();
       task.done = false;
       task.updatedAt = nowISO();
@@ -289,12 +417,14 @@ const taskRow = (t, state, options = {}) => {
     if (isGoogleConnected()) {
       const syncBtn = document.createElement('button');
       syncBtn.className = 'google-sync-btn';
-      syncBtn.title = task.google_event_id ? 'Synchronisé avec Google Calendar' : 'Cliquez pour synchroniser avec Google Calendar';
+      syncBtn.title = task.google_event_id
+        ? 'Synchronisé avec Google Calendar'
+        : 'Cliquez pour synchroniser avec Google Calendar';
       syncBtn.innerHTML = task.google_event_id
         ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01" fill="none" stroke="currentColor" stroke-width="2"/></svg>`
         : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
       syncBtn.style.opacity = task.google_event_id ? '0.5' : '1';
-      syncBtn.addEventListener('click', async (e) => {
+      syncBtn.addEventListener('click', async e => {
         e.stopPropagation();
         if (!task.google_event_id) {
           try {
@@ -353,7 +483,7 @@ const taskRow = (t, state, options = {}) => {
     tomorrowBtn.className = 'quick-action-btn';
     tomorrowBtn.title = 'Reporter à demain';
     tomorrowBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-    tomorrowBtn.addEventListener('click', async (e) => {
+    tomorrowBtn.addEventListener('click', async e => {
       e.stopPropagation();
       const d = new Date();
       d.setDate(d.getDate() + 1);
@@ -387,7 +517,7 @@ const taskRow = (t, state, options = {}) => {
     focusBtn.className = 'quick-action-btn focus';
     focusBtn.title = 'Lancer le timer';
     focusBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-    focusBtn.addEventListener('click', (e) => {
+    focusBtn.addEventListener('click', e => {
       e.stopPropagation();
       import('./focus-mode.js').then(mod => mod.startFocusMode(task, state, appCallbacks.render));
     });
@@ -397,7 +527,7 @@ const taskRow = (t, state, options = {}) => {
     urgentBtn.className = 'quick-action-btn' + (task.urgent ? ' active' : '');
     urgentBtn.title = task.urgent ? 'Enlever urgence' : 'Marquer urgent';
     urgentBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
-    urgentBtn.addEventListener('click', async (e) => {
+    urgentBtn.addEventListener('click', async e => {
       e.stopPropagation();
       const newUrgent = !task.urgent;
       task.urgent = newUrgent;
@@ -426,7 +556,7 @@ const taskRow = (t, state, options = {}) => {
     const more = document.createElement('div');
     more.className = 'task-more';
     more.innerHTML = '⋮';
-    more.addEventListener('click', (e) => {
+    more.addEventListener('click', e => {
       e.stopPropagation();
       document.querySelectorAll('.task-menu').forEach(m => m.remove());
 
@@ -435,9 +565,8 @@ const taskRow = (t, state, options = {}) => {
 
       // Option Partager uniquement en mode API et pour les taches qu'on possede
       const isOwned = !task.access_type || task.access_type === 'owner';
-      const shareOption = isApiMode && isOwned
-        ? `<div class="menu-item" data-action="share">📤 Partager</div>`
-        : '';
+      const shareOption =
+        isApiMode && isOwned ? `<div class="menu-item" data-action="share">📤 Partager</div>` : '';
 
       menu.innerHTML = `
         <div class="menu-item" data-action="urgent">🔥 ${task.urgent ? 'Enlever urgence' : 'Marquer urgent'}</div>
@@ -447,7 +576,7 @@ const taskRow = (t, state, options = {}) => {
         <div class="menu-item danger" data-action="delete">🗑️ Supprimer</div>
       `;
 
-      menu.addEventListener('click', async (me) => {
+      menu.addEventListener('click', async me => {
         const target = me.target.closest('.menu-item');
         if (!target) return;
         const action = target.dataset.action;
@@ -519,7 +648,7 @@ const taskRow = (t, state, options = {}) => {
       menu.style.right = `${window.innerWidth - rect.right}px`;
       menu.style.zIndex = '9999';
 
-      const closeMenu = (ce) => {
+      const closeMenu = ce => {
         if (!menu.contains(ce.target) && ce.target !== more) {
           menu.remove();
           document.removeEventListener('click', closeMenu);
@@ -643,7 +772,7 @@ const selectAllTasksDetail = () => {
   appCallbacks.render?.();
 };
 
-export const initEditMode = (state) => {
+export const initEditMode = state => {
   const editModeBtn = document.getElementById('editModeBtn');
   const cancelEditBtn = document.getElementById('cancelEditBtn');
   const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
@@ -692,7 +821,7 @@ export const initEditMode = (state) => {
   }
 };
 
-export const initDayDetailEditMode = (state) => {
+export const initDayDetailEditMode = state => {
   const editBtn = document.getElementById('editDayDetailBtn');
   const cancelBtn = document.getElementById('cancelEditDetailBtn');
   const deleteBtn = document.getElementById('deleteSelectedDetailBtn');
@@ -741,12 +870,25 @@ export const initDayDetailEditMode = (state) => {
   }
 };
 
-export const renderDay = (state) => {
+export const renderDay = state => {
   const d = new Date();
   const today = isoLocal(d);
 
   const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  const MONTHS = [
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
+  ];
 
   const dayNumEl = document.getElementById('dayNum');
   const dayLabelEl = document.getElementById('dayLabel');
@@ -768,7 +910,9 @@ export const renderDay = (state) => {
   const todayTasks = state.tasks
     .map(t => ensureTask(t, 'Moi'))
     .filter(t => (t.date || '').split('T')[0] === today)
-    .sort((a, b) => (b.urgent === true) - (a.urgent === true) || (a.done === true) - (b.done === true));
+    .sort(
+      (a, b) => (b.urgent === true) - (a.urgent === true) || (a.done === true) - (b.done === true)
+    );
 
   // Combined count for edit button
   const allTasks = [...overdueTasks, ...todayTasks];
@@ -810,7 +954,9 @@ export const renderDay = (state) => {
     focusContainer.querySelector('#startZenMode').addEventListener('click', () => {
       const firstTask = pendingTasks[0];
       if (firstTask) {
-        import('./focus-mode.js').then(mod => mod.startFocusMode(firstTask, state, appCallbacks.render));
+        import('./focus-mode.js').then(mod =>
+          mod.startFocusMode(firstTask, state, appCallbacks.render)
+        );
       }
     });
     dayList.appendChild(focusContainer);
@@ -872,7 +1018,9 @@ export const renderDay = (state) => {
         }
 
         saveState(state);
-        toast(`${overdueTasks.length} tâche${overdueTasks.length > 1 ? 's' : ''} reprogrammée${overdueTasks.length > 1 ? 's' : ''}`);
+        toast(
+          `${overdueTasks.length} tâche${overdueTasks.length > 1 ? 's' : ''} reprogrammée${overdueTasks.length > 1 ? 's' : ''}`
+        );
         appCallbacks.render?.();
       });
     }
@@ -975,7 +1123,8 @@ export const renderDay = (state) => {
       });
 
       const doneContainer = document.createElement('div');
-      doneContainer.className = 'collapsed-tasks done-section' + (doneTasksExpanded ? ' expanded' : '');
+      doneContainer.className =
+        'collapsed-tasks done-section' + (doneTasksExpanded ? ' expanded' : '');
       for (const t of doneToday) {
         doneContainer.appendChild(taskRow(t, state));
       }
@@ -1006,13 +1155,14 @@ export const renderDay = (state) => {
       progressBadge.className = 'badge bad';
     } else {
       progressBadge.textContent = `${totalDone}/${todayTasks.length} aujourd'hui`;
-      progressBadge.className = 'badge' + (totalDone === todayTasks.length && todayTasks.length > 0 ? ' good' : '');
+      progressBadge.className =
+        'badge' + (totalDone === todayTasks.length && todayTasks.length > 0 ? ' good' : '');
     }
   }
 
   // Init swipe gestures
   initSwipeGestures(dayList, {
-    onDone: (taskId) => {
+    onDone: taskId => {
       const task = state.tasks.find(t => t.id === taskId);
       if (task && !task.done) {
         task.done = true;
@@ -1023,7 +1173,7 @@ export const renderDay = (state) => {
         appCallbacks.render?.();
       }
     },
-    onTomorrow: (taskId) => {
+    onTomorrow: taskId => {
       const task = state.tasks.find(t => t.id === taskId);
       if (task) {
         const d = new Date();
@@ -1034,7 +1184,7 @@ export const renderDay = (state) => {
         toast('-> Demain');
         appCallbacks.render?.();
       }
-    }
+    },
   });
 
   // Start quote rotation only when day view is active
@@ -1045,23 +1195,35 @@ export const renderDay = (state) => {
 let currentMonth = new Date();
 let selectedDate = null;
 
-export const renderWeek = (state) => {
+export const renderWeek = state => {
   renderPlanning(state);
 };
 
-const renderPlanning = (state) => {
+const renderPlanning = state => {
   renderCalendar(state);
   renderDayDetail(state);
 };
 
-const renderCalendar = (state) => {
+const renderCalendar = state => {
   const grid = document.getElementById('calendarGrid');
   const titleEl = document.getElementById('monthTitle');
   if (!grid || !titleEl) return;
 
   // Update title
-  const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  const months = [
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
+  ];
   titleEl.textContent = `${months[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
 
   grid.innerHTML = '';
@@ -1083,7 +1245,11 @@ const renderCalendar = (state) => {
   const startOffset = (firstDay.getDay() + 6) % 7;
 
   // Previous month days
-  const prevMonthLastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate();
+  const prevMonthLastDay = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+    0
+  ).getDate();
   for (let i = startOffset - 1; i >= 0; i--) {
     const day = prevMonthLastDay - i;
     const cell = createCalendarDay(day, true, state);
@@ -1108,7 +1274,14 @@ const renderCalendar = (state) => {
   }
 };
 
-const createCalendarDay = (dayNumber, otherMonth, state, date = null, isToday = false, iso = null) => {
+const createCalendarDay = (
+  dayNumber,
+  otherMonth,
+  state,
+  date = null,
+  isToday = false,
+  iso = null
+) => {
   const cell = document.createElement('div');
   cell.className = 'calendar-day';
   if (otherMonth) cell.classList.add('other-month');
@@ -1141,8 +1314,13 @@ const createCalendarDay = (dayNumber, otherMonth, state, date = null, isToday = 
   return cell;
 };
 
-const renderDayDetail = (state) => {
-  console.log('[renderDayDetail] Called. selectedDate:', selectedDate, 'state.tasks.length:', state.tasks?.length);
+const renderDayDetail = state => {
+  console.log(
+    '[renderDayDetail] Called. selectedDate:',
+    selectedDate,
+    'state.tasks.length:',
+    state.tasks?.length
+  );
   const titleEl = document.getElementById('selectedDayTitle');
   const listEl = document.getElementById('dayTasksList');
   const addBtn = document.getElementById('addTaskToDay');
@@ -1167,7 +1345,13 @@ const renderDayDetail = (state) => {
     .map(t => ensureTask(t, 'Moi'))
     .filter(t => (t.date || '').split('T')[0] === selectedDate);
 
-  console.log('[renderDayDetail] Filtered tasks for', selectedDate, ':', tasks.length, tasks.map(t => ({ id: t.id, text: t.text, date: t.date })));
+  console.log(
+    '[renderDayDetail] Filtered tasks for',
+    selectedDate,
+    ':',
+    tasks.length,
+    tasks.map(t => ({ id: t.id, text: t.text, date: t.date }))
+  );
 
   // Track visible task IDs for select all
   visibleTaskIdsDetail = tasks.map(t => t.id);
@@ -1238,4 +1422,3 @@ export const initPlanningControls = (state, renderCallback) => {
     });
   }
 };
-

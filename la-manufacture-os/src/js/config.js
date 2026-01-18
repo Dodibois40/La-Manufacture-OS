@@ -3,17 +3,18 @@ import { saveState, defaultState } from './storage.js';
 import { isApiMode, api } from './api-client.js';
 import { signOut } from './clerk-auth.js';
 
-export const renderConfig = (state) => {
+export const renderConfig = state => {
   // Configuration rendering - no owners to display anymore
 };
 
 export const initConfig = (state, renderCallback, setViewCallback) => {
-
   // Export (optional - removed from UI)
   const exportBtn = document.getElementById('exportBtn');
   if (exportBtn) {
     exportBtn.addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json;charset=utf-8' });
+      const blob = new Blob([JSON.stringify(state, null, 2)], {
+        type: 'application/json;charset=utf-8',
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -35,7 +36,7 @@ export const initConfig = (state, renderCallback, setViewCallback) => {
       importFile.click();
     });
 
-    importFile.addEventListener('change', (e) => {
+    importFile.addEventListener('change', e => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
 
@@ -69,7 +70,7 @@ export const initConfig = (state, renderCallback, setViewCallback) => {
       message: 'This action cannot be undone. All your tasks will be permanently deleted.',
       confirmText: 'Delete',
       cancelText: 'Cancel',
-      danger: true
+      danger: true,
     });
 
     if (!confirmed) return;
@@ -101,7 +102,7 @@ export const initConfig = (state, renderCallback, setViewCallback) => {
       message: 'You will be redirected to the login page.',
       confirmText: 'Sign Out',
       cancelText: 'Cancel',
-      danger: false
+      danger: false,
     });
 
     if (!confirmed) return;
@@ -112,4 +113,3 @@ export const initConfig = (state, renderCallback, setViewCallback) => {
     await signOut();
   });
 };
-

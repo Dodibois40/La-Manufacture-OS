@@ -49,12 +49,14 @@ npm run dev         # Dev server avec hot reload
 ## API Endpoints
 
 ### Auth
+
 - `POST /api/auth/register` - Créer un compte
 - `POST /api/auth/login` - Se connecter
 - `POST /api/auth/logout` - Se déconnecter
 - `GET /api/auth/me` - Info utilisateur
 
 ### Tasks
+
 - `GET /api/tasks` - Toutes les tâches
 - `GET /api/tasks/today` - Tâches du jour
 - `GET /api/tasks/late` - Tâches en retard
@@ -65,15 +67,18 @@ npm run dev         # Dev server avec hot reload
 - `POST /api/tasks/:id/time` - Ajouter du temps
 
 ### AI
+
 - `POST /api/ai/focus-mode` - Mode focus (AI choisit)
 - `GET /api/ai/coach/morning` - Briefing matinal
 - `POST /api/ai/parse-dump` - Parser texte brut
 
 ### Settings
+
 - `GET /api/settings` - Récupérer settings
 - `PATCH /api/settings` - Modifier settings
 
 ### Email
+
 - `POST /api/email/inbound` - Webhook email
 - `GET /api/email/inbox` - Emails non traités
 - `POST /api/email/inbox/:id/process` - Traiter email

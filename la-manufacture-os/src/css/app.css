@@ -38,7 +38,9 @@ body.briefing-active nav {
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 .app-loader.hidden {
@@ -67,31 +69,44 @@ body.briefing-active nav {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-.loader-logo span:nth-child(2) { animation-delay: 0.1s; }
-.loader-logo span:nth-child(3) { animation-delay: 0.2s; }
-.loader-logo span:nth-child(4) { animation-delay: 0.3s; }
+.loader-logo span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.loader-logo span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.loader-logo span:nth-child(4) {
+  animation-delay: 0.3s;
+}
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .loader-spinner {
   width: 28px;
   height: 28px;
   margin: 0 auto;
-  border: 2px solid rgba(255,255,255,0.15);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loader-text {
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.4);
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.7rem;
   margin-top: 20px;
@@ -133,7 +148,11 @@ header {
 }
 
 .header-logo-letter {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 1.5rem;
   font-weight: 200;
   color: #fff;
@@ -261,7 +280,7 @@ h3 {
   animation-delay: 0.1s;
 }
 
-.list .task:nth-child(n+6) {
+.list .task:nth-child(n + 6) {
   animation-delay: 0.12s;
 }
 
@@ -282,11 +301,12 @@ h3 {
 button,
 .btn,
 .check {
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-              opacity 0.2s ease,
-              background 0.2s ease,
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    opacity 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .task:hover,
@@ -451,7 +471,11 @@ button:active,
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.15em;
@@ -474,7 +498,11 @@ button:active,
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.02em;
@@ -489,7 +517,11 @@ button:active,
 
 .settings-hint {
   margin-top: 8px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.7rem;
   font-weight: 400;
   letter-spacing: 0.05em;
@@ -498,7 +530,11 @@ button:active,
 
 /* Settings Title - FLOW Style */
 .settings-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.9rem;
   font-weight: 300;
   letter-spacing: 0.3em;
@@ -553,9 +589,10 @@ nav button {
   width: 50px;
   height: 50px;
   border-radius: 14px;
-  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
-              background 0.2s ease,
-              color 0.2s ease;
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s ease,
+    color 0.2s ease;
   position: relative;
   transform-origin: bottom center;
 }
@@ -589,7 +626,9 @@ nav button.active .nav-icon {
   width: 22px;
   height: 22px;
   margin-bottom: 2px;
-  transition: transform 0.3s var(--ease-spring), filter 0.3s ease;
+  transition:
+    transform 0.3s var(--ease-spring),
+    filter 0.3s ease;
 }
 
 .nav-label {
@@ -597,7 +636,6 @@ nav button.active .nav-icon {
   font-weight: 600;
   opacity: 0.8;
 }
-
 
 /* ========================================
    AUTH VIEW - SpaceX/Tesla Style
@@ -648,15 +686,24 @@ nav button.active .nav-icon {
   left: -50%;
   right: -50%;
   bottom: -50%;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, transparent 50%);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
   animation: subtleMove 20s ease-in-out infinite;
 }
 
 @keyframes subtleMove {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(10%, 5%); }
-  50% { transform: translate(-5%, 10%); }
-  75% { transform: translate(-10%, -5%); }
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(10%, 5%);
+  }
+  50% {
+    transform: translate(-5%, 10%);
+  }
+  75% {
+    transform: translate(-10%, -5%);
+  }
 }
 
 /* Content wrapper */
@@ -678,7 +725,11 @@ nav button.active .nav-icon {
 }
 
 .logo-letter {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 3rem;
   font-weight: 100;
   color: #fff;
@@ -713,8 +764,13 @@ nav button.active .nav-icon {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Forms wrapper */
@@ -1350,7 +1406,11 @@ nav button.active .nav-icon {
 }
 
 .confirm-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 1.1rem;
   font-weight: 400;
   letter-spacing: 0.05em;
@@ -1359,7 +1419,11 @@ nav button.active .nav-icon {
 }
 
 .confirm-message {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.85rem;
   font-weight: 300;
   color: rgba(255, 255, 255, 0.5);
@@ -1378,7 +1442,11 @@ nav button.active .nav-icon {
   padding: 14px 20px;
   border-radius: var(--radius-m);
   border: none;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -1419,8 +1487,12 @@ nav button.active .nav-icon {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {

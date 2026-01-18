@@ -16,14 +16,15 @@ const PRECACHE_ASSETS = [
   '/src/css/planning.css',
   '/src/css/app.css',
   '/src/js/app.js',
-  '/src/assets/favicon.svg'
+  '/src/assets/favicon.svg',
 ];
 
 // Install event - cache essential assets
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
+    caches
+      .open(CACHE_NAME)
+      .then(cache => {
         console.log('[SW] Precaching assets');
         return cache.addAll(PRECACHE_ASSETS);
       })
@@ -32,23 +33,26 @@ self.addEventListener('install', (event) => {
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
-          })
-      );
-    }).then(() => self.clients.claim())
+    caches
+      .keys()
+      .then(cacheNames => {
+        return Promise.all(
+          cacheNames
+            .filter(name => name !== CACHE_NAME)
+            .map(name => {
+              console.log('[SW] Deleting old cache:', name);
+              return caches.delete(name);
+            })
+        );
+      })
+      .then(() => self.clients.claim())
   );
 });
 
 // Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -62,34 +66,33 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== location.origin) return;
 
   event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          // Return cached version, but also update cache in background
-          event.waitUntil(updateCache(request));
-          return cachedResponse;
-        }
+    caches.match(request).then(cachedResponse => {
+      if (cachedResponse) {
+        // Return cached version, but also update cache in background
+        event.waitUntil(updateCache(request));
+        return cachedResponse;
+      }
 
-        // Not in cache - fetch from network
-        return fetch(request)
-          .then((response) => {
-            // Cache successful responses
-            if (response.ok) {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(request, responseClone);
-              });
-            }
-            return response;
-          })
-          .catch(() => {
-            // Network failed - return offline page for navigation
-            if (request.mode === 'navigate') {
-              return caches.match(OFFLINE_URL);
-            }
-            return new Response('Offline', { status: 503 });
-          });
-      })
+      // Not in cache - fetch from network
+      return fetch(request)
+        .then(response => {
+          // Cache successful responses
+          if (response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Network failed - return offline page for navigation
+          if (request.mode === 'navigate') {
+            return caches.match(OFFLINE_URL);
+          }
+          return new Response('Offline', { status: 503 });
+        });
+    })
   );
 });
 
@@ -107,7 +110,7 @@ async function updateCache(request) {
 }
 
 // Handle push notifications
-self.addEventListener('push', (event) => {
+self.addEventListener('push', event => {
   if (!event.data) return;
 
   const data = event.data.json();
@@ -117,39 +120,36 @@ self.addEventListener('push', (event) => {
     badge: '/icons/badge-72x72.png',
     vibrate: [100, 50, 100],
     data: data.data || {},
-    actions: data.actions || []
+    actions: data.actions || [],
   };
 
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'FLOW', options)
-  );
+  event.waitUntil(self.registration.showNotification(data.title || 'FLOW', options));
 });
 
 // Handle notification clicks
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', event => {
   event.notification.close();
 
   const urlToOpen = event.notification.data?.url || '/';
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((windowClients) => {
-        // Check if app is already open
-        for (const client of windowClients) {
-          if (client.url === urlToOpen && 'focus' in client) {
-            return client.focus();
-          }
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // Check if app is already open
+      for (const client of windowClients) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
         }
-        // Open new window
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen);
-        }
-      })
+      }
+      // Open new window
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
   );
 });
 
 // Background sync for offline task creation
-self.addEventListener('sync', (event) => {
+self.addEventListener('sync', event => {
   if (event.tag === 'sync-tasks') {
     event.waitUntil(syncTasks());
   }

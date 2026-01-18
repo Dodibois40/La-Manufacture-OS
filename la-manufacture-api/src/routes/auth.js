@@ -2,7 +2,7 @@ import { query } from '../db/connection.js';
 
 export default async function authRoutes(fastify) {
   // Get current user - user is auto-created in authenticate middleware
-  fastify.get('/me', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/me', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query(

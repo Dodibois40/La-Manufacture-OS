@@ -1,253 +1,324 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Idées - FLOW</title>
-  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Idées - FLOW</title>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg" />
 
-  <!-- CSS imports -->
-  <link rel="stylesheet" href="/src/css/variables.css">
-  <link rel="stylesheet" href="/src/css/reset.css">
-  <link rel="stylesheet" href="/src/css/design-system.css">
-  <link rel="stylesheet" href="/src/css/components.css">
-  <link rel="stylesheet" href="/src/css/app.css">
-  <link rel="stylesheet" href="/src/css/notes.css">
-</head>
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="/src/css/variables.css" />
+    <link rel="stylesheet" href="/src/css/reset.css" />
+    <link rel="stylesheet" href="/src/css/design-system.css" />
+    <link rel="stylesheet" href="/src/css/components.css" />
+    <link rel="stylesheet" href="/src/css/app.css" />
+    <link rel="stylesheet" href="/src/css/notes.css" />
+  </head>
 
-<body>
-  <div class="container" id="app">
-    <header>
-      <div class="brand">
-        <div class="header-logo">
-          <span class="header-logo-letter">F</span>
-          <span class="header-logo-letter">L</span>
-          <span class="header-logo-letter">O</span>
-          <span class="header-logo-letter">W</span>
-        </div>
-      </div>
-      <div class="topStatus">
-        <span class="badge">SECOND BRAIN</span>
-      </div>
-    </header>
-
-    <!-- Notes View -->
-    <div class="view active">
-      <div class="view-header">
-        <h2 class="settings-title">IDÉES</h2>
-      </div>
-
-      <!-- Toolbar: Search + Filters -->
-      <div class="notes-toolbar">
-        <div class="search-bar">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input
-            type="text"
-            class="search-input"
-            id="searchInput"
-            placeholder="Rechercher dans vos notes..."
-          >
-        </div>
-
-        <div class="filters">
-          <button class="filter-chip active" data-filter="all">Toutes</button>
-          <button class="filter-chip" data-filter="pinned">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 17v5m-7-3l7-7 7 7"/>
-            </svg>
-            Épinglées
-          </button>
-          <select class="filter-select" id="projectFilter">
-            <option value="">Tous les projets</option>
-            <!-- Généré dynamiquement -->
-          </select>
-          <button class="btn btn-primary" id="createNoteBtn">+ Nouvelle idée</button>
-        </div>
-      </div>
-
-      <!-- Notes Container (Google Keep style) -->
-      <div class="notes-container" id="notesContainer">
-        <!-- Sections générées dynamiquement -->
-      </div>
-
-      <!-- Empty State -->
-      <div class="empty-state hidden" id="emptyState">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-        </svg>
-        <h3>Aucune idée</h3>
-        <p>Créez votre première idée pour commencer</p>
-        <button class="btn btn-primary" onclick="document.getElementById('createNoteBtn').click()">
-          + Créer une idée
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Navigation Dock -->
-  <nav>
-    <button id="nav-day">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-      </svg>
-      <span class="nav-label">Today</span>
-    </button>
-    <button id="nav-week">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <path d="M3 10h18M8 2v4M16 2v4" />
-      </svg>
-      <span class="nav-label">Plan</span>
-    </button>
-    <button id="nav-inbox">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-      <span class="nav-label">Add</span>
-    </button>
-    <button class="active" id="nav-notes">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-      </svg>
-      <span class="nav-label">Notes</span>
-    </button>
-    <button id="nav-team">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-      <span class="nav-label">Team</span>
-    </button>
-    <button id="nav-config">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      <span class="nav-label">Menu</span>
-    </button>
-  </nav>
-
-  <!-- Modal: Create/Edit Note -->
-  <div class="modal-overlay" id="noteModal">
-    <div class="modal modal-large">
-      <div class="modal-header">
-        <h2 class="modal-title" id="noteModalTitle">Créer une note</h2>
-        <button class="modal-close" onclick="closeModal('noteModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="noteId">
-
-        <!-- Title -->
-        <div class="input-group">
-          <label class="input-label">Titre</label>
-          <input type="text" class="input" id="noteTitle" placeholder="Titre de la note" maxlength="255">
-        </div>
-
-        <!-- Content -->
-        <div class="input-group">
-          <label class="input-label">Contenu</label>
-          <textarea class="input textarea note-content" id="noteContent" placeholder="Écrivez votre note..."></textarea>
-        </div>
-
-        <!-- Color Picker -->
-        <div class="input-group">
-          <label class="input-label">Couleur</label>
-          <div class="color-picker">
-            <button class="color-btn" data-color="" title="Aucune"></button>
-            <button class="color-btn" data-color="blue" title="Technique/Dev"></button>
-            <button class="color-btn" data-color="green" title="Idée/Créativité"></button>
-            <button class="color-btn" data-color="yellow" title="Attention"></button>
-            <button class="color-btn" data-color="orange" title="Urgent"></button>
-            <button class="color-btn" data-color="red" title="Critique"></button>
-            <button class="color-btn" data-color="purple" title="Stratégie"></button>
+  <body>
+    <div class="container" id="app">
+      <header>
+        <div class="brand">
+          <div class="header-logo">
+            <span class="header-logo-letter">F</span>
+            <span class="header-logo-letter">L</span>
+            <span class="header-logo-letter">O</span>
+            <span class="header-logo-letter">W</span>
           </div>
         </div>
+        <div class="topStatus">
+          <span class="badge">SECOND BRAIN</span>
+        </div>
+      </header>
 
-        <!-- Pin Checkbox -->
-        <div class="input-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="notePinned">
-            <span>Épingler cette note</span>
-          </label>
+      <!-- Notes View -->
+      <div class="view active">
+        <div class="view-header">
+          <h2 class="settings-title">IDÉES</h2>
         </div>
 
-        <!-- Relations -->
-        <div class="input-group">
-          <label class="input-label">Lier à un projet</label>
-          <div style="display: flex; gap: 8px;">
-            <select class="input" id="noteProject" style="flex: 1;">
-              <option value="">Aucun projet</option>
+        <!-- Toolbar: Search + Filters -->
+        <div class="notes-toolbar">
+          <div class="search-bar">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              class="search-input"
+              id="searchInput"
+              placeholder="Rechercher dans vos notes..."
+            />
+          </div>
+
+          <div class="filters">
+            <button class="filter-chip active" data-filter="all">Toutes</button>
+            <button class="filter-chip" data-filter="pinned">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 17v5m-7-3l7-7 7 7" />
+              </svg>
+              Épinglées
+            </button>
+            <select class="filter-select" id="projectFilter">
+              <option value="">Tous les projets</option>
               <!-- Généré dynamiquement -->
             </select>
-            <button type="button" class="btn btn-secondary" id="quickAddProjectBtn" title="Créer un projet">+</button>
+            <button class="btn btn-primary" id="createNoteBtn">+ Nouvelle idée</button>
           </div>
         </div>
 
-        <div class="input-group">
-          <label class="input-label">Lier à une tâche</label>
-          <select class="input" id="noteTask">
-            <option value="">Aucune tâche</option>
-            <!-- Généré dynamiquement -->
-          </select>
+        <!-- Notes Container (Google Keep style) -->
+        <div class="notes-container" id="notesContainer">
+          <!-- Sections générées dynamiquement -->
         </div>
 
-        <!-- Share Section -->
-        <div class="input-group">
-          <label class="input-label">Partager avec</label>
-          <div class="shares-list" id="sharesList">
-            <!-- Partages générés dynamiquement -->
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+            />
+          </svg>
+          <h3>Aucune idée</h3>
+          <p>Créez votre première idée pour commencer</p>
+          <button
+            class="btn btn-primary"
+            onclick="document.getElementById('createNoteBtn').click()"
+          >
+            + Créer une idée
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Dock -->
+    <nav>
+      <button id="nav-day">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path
+            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          />
+        </svg>
+        <span class="nav-label">Today</span>
+      </button>
+      <button id="nav-week">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <path d="M3 10h18M8 2v4M16 2v4" />
+        </svg>
+        <span class="nav-label">Plan</span>
+      </button>
+      <button id="nav-inbox">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span class="nav-label">Add</span>
+      </button>
+      <button class="active" id="nav-notes">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+          />
+        </svg>
+        <span class="nav-label">Notes</span>
+      </button>
+      <button id="nav-team">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span class="nav-label">Team</span>
+      </button>
+      <button id="nav-config">
+        <svg
+          class="nav-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span class="nav-label">Menu</span>
+      </button>
+    </nav>
+
+    <!-- Modal: Create/Edit Note -->
+    <div class="modal-overlay" id="noteModal">
+      <div class="modal modal-large">
+        <div class="modal-header">
+          <h2 class="modal-title" id="noteModalTitle">Créer une note</h2>
+          <button class="modal-close" onclick="closeModal('noteModal')">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="noteId" />
+
+          <!-- Title -->
+          <div class="input-group">
+            <label class="input-label">Titre</label>
+            <input
+              type="text"
+              class="input"
+              id="noteTitle"
+              placeholder="Titre de la note"
+              maxlength="255"
+            />
           </div>
-          <button class="btn btn-secondary btn-sm" id="shareNoteBtn">+ Partager</button>
+
+          <!-- Content -->
+          <div class="input-group">
+            <label class="input-label">Contenu</label>
+            <textarea
+              class="input textarea note-content"
+              id="noteContent"
+              placeholder="Écrivez votre note..."
+            ></textarea>
+          </div>
+
+          <!-- Color Picker -->
+          <div class="input-group">
+            <label class="input-label">Couleur</label>
+            <div class="color-picker">
+              <button class="color-btn" data-color="" title="Aucune"></button>
+              <button class="color-btn" data-color="blue" title="Technique/Dev"></button>
+              <button class="color-btn" data-color="green" title="Idée/Créativité"></button>
+              <button class="color-btn" data-color="yellow" title="Attention"></button>
+              <button class="color-btn" data-color="orange" title="Urgent"></button>
+              <button class="color-btn" data-color="red" title="Critique"></button>
+              <button class="color-btn" data-color="purple" title="Stratégie"></button>
+            </div>
+          </div>
+
+          <!-- Pin Checkbox -->
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="notePinned" />
+              <span>Épingler cette note</span>
+            </label>
+          </div>
+
+          <!-- Relations -->
+          <div class="input-group">
+            <label class="input-label">Lier à un projet</label>
+            <div style="display: flex; gap: 8px">
+              <select class="input" id="noteProject" style="flex: 1">
+                <option value="">Aucun projet</option>
+                <!-- Généré dynamiquement -->
+              </select>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="quickAddProjectBtn"
+                title="Créer un projet"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Lier à une tâche</label>
+            <select class="input" id="noteTask">
+              <option value="">Aucune tâche</option>
+              <!-- Généré dynamiquement -->
+            </select>
+          </div>
+
+          <!-- Share Section -->
+          <div class="input-group">
+            <label class="input-label">Partager avec</label>
+            <div class="shares-list" id="sharesList">
+              <!-- Partages générés dynamiquement -->
+            </div>
+            <button class="btn btn-secondary btn-sm" id="shareNoteBtn">+ Partager</button>
+          </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('noteModal')">Annuler</button>
-        <button class="btn btn-danger hidden" id="deleteNoteBtn">Supprimer</button>
-        <button class="btn btn-primary" id="saveNoteBtn">Enregistrer</button>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('noteModal')">Annuler</button>
+          <button class="btn btn-danger hidden" id="deleteNoteBtn">Supprimer</button>
+          <button class="btn btn-primary" id="saveNoteBtn">Enregistrer</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modal: Share Note -->
-  <div class="modal-overlay" id="shareModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Partager la note</h2>
-        <button class="modal-close" onclick="closeModal('shareModal')">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="input-group">
-          <label class="input-label">Membre</label>
-          <select class="input" id="shareMember">
-            <option value="">Sélectionner un membre</option>
-            <!-- Généré dynamiquement -->
-          </select>
+    <!-- Modal: Share Note -->
+    <div class="modal-overlay" id="shareModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Partager la note</h2>
+          <button class="modal-close" onclick="closeModal('shareModal')">×</button>
         </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <label class="input-label">Membre</label>
+            <select class="input" id="shareMember">
+              <option value="">Sélectionner un membre</option>
+              <!-- Généré dynamiquement -->
+            </select>
+          </div>
 
-        <div class="input-group">
-          <label class="input-label">Permission</label>
-          <select class="input" id="sharePermission">
-            <option value="view">Lecture seule</option>
-            <option value="edit">Édition</option>
-          </select>
+          <div class="input-group">
+            <label class="input-label">Permission</label>
+            <select class="input" id="sharePermission">
+              <option value="view">Lecture seule</option>
+              <option value="edit">Édition</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('shareModal')">Annuler</button>
-        <button class="btn btn-primary" id="confirmShareBtn">Partager</button>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('shareModal')">Annuler</button>
+          <button class="btn btn-primary" id="confirmShareBtn">Partager</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Scripts -->
-  <script type="module" src="/src/js/notes.js"></script>
-</body>
+    <!-- Scripts -->
+    <script type="module" src="/src/js/notes.js"></script>
+  </body>
 </html>

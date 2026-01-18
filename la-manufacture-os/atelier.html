@@ -1,104 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="FLOW - Atelier" />
+    <title>FLOW - Atelier</title>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg" />
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="FLOW - Atelier">
-  <title>FLOW - Atelier</title>
-  <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg">
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="/src/css/variables.css" />
+    <link rel="stylesheet" href="/src/css/reset.css" />
+    <link rel="stylesheet" href="/src/css/atelier.css" />
+  </head>
 
-  <!-- CSS imports -->
-  <link rel="stylesheet" href="/src/css/variables.css">
-  <link rel="stylesheet" href="/src/css/reset.css">
-  <link rel="stylesheet" href="/src/css/atelier.css">
-</head>
+  <body>
+    <div class="atelier-container" id="app">
+      <!-- Header -->
+      <header class="atelier-header">
+        <div class="atelier-logo"><span>F</span><span>L</span><span>O</span><span>W</span></div>
+        <div class="atelier-subtitle">SECOND BRAIN</div>
+      </header>
 
-<body>
-  <div class="atelier-container" id="app">
-    <!-- Header -->
-    <header class="atelier-header">
-      <div class="atelier-logo">
-        <span>F</span><span>L</span><span>O</span><span>W</span>
+      <!-- Vue: Selection du membre -->
+      <div class="atelier-view" id="view-select">
+        <h1 class="atelier-title">Qui es-tu ?</h1>
+        <div class="members-grid" id="membersGrid">
+          <!-- Membres generes dynamiquement -->
+          <div class="member-loading">Chargement...</div>
+        </div>
       </div>
-      <div class="atelier-subtitle">SECOND BRAIN</div>
-    </header>
 
-    <!-- Vue: Selection du membre -->
-    <div class="atelier-view" id="view-select">
-      <h1 class="atelier-title">Qui es-tu ?</h1>
-      <div class="members-grid" id="membersGrid">
-        <!-- Membres generes dynamiquement -->
-        <div class="member-loading">Chargement...</div>
-      </div>
-    </div>
-
-    <!-- Vue: Taches du membre -->
-    <div class="atelier-view hidden" id="view-tasks">
-      <div class="tasks-header">
-        <button class="back-btn" id="backBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <div class="member-info">
-          <span class="member-avatar" id="currentMemberAvatar"></span>
-          <div class="member-details">
-            <h2 id="currentMemberName">-</h2>
-            <span class="tasks-date" id="tasksDate">-</span>
+      <!-- Vue: Taches du membre -->
+      <div class="atelier-view hidden" id="view-tasks">
+        <div class="tasks-header">
+          <button class="back-btn" id="backBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div class="member-info">
+            <span class="member-avatar" id="currentMemberAvatar"></span>
+            <div class="member-details">
+              <h2 id="currentMemberName">-</h2>
+              <span class="tasks-date" id="tasksDate">-</span>
+            </div>
           </div>
+          <button class="files-btn" id="filesBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            <span>Fichiers</span>
+          </button>
         </div>
-        <button class="files-btn" id="filesBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          <span>Fichiers</span>
-        </button>
+
+        <div class="tasks-list" id="tasksList">
+          <!-- Taches generees dynamiquement -->
+        </div>
+
+        <div class="tasks-progress" id="tasksProgress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="progress-text" id="progressText">0/0</span>
+        </div>
       </div>
 
-      <div class="tasks-list" id="tasksList">
-        <!-- Taches generees dynamiquement -->
-      </div>
-
-      <div class="tasks-progress" id="tasksProgress">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
+      <!-- Vue: Fichiers -->
+      <div class="atelier-view hidden" id="view-files">
+        <div class="files-header">
+          <button class="back-btn" id="backFromFilesBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h2>Documents</h2>
         </div>
-        <span class="progress-text" id="progressText">0/0</span>
+
+        <div class="files-tabs">
+          <button class="file-tab active" data-tab="global">Tous</button>
+          <button class="file-tab" data-tab="member">Mes documents</button>
+        </div>
+
+        <div class="files-list" id="filesList">
+          <!-- Fichiers generes dynamiquement -->
+        </div>
       </div>
     </div>
 
-    <!-- Vue: Fichiers -->
-    <div class="atelier-view hidden" id="view-files">
-      <div class="files-header">
-        <button class="back-btn" id="backFromFilesBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <h2>Documents</h2>
-      </div>
+    <!-- Toast notifications -->
+    <div class="atelier-toast" id="toast"></div>
 
-      <div class="files-tabs">
-        <button class="file-tab active" data-tab="global">Tous</button>
-        <button class="file-tab" data-tab="member">Mes documents</button>
-      </div>
-
-      <div class="files-list" id="filesList">
-        <!-- Fichiers generes dynamiquement -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast notifications -->
-  <div class="atelier-toast" id="toast"></div>
-
-  <!-- Main App -->
-  <script type="module" src="/src/js/atelier.js"></script>
-</body>
-
+    <!-- Main App -->
+    <script type="module" src="/src/js/atelier.js"></script>
+  </body>
 </html>

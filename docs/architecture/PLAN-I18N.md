@@ -11,12 +11,12 @@
 
 ### 1.1 État actuel
 
-| Composant | État | Problème |
-|-----------|------|----------|
-| Frontend (la-manufacture-os) | 🔴 Français hardcodé | Tous les textes en FR |
-| API (la-manufacture-api) | 🔴 Français hardcodé | Prompt IA 693 lignes FR |
-| Database | 🟡 Neutre | Pas de champ locale/timezone |
-| Prompt IA | 🔴 FR uniquement | Keywords, examples, logic tout en FR |
+| Composant                    | État                 | Problème                             |
+| ---------------------------- | -------------------- | ------------------------------------ |
+| Frontend (la-manufacture-os) | 🔴 Français hardcodé | Tous les textes en FR                |
+| API (la-manufacture-api)     | 🔴 Français hardcodé | Prompt IA 693 lignes FR              |
+| Database                     | 🟡 Neutre            | Pas de champ locale/timezone         |
+| Prompt IA                    | 🔴 FR uniquement     | Keywords, examples, logic tout en FR |
 
 ### 1.2 Architecture cible
 
@@ -70,6 +70,7 @@
 ## 2. Phases d'implémentation
 
 ### Phase 1 : Infrastructure i18n (Fondations)
+
 **Durée estimée** : 4-6 heures
 **Priorité** : P0 - BLOQUANT
 
@@ -113,19 +114,19 @@ export const SUPPORTED_TIMEZONES = [
   'America/Chicago',
   'Asia/Tokyo',
   'Asia/Shanghai',
-  'Australia/Sydney'
+  'Australia/Sydney',
 ];
 export const DEFAULT_TIMEZONE = 'Europe/Paris';
 
 // Mapping locale -> timezone par défaut
 export const LOCALE_TIMEZONE_DEFAULTS = {
-  'fr': 'Europe/Paris',
+  fr: 'Europe/Paris',
   'fr-FR': 'Europe/Paris',
   'fr-CA': 'America/Montreal',
-  'en': 'America/New_York',
+  en: 'America/New_York',
   'en-US': 'America/New_York',
   'en-GB': 'Europe/London',
-  'en-AU': 'Australia/Sydney'
+  'en-AU': 'Australia/Sydney',
 };
 
 // Business hours par région
@@ -134,12 +135,12 @@ export const BUSINESS_HOURS = {
   'Europe/London': { start: 9, end: 17, lunchStart: 12, lunchEnd: 13 },
   'America/New_York': { start: 9, end: 17, lunchStart: 12, lunchEnd: 13 },
   'America/Los_Angeles': { start: 8, end: 17, lunchStart: 12, lunchEnd: 13 },
-  'Asia/Tokyo': { start: 9, end: 18, lunchStart: 12, lunchEnd: 13 }
+  'Asia/Tokyo': { start: 9, end: 18, lunchStart: 12, lunchEnd: 13 },
 };
 
 // Durées événements par culture
 export const EVENT_DURATIONS = {
-  'fr': {
+  fr: {
     meeting: 60,
     call: 30,
     lunch: 90,
@@ -147,9 +148,9 @@ export const EVENT_DURATIONS = {
     coffee: 45,
     visit: 120,
     training: 240,
-    conference: 480
+    conference: 480,
   },
-  'en': {
+  en: {
     meeting: 60,
     call: 30,
     lunch: 45,
@@ -157,8 +158,8 @@ export const EVENT_DURATIONS = {
     coffee: 30,
     visit: 60,
     training: 180,
-    conference: 480
-  }
+    conference: 480,
+  },
 };
 ```
 
@@ -178,11 +179,31 @@ export const EVENT_DURATIONS = {
     "information_words": ["budget", "préfère", "veut", "aime"]
   },
   "task_triggers": {
-    "action_verbs": ["appeler", "envoyer", "faire", "préparer", "vérifier", "acheter", "contacter", "relancer", "finaliser"],
+    "action_verbs": [
+      "appeler",
+      "envoyer",
+      "faire",
+      "préparer",
+      "vérifier",
+      "acheter",
+      "contacter",
+      "relancer",
+      "finaliser"
+    ],
     "obligation_words": ["il faut", "je dois", "à faire", "faut que"]
   },
   "urgency": {
-    "urgent": ["URGENT", "ASAP", "immédiatement", "tout de suite", "!!!", "critique", "en panne", "down", "bloqué"],
+    "urgent": [
+      "URGENT",
+      "ASAP",
+      "immédiatement",
+      "tout de suite",
+      "!!!",
+      "critique",
+      "en panne",
+      "down",
+      "bloqué"
+    ],
     "important": ["important", "crucial", "essentiel", "clé", "prioritaire"]
   },
   "time_expressions": {
@@ -201,10 +222,32 @@ export const EVENT_DURATIONS = {
       "fin d'après-midi": "17:00",
       "soir": "18:00"
     },
-    "separators": ["et puis", "aussi", "sinon", "ah et", "d'ailleurs", "au fait", "tiens", "j'oubliais"]
+    "separators": [
+      "et puis",
+      "aussi",
+      "sinon",
+      "ah et",
+      "d'ailleurs",
+      "au fait",
+      "tiens",
+      "j'oubliais"
+    ]
   },
   "day_names": ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
-  "month_names": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+  "month_names": [
+    "janvier",
+    "février",
+    "mars",
+    "avril",
+    "mai",
+    "juin",
+    "juillet",
+    "août",
+    "septembre",
+    "octobre",
+    "novembre",
+    "décembre"
+  ]
 }
 ```
 
@@ -224,11 +267,34 @@ export const EVENT_DURATIONS = {
     "information_words": ["budget", "prefers", "wants", "likes"]
   },
   "task_triggers": {
-    "action_verbs": ["call", "send", "do", "prepare", "check", "buy", "contact", "follow up", "finalize", "review", "email"],
+    "action_verbs": [
+      "call",
+      "send",
+      "do",
+      "prepare",
+      "check",
+      "buy",
+      "contact",
+      "follow up",
+      "finalize",
+      "review",
+      "email"
+    ],
     "obligation_words": ["need to", "must", "have to", "should", "gotta"]
   },
   "urgency": {
-    "urgent": ["URGENT", "ASAP", "immediately", "right now", "!!!", "critical", "down", "broken", "blocked", "emergency"],
+    "urgent": [
+      "URGENT",
+      "ASAP",
+      "immediately",
+      "right now",
+      "!!!",
+      "critical",
+      "down",
+      "broken",
+      "blocked",
+      "emergency"
+    ],
     "important": ["important", "crucial", "essential", "key", "priority", "high priority"]
   },
   "time_expressions": {
@@ -248,10 +314,32 @@ export const EVENT_DURATIONS = {
       "evening": "18:00",
       "night": "20:00"
     },
-    "separators": ["and then", "also", "plus", "oh and", "by the way", "oh right", "wait", "I forgot"]
+    "separators": [
+      "and then",
+      "also",
+      "plus",
+      "oh and",
+      "by the way",
+      "oh right",
+      "wait",
+      "I forgot"
+    ]
   },
   "day_names": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-  "month_names": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+  "month_names": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ]
 }
 ```
 
@@ -260,7 +348,12 @@ export const EVENT_DURATIONS = {
 ```javascript
 // la-manufacture-api/src/i18n/middleware.js
 
-import { SUPPORTED_LOCALES, DEFAULT_LOCALE, LOCALE_TIMEZONE_DEFAULTS, DEFAULT_TIMEZONE } from './config.js';
+import {
+  SUPPORTED_LOCALES,
+  DEFAULT_LOCALE,
+  LOCALE_TIMEZONE_DEFAULTS,
+  DEFAULT_TIMEZONE,
+} from './config.js';
 
 export function extractLocaleFromRequest(request) {
   // 1. Check explicit header
@@ -292,7 +385,8 @@ export function extractTimezoneFromRequest(request, locale) {
   }
 
   // 2. Default based on locale
-  const fullLocale = request.headers['x-user-locale'] || request.headers['accept-language']?.split(',')[0];
+  const fullLocale =
+    request.headers['x-user-locale'] || request.headers['accept-language']?.split(',')[0];
   if (fullLocale && LOCALE_TIMEZONE_DEFAULTS[fullLocale]) {
     return LOCALE_TIMEZONE_DEFAULTS[fullLocale];
   }
@@ -307,7 +401,7 @@ export function i18nMiddleware(request, reply, done) {
   request.i18n = {
     locale,
     timezone,
-    language: locale // alias
+    language: locale, // alias
   };
 
   done();
@@ -367,20 +461,26 @@ export function getI18nConfig(locale, timezone) {
     eventDurations,
 
     // Helper functions
-    getDayName: (dayIndex) => localeData.keywords.day_names[dayIndex],
-    getMonthName: (monthIndex) => localeData.keywords.month_names[monthIndex],
-    getNamedTime: (name) => localeData.keywords.time_expressions.named_times[name.toLowerCase()],
-    getRelativeDay: (expression) => localeData.keywords.time_expressions.relative_days[expression.toLowerCase()]
+    getDayName: dayIndex => localeData.keywords.day_names[dayIndex],
+    getMonthName: monthIndex => localeData.keywords.month_names[monthIndex],
+    getNamedTime: name => localeData.keywords.time_expressions.named_times[name.toLowerCase()],
+    getRelativeDay: expression =>
+      localeData.keywords.time_expressions.relative_days[expression.toLowerCase()],
   };
 }
 
-export { i18nMiddleware, extractLocaleFromRequest, extractTimezoneFromRequest } from './middleware.js';
+export {
+  i18nMiddleware,
+  extractLocaleFromRequest,
+  extractTimezoneFromRequest,
+} from './middleware.js';
 export * from './config.js';
 ```
 
 ---
 
 ### Phase 2 : Prompt Système Multi-langue
+
 **Durée estimée** : 6-8 heures
 **Priorité** : P0 - BLOQUANT
 
@@ -393,11 +493,19 @@ Créer `la-manufacture-api/src/prompts/system-prompt-fr.js` :
 
 export function generateSystemPromptFR(config) {
   const {
-    currentDate, currentDayName, currentTime,
-    tomorrowDate, tomorrowDayName, afterTomorrowDate,
-    activeProjects, existingTags, teamMembers,
-    keywords, businessHours, eventDurations,
-    weekDaysStr
+    currentDate,
+    currentDayName,
+    currentTime,
+    tomorrowDate,
+    tomorrowDayName,
+    afterTomorrowDate,
+    activeProjects,
+    existingTags,
+    teamMembers,
+    keywords,
+    businessHours,
+    eventDurations,
+    weekDaysStr,
   } = config;
 
   return `Tu es un SECOND BRAIN - un assistant cognitif de niveau supérieur...
@@ -420,10 +528,17 @@ SECTION 4 : DATES & HEURES (CALCUL PRÉCIS)
 
 export function generateUserPromptFR(config) {
   const {
-    text, currentDate, currentDayName, currentTime,
-    tomorrowDate, tomorrowDayName, afterTomorrowDate,
-    activeProjects, existingTags, teamMembers,
-    weekDaysStr
+    text,
+    currentDate,
+    currentDayName,
+    currentTime,
+    tomorrowDate,
+    tomorrowDayName,
+    afterTomorrowDate,
+    activeProjects,
+    existingTags,
+    teamMembers,
+    weekDaysStr,
   } = config;
 
   return `🧠 ACTIVATION SECOND BRAIN - Analyse complète requise
@@ -450,11 +565,19 @@ Créer `la-manufacture-api/src/prompts/system-prompt-en.js` :
 
 export function generateSystemPromptEN(config) {
   const {
-    currentDate, currentDayName, currentTime,
-    tomorrowDate, tomorrowDayName, afterTomorrowDate,
-    activeProjects, existingTags, teamMembers,
-    keywords, businessHours, eventDurations,
-    weekDaysStr
+    currentDate,
+    currentDayName,
+    currentTime,
+    tomorrowDate,
+    tomorrowDayName,
+    afterTomorrowDate,
+    activeProjects,
+    existingTags,
+    teamMembers,
+    keywords,
+    businessHours,
+    eventDurations,
+    weekDaysStr,
   } = config;
 
   return `You are a SECOND BRAIN - a superior-level cognitive assistant. You don't just parse text: you UNDERSTAND, ANTICIPATE, VERIFY, and ENRICH.
@@ -736,10 +859,17 @@ not just that you're parsing text. You are their COGNITIVE EXTENSION.`;
 
 export function generateUserPromptEN(config) {
   const {
-    text, currentDate, currentDayName, currentTime,
-    tomorrowDate, tomorrowDayName, afterTomorrowDate,
-    activeProjects, existingTags, teamMembers,
-    weekDaysStr
+    text,
+    currentDate,
+    currentDayName,
+    currentTime,
+    tomorrowDate,
+    tomorrowDayName,
+    afterTomorrowDate,
+    activeProjects,
+    existingTags,
+    teamMembers,
+    weekDaysStr,
   } = config;
 
   return `🧠 SECOND BRAIN ACTIVATION - Complete analysis required
@@ -814,12 +944,12 @@ import { getI18nConfig } from '../i18n/index.js';
 const promptGenerators = {
   fr: {
     system: generateSystemPromptFR,
-    user: generateUserPromptFR
+    user: generateUserPromptFR,
   },
   en: {
     system: generateSystemPromptEN,
-    user: generateUserPromptEN
-  }
+    user: generateUserPromptEN,
+  },
 };
 
 export function generatePrompts(locale, config) {
@@ -827,7 +957,7 @@ export function generatePrompts(locale, config) {
 
   return {
     systemPrompt: generator.system(config),
-    userPrompt: generator.user(config)
+    userPrompt: generator.user(config),
   };
 }
 
@@ -842,19 +972,19 @@ export function buildPromptConfig(request, text, userData) {
     timeZone: timezone,
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   });
 
   const dayFormatter = new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-US', {
     timeZone: timezone,
-    weekday: 'long'
+    weekday: 'long',
   });
 
   const timeFormatter = new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-US', {
     timeZone: timezone,
     hour: '2-digit',
     minute: '2-digit',
-    hour12: locale !== 'fr'
+    hour12: locale !== 'fr',
   });
 
   const currentDate = dateFormatter.format(now);
@@ -877,7 +1007,7 @@ export function buildPromptConfig(request, text, userData) {
     d.setDate(d.getDate() + i);
     weekDays.push({
       name: dayFormatter.format(d),
-      date: dateFormatter.format(d)
+      date: dateFormatter.format(d),
     });
   }
   const weekDaysStr = weekDays.map(d => `${d.name} → ${d.date}`).join(', ');
@@ -898,7 +1028,7 @@ export function buildPromptConfig(request, text, userData) {
     teamMembers: userData.teamMembers || [],
     keywords: i18nConfig.keywords,
     businessHours: i18nConfig.businessHours,
-    eventDurations: i18nConfig.eventDurations
+    eventDurations: i18nConfig.eventDurations,
   };
 }
 ```
@@ -906,6 +1036,7 @@ export function buildPromptConfig(request, text, userData) {
 ---
 
 ### Phase 3 : Modifications Database
+
 **Durée estimée** : 1-2 heures
 **Priorité** : P1
 
@@ -967,7 +1098,7 @@ fastify.patch('/user/preferences', async (request, reply) => {
 
   return reply.send({
     success: true,
-    preferences: result.rows[0]
+    preferences: result.rows[0],
   });
 });
 ```
@@ -975,6 +1106,7 @@ fastify.patch('/user/preferences', async (request, reply) => {
 ---
 
 ### Phase 4 : Modifications Frontend
+
 **Durée estimée** : 4-6 heures
 **Priorité** : P2
 
@@ -1143,6 +1275,7 @@ la-manufacture-os/
 ---
 
 ### Phase 5 : Modification route /process-inbox
+
 **Durée estimée** : 2-3 heures
 **Priorité** : P0
 
@@ -1183,17 +1316,16 @@ export default async function aiRoutes(fastify) {
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 2000,
         system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
+        messages: [{ role: 'user', content: userPrompt }],
       });
 
       // Parse and process response (unchanged logic)
       // ...
-
     } catch (error) {
       fastify.log.error('Process inbox error:', error);
       return reply.status(500).send({
         error: 'Inbox processing failed',
-        details: error.message
+        details: error.message,
       });
     }
   });
@@ -1226,14 +1358,14 @@ describe('i18n Configuration', () => {
 
   test('extracts locale from X-User-Locale header', () => {
     const request = {
-      headers: { 'x-user-locale': 'en-US' }
+      headers: { 'x-user-locale': 'en-US' },
     };
     expect(extractLocaleFromRequest(request)).toBe('en');
   });
 
   test('falls back to default locale', () => {
     const request = {
-      headers: {}
+      headers: {},
     };
     expect(extractLocaleFromRequest(request)).toBe('fr');
   });
@@ -1276,12 +1408,12 @@ describe('AI Prompt Parsing', () => {
 
 ### 3.3 Matrice de tests timezone
 
-| User Timezone | Input | Expected Date | Expected Time |
-|---------------|-------|---------------|---------------|
-| Europe/Paris | "demain 14h" | tomorrow +0 | 14:00 |
-| America/New_York | "tomorrow 2pm" | tomorrow +0 | 14:00 |
-| Asia/Tokyo | "明日 14時" | tomorrow +0 | 14:00 |
-| America/Los_Angeles | "Monday 9am" | next Monday | 09:00 |
+| User Timezone       | Input          | Expected Date | Expected Time |
+| ------------------- | -------------- | ------------- | ------------- |
+| Europe/Paris        | "demain 14h"   | tomorrow +0   | 14:00         |
+| America/New_York    | "tomorrow 2pm" | tomorrow +0   | 14:00         |
+| Asia/Tokyo          | "明日 14時"    | tomorrow +0   | 14:00         |
+| America/Los_Angeles | "Monday 9am"   | next Monday   | 09:00         |
 
 ---
 
@@ -1316,15 +1448,15 @@ describe('AI Prompt Parsing', () => {
 
 ## 5. Estimation effort total
 
-| Phase | Tâches | Durée |
-|-------|--------|-------|
-| **Phase 1** | Infrastructure i18n (fichiers, config, middleware) | 4-6h |
-| **Phase 2** | Prompts système FR refactoré + EN complet | 6-8h |
-| **Phase 3** | Database migration + API preferences | 1-2h |
-| **Phase 4** | Frontend i18n (détection, messages, headers) | 4-6h |
-| **Phase 5** | Modification route /process-inbox | 2-3h |
-| **Tests** | Unitaires + intégration + manuels | 3-4h |
-| **Buffer** | Imprévus, debugging, ajustements | 2-3h |
+| Phase       | Tâches                                             | Durée |
+| ----------- | -------------------------------------------------- | ----- |
+| **Phase 1** | Infrastructure i18n (fichiers, config, middleware) | 4-6h  |
+| **Phase 2** | Prompts système FR refactoré + EN complet          | 6-8h  |
+| **Phase 3** | Database migration + API preferences               | 1-2h  |
+| **Phase 4** | Frontend i18n (détection, messages, headers)       | 4-6h  |
+| **Phase 5** | Modification route /process-inbox                  | 2-3h  |
+| **Tests**   | Unitaires + intégration + manuels                  | 3-4h  |
+| **Buffer**  | Imprévus, debugging, ajustements                   | 2-3h  |
 
 **Total estimé : 22-32 heures** (3-4 jours de travail concentré)
 
@@ -1332,28 +1464,31 @@ describe('AI Prompt Parsing', () => {
 
 ## 6. Risques et mitigations
 
-| Risque | Probabilité | Impact | Mitigation |
-|--------|-------------|--------|------------|
-| Régression prompt FR | Moyenne | Critique | Tests automatisés avant/après |
-| Performance Claude avec 2 prompts | Faible | Moyen | Pas de changement (même format) |
-| Timezone edge cases | Moyenne | Moyen | Tests exhaustifs DST/leap year |
-| Keywords EN incomplets | Haute | Moyen | Itération rapide post-launch |
-| UX confusion langue | Faible | Faible | Détection auto + option manuelle |
+| Risque                            | Probabilité | Impact   | Mitigation                       |
+| --------------------------------- | ----------- | -------- | -------------------------------- |
+| Régression prompt FR              | Moyenne     | Critique | Tests automatisés avant/après    |
+| Performance Claude avec 2 prompts | Faible      | Moyen    | Pas de changement (même format)  |
+| Timezone edge cases               | Moyenne     | Moyen    | Tests exhaustifs DST/leap year   |
+| Keywords EN incomplets            | Haute       | Moyen    | Itération rapide post-launch     |
+| UX confusion langue               | Faible      | Faible   | Détection auto + option manuelle |
 
 ---
 
 ## 7. Évolutions futures
 
 ### 7.1 Court terme (après EN)
+
 - Support Espagnol (ES) - marché LATAM
 - Support Allemand (DE) - marché DACH
 
 ### 7.2 Moyen terme
+
 - Détection automatique de langue dans le texte saisi
 - Support mixte (input EN, UI FR)
 - Amélioration continue keywords par ML
 
 ### 7.3 Long terme
+
 - Multi-langue dans une même conversation IA
 - Traduction automatique des tâches
 - Support RTL (Arabe, Hébreu)

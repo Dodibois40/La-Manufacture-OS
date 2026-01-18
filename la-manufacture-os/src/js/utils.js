@@ -93,7 +93,7 @@ const playCompletionSound = () => {
 };
 
 // Sons
-export const playSound = (type) => {
+export const playSound = type => {
   if (type === 'complete') {
     playCompletionSound();
     return;
@@ -159,8 +159,14 @@ export const ensureTask = (t, defaultOwner) => {
 // Confirmation Dialog - FLOW Style
 export const triggerConfetti = celebrate;
 
-export const confirmDialog = ({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', danger = false }) => {
-  return new Promise((resolve) => {
+export const confirmDialog = ({
+  title,
+  message,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  danger = false,
+}) => {
+  return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'confirm-overlay';
     overlay.innerHTML = `
@@ -174,7 +180,7 @@ export const confirmDialog = ({ title, message, confirmText = 'Confirm', cancelT
       </div>
     `;
 
-    const close = (result) => {
+    const close = result => {
       overlay.style.opacity = '0';
       setTimeout(() => overlay.remove(), 200);
       resolve(result);
@@ -182,7 +188,9 @@ export const confirmDialog = ({ title, message, confirmText = 'Confirm', cancelT
 
     overlay.querySelector('[data-action="cancel"]').onclick = () => close(false);
     overlay.querySelector('[data-action="confirm"]').onclick = () => close(true);
-    overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+    overlay.onclick = e => {
+      if (e.target === overlay) close(false);
+    };
 
     document.body.appendChild(overlay);
   });

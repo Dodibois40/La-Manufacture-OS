@@ -4,381 +4,398 @@
    ======================================== */
 
 .brief-overlay-spacex {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    z-index: 3000;
-    display: flex;
-    align-items: center;
-    color: #fff;
-    overflow: hidden;
-    transition: opacity 0.6s ease-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  overflow: hidden;
+  transition: opacity 0.6s ease-out;
 }
 
 .brief-overlay-spacex.hidden {
-    opacity: 0;
-    pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Stars Background */
 .stars {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image:
-        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8), transparent),
-        radial-gradient(1px 1px at 20% 50%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1.5px 1.5px at 30% 10%, rgba(255,255,255,0.7), transparent),
-        radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 50% 30%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1.5px 1.5px at 60% 70%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 70% 15%, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 80% 45%, rgba(255,255,255,0.7), transparent),
-        radial-gradient(1.5px 1.5px at 90% 85%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 15% 90%, rgba(255,255,255,0.4), transparent);
-    opacity: 0.6;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 20% 50%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 30% 10%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 50% 30%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 60% 70%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 70% 15%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 80% 45%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 90% 85%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 15% 90%, rgba(255, 255, 255, 0.4), transparent);
+  opacity: 0.6;
 }
 
 /* Planet Container - SpaceX Mars style (massive, edge-cropped) */
 .planet-container {
-    position: absolute;
-    right: -18%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 90vh;
-    height: 90vh;
-    min-width: 500px;
-    min-height: 500px;
+  position: absolute;
+  right: -18%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 90vh;
+  height: 90vh;
+  min-width: 500px;
+  min-height: 500px;
 }
 
 @media (min-width: 1400px) {
-    .planet-container {
-        width: 95vh;
-        height: 95vh;
-        right: -15%;
-    }
+  .planet-container {
+    width: 95vh;
+    height: 95vh;
+    right: -15%;
+  }
 }
 
 @media (max-width: 1200px) {
-    .planet-container {
-        right: -25%;
-        width: 85vh;
-        height: 85vh;
-    }
+  .planet-container {
+    right: -25%;
+    width: 85vh;
+    height: 85vh;
+  }
 }
 
 @media (max-width: 768px) {
-    .planet-container {
-        right: -40%;
-        top: 60%;
-        width: 80vh;
-        height: 80vh;
-        min-width: 400px;
-        min-height: 400px;
-    }
+  .planet-container {
+    right: -40%;
+    top: 60%;
+    width: 80vh;
+    height: 80vh;
+    min-width: 400px;
+    min-height: 400px;
+  }
 }
 
 /* Outer Atmospheric Glow - halo only on lit side (left) */
 .planet-glow {
-    position: absolute;
-    width: 115%;
-    height: 115%;
-    top: -7.5%;
-    left: -7.5%;
-    border-radius: 50%;
-    /* Bright rim glow on the lit edge */
-    background: radial-gradient(
-        ellipse 55% 55% at 35% 50%,
-        rgba(135, 200, 255, 0.25) 45%,
-        rgba(100, 170, 255, 0.15) 52%,
-        rgba(80, 150, 230, 0.08) 58%,
-        transparent 65%
-    );
-    pointer-events: none;
+  position: absolute;
+  width: 115%;
+  height: 115%;
+  top: -7.5%;
+  left: -7.5%;
+  border-radius: 50%;
+  /* Bright rim glow on the lit edge */
+  background: radial-gradient(
+    ellipse 55% 55% at 35% 50%,
+    rgba(135, 200, 255, 0.25) 45%,
+    rgba(100, 170, 255, 0.15) 52%,
+    rgba(80, 150, 230, 0.08) 58%,
+    transparent 65%
+  );
+  pointer-events: none;
 }
 
 /* The Planet sphere - this creates the circular mask */
 .planet {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #000;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #000;
 }
 
 /* Earth day texture - rotating to the RIGHT */
 .planet-day {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    background-color: #1a4d6e;
-    background-image: url('/earth-day.webp');
-    background-repeat: repeat-x;
-    background-size: cover;
-    background-position: 0 0;
-    animation: rotateEarthRight 90s linear infinite;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: #1a4d6e;
+  background-image: url('/earth-day.webp');
+  background-repeat: repeat-x;
+  background-size: cover;
+  background-position: 0 0;
+  animation: rotateEarthRight 90s linear infinite;
 }
 
 /* Clouds layer - slightly faster rotation for realism */
 .planet-clouds {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    background-color: transparent;
-    background-image: url('/earth-clouds.webp');
-    background-repeat: repeat-x;
-    background-size: cover;
-    background-position: 0 0;
-    animation: rotateEarthRight 80s linear infinite;
-    opacity: 0.5;
-    z-index: 2;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: transparent;
+  background-image: url('/earth-clouds.webp');
+  background-repeat: repeat-x;
+  background-size: cover;
+  background-position: 0 0;
+  animation: rotateEarthRight 80s linear infinite;
+  opacity: 0.5;
+  z-index: 2;
 }
 
 /* Earth night/cities texture - same rotation as day */
 .planet-night {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    background-color: #0a0a12;
-    background-image: url('/earth-night.webp');
-    background-repeat: repeat-x;
-    background-size: cover;
-    background-position: 0 0;
-    animation: rotateEarthRight 90s linear infinite;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: #0a0a12;
+  background-image: url('/earth-night.webp');
+  background-repeat: repeat-x;
+  background-size: cover;
+  background-position: 0 0;
+  animation: rotateEarthRight 90s linear infinite;
 }
 
 /* Shadow layer - sun from LEFT, shadow on RIGHT with curved terminator */
 .planet-shadow {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    /* Multiple gradients for realistic curved shadow */
-    background:
-        /* Main curved shadow - positioned off-left for curve effect */
-        radial-gradient(ellipse 120% 100% at -30% 50%,
-            transparent 40%,
-            rgba(0,0,0,0.15) 50%,
-            rgba(0,0,0,0.4) 58%,
-            rgba(0,0,0,0.7) 65%,
-            rgba(0,0,0,0.92) 75%,
-            #000 85%
-        );
-    z-index: 5;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Multiple gradients for realistic curved shadow */
+  background:
+        /* Main curved shadow - positioned off-left for curve effect */ radial-gradient(
+    ellipse 120% 100% at -30% 50%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.4) 58%,
+    rgba(0, 0, 0, 0.7) 65%,
+    rgba(0, 0, 0, 0.92) 75%,
+    #000 85%
+  );
+  z-index: 5;
 }
 
 /* City lights container - only visible in shadow area */
 .planet-cities-mask {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    overflow: hidden;
-    background: transparent;
-    /* Mask shows cities only on the dark/right side */
-    -webkit-mask-image: radial-gradient(ellipse 120% 100% at -30% 50%,
-        transparent 40%,
-        transparent 58%,
-        rgba(0,0,0,0.5) 68%,
-        black 80%
-    );
-    mask-image: radial-gradient(ellipse 120% 100% at -30% 50%,
-        transparent 40%,
-        transparent 58%,
-        rgba(0,0,0,0.5) 68%,
-        black 80%
-    );
-    z-index: 4;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: transparent;
+  /* Mask shows cities only on the dark/right side */
+  -webkit-mask-image: radial-gradient(
+    ellipse 120% 100% at -30% 50%,
+    transparent 40%,
+    transparent 58%,
+    rgba(0, 0, 0, 0.5) 68%,
+    black 80%
+  );
+  mask-image: radial-gradient(
+    ellipse 120% 100% at -30% 50%,
+    transparent 40%,
+    transparent 58%,
+    rgba(0, 0, 0, 0.5) 68%,
+    black 80%
+  );
+  z-index: 4;
 }
 
 /* Planet night inside mask - needs same sizing as day */
 .planet-cities-mask .planet-night {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
 }
 
 /* Atmosphere glow on lit side */
 .planet-atmosphere {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    /* Blue atmospheric rim on lit side */
-    box-shadow:
-        inset 25px 0 50px rgba(100, 180, 255, 0.2),
-        inset 8px 0 25px rgba(135, 206, 250, 0.15);
-    z-index: 10;
-    pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Blue atmospheric rim on lit side */
+  box-shadow:
+    inset 25px 0 50px rgba(100, 180, 255, 0.2),
+    inset 8px 0 25px rgba(135, 206, 250, 0.15);
+  z-index: 10;
+  pointer-events: none;
 }
 
 /* Rotation vers la DROITE (continents vont vers la droite = fond va vers la gauche) */
 @keyframes rotateEarthRight {
-    from { background-position: 0 0; }
-    to { background-position: -100% 0; }
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
 }
 
 /* Content - Centered Mission Control Style */
 .brief-content-mission {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    text-align: center;
-    max-width: 600px;
-    padding: 0 40px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  text-align: center;
+  max-width: 600px;
+  padding: 0 40px;
 }
 
 @media (min-width: 1200px) {
-    .brief-content-mission {
-        left: 35%;
-    }
+  .brief-content-mission {
+    left: 35%;
+  }
 }
 
 @media (max-width: 768px) {
-    .brief-content-mission {
-        left: 50%;
-        width: 90%;
-    }
+  .brief-content-mission {
+    left: 50%;
+    width: 90%;
+  }
 }
 
 /* Date - Small uppercase */
 .mission-date {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.3em;
-    color: rgba(255, 255, 255, 0.4);
-    margin-bottom: 20px;
-    animation: missionFadeUp 0.8s ease-out;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 20px;
+  animation: missionFadeUp 0.8s ease-out;
 }
 
 /* Greeting - Elegant */
 .mission-greeting {
-    font-family: 'Inter', -apple-system, sans-serif;
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    font-weight: 300;
-    letter-spacing: -0.02em;
-    color: #fff;
-    margin: 0 0 16px 0;
-    line-height: 1.1;
-    animation: missionFadeUp 0.8s ease-out 0.1s backwards;
+  font-family:
+    'Inter',
+    -apple-system,
+    sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  animation: missionFadeUp 0.8s ease-out 0.1s backwards;
 }
 
 /* Tagline - Simple info */
 .mission-tagline {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0 0 8px 0;
-    animation: missionFadeUp 0.8s ease-out 0.2s backwards;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 8px 0;
+  animation: missionFadeUp 0.8s ease-out 0.2s backwards;
 }
 
 /* Urgent count */
 .mission-urgent {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #ff6b5b;
-    margin: 0 0 32px 0;
-    animation: missionFadeUp 0.8s ease-out 0.25s backwards;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ff6b5b;
+  margin: 0 0 32px 0;
+  animation: missionFadeUp 0.8s ease-out 0.25s backwards;
 }
 
 .mission-tagline:last-of-type {
-    margin-bottom: 32px;
+  margin-bottom: 32px;
 }
 
 @keyframes missionFadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Mission Button - Clean & Bold */
 .btn-mission {
-    display: inline-block;
-    padding: 16px 48px;
-    background: #fff;
-    border: none;
-    border-radius: var(--radius-m);
-    color: #000;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    animation: missionFadeUp 0.8s ease-out 0.3s backwards;
+  display: inline-block;
+  padding: 16px 48px;
+  background: #fff;
+  border: none;
+  border-radius: var(--radius-m);
+  color: #000;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: missionFadeUp 0.8s ease-out 0.3s backwards;
 }
 
 .btn-mission:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: scale(1.02);
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.02);
 }
 
 .btn-mission:active {
-    transform: scale(0.98);
+  transform: scale(0.98);
 }
 
 /* Launch Animation */
 .brief-overlay-spacex.launching {
-    animation: zoomIntoSpace 0.7s ease-in forwards;
+  animation: zoomIntoSpace 0.7s ease-in forwards;
 }
 
 .brief-overlay-spacex.launching .planet-day,
 .brief-overlay-spacex.launching .planet-clouds,
 .brief-overlay-spacex.launching .planet-night {
-    animation-play-state: paused;
+  animation-play-state: paused;
 }
 
 .brief-overlay-spacex.launching .planet {
-    animation: planetZoom 0.7s ease-in forwards;
+  animation: planetZoom 0.7s ease-in forwards;
 }
 
 .brief-overlay-spacex.launching .brief-content-mission {
-    animation: contentFadeOut 0.5s ease-in forwards;
+  animation: contentFadeOut 0.5s ease-in forwards;
 }
 
 @keyframes zoomIntoSpace {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes planetZoom {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.15); }
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.15);
+  }
 }
 
 @keyframes contentFadeOut {
-    0% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-60px);
-    }
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
 }
 
 /* ========================================
@@ -386,45 +403,45 @@
    ======================================== */
 
 .focus-timer {
-    position: fixed;
-    top: env(safe-area-inset-top, 20px);
-    right: 20px;
-    background: rgba(28, 28, 30, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    color: var(--accent);
-    padding: 6px 14px;
-    border-radius: 99px;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.95rem;
-    font-weight: 700;
-    z-index: 1000;
-    cursor: pointer;
-    display: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+  position: fixed;
+  top: env(safe-area-inset-top, 20px);
+  right: 20px;
+  background: rgba(28, 28, 30, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  z-index: 1000;
+  cursor: pointer;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
 }
 
 .focus-timer.active {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: focusAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: focusAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes focusAppear {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .focus-timer::before {
-    content: '';
-    font-size: 0.9rem;
+  content: '';
+  font-size: 0.9rem;
 }

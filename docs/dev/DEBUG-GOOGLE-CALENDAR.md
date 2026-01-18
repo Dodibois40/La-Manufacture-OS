@@ -7,6 +7,7 @@ Guide pour diagnostiquer et résoudre les problèmes de synchronisation Google C
 ### Lancer l'outil de debug
 
 1. Ouvrez votre navigateur et allez sur :
+
    ```
    http://localhost:3000/debug-google-sync.html
    ```
@@ -30,6 +31,7 @@ Guide pour diagnostiquer et résoudre les problèmes de synchronisation Google C
 **Symptôme :** L'outil affiche "Google Calendar non connecté"
 
 **Solution :**
+
 1. Allez dans **Paramètres** de l'app
 2. Cliquez sur **"Connecter Google Calendar"**
 3. Autorisez l'accès
@@ -41,6 +43,7 @@ Guide pour diagnostiquer et résoudre les problèmes de synchronisation Google C
 **Problème :** Le RDV n'a pas d'heure de début (`start_time`)
 
 **Solution :**
+
 1. Éditez le RDV dans l'app
 2. Ajoutez une heure (ex: "08:00" ou "14h30")
 3. Réessayez la synchronisation
@@ -52,6 +55,7 @@ Guide pour diagnostiquer et résoudre les problèmes de synchronisation Google C
 **Problème :** Token Google expiré ou permissions insuffisantes
 
 **Solution :**
+
 1. Allez dans **Paramètres**
 2. Cliquez sur **"Déconnecter"** Google Calendar
 3. **Reconnectez-vous** pour rafraîchir les permissions
@@ -64,6 +68,7 @@ Guide pour diagnostiquer et résoudre les problèmes de synchronisation Google C
 **Problème :** Le statut Google n'est pas détecté au démarrage
 
 **Solution :**
+
 1. Ouvrez la **Console du navigateur** (F12)
 2. Cherchez les erreurs liées à Google
 3. Rechargez la page (Ctrl+R ou Cmd+R)
@@ -76,6 +81,7 @@ Guide pour diagnostiquer et résoudre les problèmes de synchronisation Google C
 Le scope utilisé est : `https://www.googleapis.com/auth/calendar.events`
 
 Ce scope permet de :
+
 - ✅ Créer des événements
 - ✅ Modifier des événements
 - ✅ Supprimer des événements
@@ -93,6 +99,7 @@ Ce scope permet de :
 ### Dans la console du navigateur (F12)
 
 Cherchez ces messages :
+
 ```
 Google Calendar status: connected/not connected
 syncTaskToGoogle called for task: {...}
@@ -102,11 +109,13 @@ Sync skipped: googleConnected= ...
 ### Dans les logs du backend
 
 Si vous avez accès aux logs Railway :
+
 ```bash
 railway logs
 ```
 
 Cherchez :
+
 ```
 Incoming sync-event request
 Google Calendar sync error
@@ -145,6 +154,7 @@ Si rien ne fonctionne, reconnectez-vous complètement :
 ## 📞 Support
 
 Si le problème persiste :
+
 1. Utilisez l'outil de debug : `/debug-google-sync.html`
 2. Copiez les logs de la section "5. Logs Console"
 3. Vérifiez les erreurs dans la console du navigateur (F12)

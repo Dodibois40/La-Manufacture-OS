@@ -71,7 +71,7 @@ const playChime = () => {
     // PHASE 1: LE SOUFFLE (0.0s - 0.4s)
     // Anticipation subliminale - le cerveau se prépare
     // ═══════════════════════════════════════════════════════════════
-    const playBreath = (t) => {
+    const playBreath = t => {
       // Sub-rumble très bas - on le sent plus qu'on l'entend
       const sub = ctx.createOscillator();
       const subG = ctx.createGain();
@@ -117,7 +117,7 @@ const playChime = () => {
     // PHASE 2: L'ANCRAGE (0.25s - 0.8s)
     // Fondation puissante - tu es planté, prêt
     // ═══════════════════════════════════════════════════════════════
-    const playAnchor = (t) => {
+    const playAnchor = t => {
       // C2 + C3 en octaves - la fondation
       const freqs = [65.41, 130.81]; // C2, C3
 
@@ -162,17 +162,17 @@ const playChime = () => {
     // Quinte parfaite C→G - la montée qui donne des frissons
     // Inspiré THX: voix qui convergent vers l'harmonie
     // ═══════════════════════════════════════════════════════════════
-    const playAscension = (t) => {
+    const playAscension = t => {
       // Accord C majeur avec 7ème majeure - moderne, aspirationnel
       // Construit progressivement comme le THX Deep Note
       const voices = [
-        { freq: 261.63, delay: 0, vol: 0.18 },      // C4
-        { freq: 329.63, delay: 0.04, vol: 0.12 },   // E4 (tierce)
-        { freq: 392.00, delay: 0.08, vol: 0.15 },   // G4 (quinte parfaite!)
-        { freq: 493.88, delay: 0.12, vol: 0.10 },   // B4 (7ème majeure - tension belle)
-        { freq: 523.25, delay: 0.16, vol: 0.14 },   // C5 (octave - résolution)
-        { freq: 659.25, delay: 0.20, vol: 0.08 },   // E5
-        { freq: 783.99, delay: 0.24, vol: 0.10 },   // G5 (quinte haute)
+        { freq: 261.63, delay: 0, vol: 0.18 }, // C4
+        { freq: 329.63, delay: 0.04, vol: 0.12 }, // E4 (tierce)
+        { freq: 392.0, delay: 0.08, vol: 0.15 }, // G4 (quinte parfaite!)
+        { freq: 493.88, delay: 0.12, vol: 0.1 }, // B4 (7ème majeure - tension belle)
+        { freq: 523.25, delay: 0.16, vol: 0.14 }, // C5 (octave - résolution)
+        { freq: 659.25, delay: 0.2, vol: 0.08 }, // E5
+        { freq: 783.99, delay: 0.24, vol: 0.1 }, // G5 (quinte haute)
       ];
 
       voices.forEach(({ freq, delay, vol }) => {
@@ -218,11 +218,11 @@ const playChime = () => {
     // 3 notes mémorables - l'ADN sonore de FLOW
     // C5 → G5 → C6 (octave, quinte, octave = résolution parfaite)
     // ═══════════════════════════════════════════════════════════════
-    const playSignature = (t) => {
+    const playSignature = t => {
       const notes = [
-        { freq: 523.25, time: 0, dur: 0.25 },      // C5 - départ
-        { freq: 783.99, time: 0.12, dur: 0.28 },   // G5 - quinte (élévation)
-        { freq: 1046.50, time: 0.26, dur: 0.45 },  // C6 - octave (accomplissement)
+        { freq: 523.25, time: 0, dur: 0.25 }, // C5 - départ
+        { freq: 783.99, time: 0.12, dur: 0.28 }, // G5 - quinte (élévation)
+        { freq: 1046.5, time: 0.26, dur: 0.45 }, // C6 - octave (accomplissement)
       ];
 
       notes.forEach(({ freq, time: offset, dur }) => {
@@ -267,12 +267,12 @@ const playChime = () => {
     // PHASE 5: L'ÉPANOUISSEMENT (0.85s - 2.0s)
     // Shimmer final - comme le soleil qui perce les nuages
     // ═══════════════════════════════════════════════════════════════
-    const playBloom = (t) => {
+    const playBloom = t => {
       // Arpège de lumière descendant
       const shimmer = [
-        { freq: 2093.00, delay: 0 },      // C7
-        { freq: 1567.98, delay: 0.05 },   // G6
-        { freq: 1318.51, delay: 0.10 },   // E6
+        { freq: 2093.0, delay: 0 }, // C7
+        { freq: 1567.98, delay: 0.05 }, // G6
+        { freq: 1318.51, delay: 0.1 }, // E6
       ];
 
       shimmer.forEach(({ freq, delay }) => {
@@ -320,15 +320,14 @@ const playChime = () => {
     // Timeline optimisée pour double pic dopaminergique:
     // [Anticipation 0-0.35s] → [Climax 0.35-0.85s] → [Résolution 0.85-2.0s]
 
-    playBreath(now);              // 0.00s - Anticipation commence
-    playAnchor(now + 0.25);       // 0.25s - Fondation
-    playAscension(now + 0.35);    // 0.35s - L'accord qui monte
-    playSignature(now + 0.55);    // 0.55s - Les 3 notes signature
-    playBloom(now + 0.85);        // 0.85s - Épanouissement final
+    playBreath(now); // 0.00s - Anticipation commence
+    playAnchor(now + 0.25); // 0.25s - Fondation
+    playAscension(now + 0.35); // 0.35s - L'accord qui monte
+    playSignature(now + 0.55); // 0.55s - Les 3 notes signature
+    playBloom(now + 0.85); // 0.85s - Épanouissement final
 
     // Cleanup après la reverb
     setTimeout(() => ctx.close(), 4000);
-
   } catch (e) {
     console.error('Audio error:', e);
   }

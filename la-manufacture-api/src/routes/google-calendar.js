@@ -25,7 +25,7 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
     oauth2Client.setCredentials({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-      expiry_date: new Date(tokens.token_expiry).getTime()
+      expiry_date: new Date(tokens.token_expiry).getTime(),
     });
 
     // Refresh token if expired
@@ -42,7 +42,7 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
     // Format time to HH:MM
-    const formatTime = (t) => {
+    const formatTime = t => {
       if (!t) return null;
       const match = String(t).match(/^(\d{1,2})[:h](\d{2})/i);
       return match ? `${match[1].padStart(2, '0')}:${match[2]}` : null;
@@ -50,7 +50,10 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
 
     const startHM = formatTime(task.start_time);
     if (!startHM) {
-      fastify.log.warn({ taskId: task.id, start_time: task.start_time }, 'Auto-sync: Invalid start_time format');
+      fastify.log.warn(
+        { taskId: task.id, start_time: task.start_time },
+        'Auto-sync: Invalid start_time format'
+      );
       return { success: false, reason: 'invalid_time' };
     }
 
@@ -63,7 +66,10 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
     }
 
     // Ensure date is only YYYY-MM-DD
-    const cleanDate = typeof task.date === 'string' ? task.date.split('T')[0] : new Date(task.date).toISOString().split('T')[0];
+    const cleanDate =
+      typeof task.date === 'string'
+        ? task.date.split('T')[0]
+        : new Date(task.date).toISOString().split('T')[0];
 
     const event = {
       summary: task.text,
@@ -79,7 +85,10 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
       },
     };
 
-    fastify.log.info({ taskId: task.id, summary: event.summary, start: event.start.dateTime }, 'Auto-sync: Creating Google event');
+    fastify.log.info(
+      { taskId: task.id, summary: event.summary, start: event.start.dateTime },
+      'Auto-sync: Creating Google event'
+    );
 
     const result = await calendar.events.insert({
       calendarId: calendar_id,
@@ -88,7 +97,6 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
 
     fastify.log.info({ taskId: task.id, googleEventId: result.data.id }, 'Auto-sync: Success');
     return { success: true, eventId: result.data.id };
-
   } catch (error) {
     fastify.log.error({ userId, taskId: task.id, error: error.message }, 'Auto-sync: Failed');
     return { success: false, reason: 'api_error', error: error.message };
@@ -139,7 +147,7 @@ export default async function googleCalendarRoutes(fastify) {
     newClient.setCredentials({
       access_token,
       refresh_token,
-      expiry_date: new Date(token_expiry).getTime()
+      expiry_date: new Date(token_expiry).getTime(),
     });
 
     // Refresh if needed
@@ -219,7 +227,7 @@ export default async function googleCalendarRoutes(fastify) {
   });
 
   // Get connection status
-  fastify.get('/status', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/status', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query(
@@ -238,12 +246,12 @@ export default async function googleCalendarRoutes(fastify) {
       connected: true,
       calendarId: token.calendar_id,
       connectedAt: token.created_at,
-      needsRefresh: isExpired
+      needsRefresh: isExpired,
     };
   });
 
   // Disconnect Google Calendar
-  fastify.delete('/disconnect', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.delete('/disconnect', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     await query('DELETE FROM google_tokens WHERE user_id = $1', [userId]);
@@ -255,7 +263,10 @@ export default async function googleCalendarRoutes(fastify) {
   fastify.post('/sync-event', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
     const { taskId, title, date, startTime, endTime, location, googleEventId } = request.body;
-    fastify.log.info({ taskId, title, date, startTime, googleEventId }, 'Incoming sync-event request');
+    fastify.log.info(
+      { taskId, title, date, startTime, googleEventId },
+      'Incoming sync-event request'
+    );
 
     if (!taskId || !title || !date || !startTime) {
       fastify.log.warn('Missing required fields for sync-event');
@@ -273,14 +284,17 @@ export default async function googleCalendarRoutes(fastify) {
       const calendar = google.calendar({ version: 'v3', auth: client });
 
       // Get calendar_id
-      const userResult = await query('SELECT calendar_id FROM google_tokens WHERE user_id = $1', [userId]);
+      const userResult = await query('SELECT calendar_id FROM google_tokens WHERE user_id = $1', [
+        userId,
+      ]);
       const calendar_id = userResult.rows[0]?.calendar_id || 'primary';
 
       // Ensure date is only YYYY-MM-DD
-      const cleanDate = typeof date === 'string' ? date.split('T')[0] : new Date(date).toISOString().split('T')[0];
+      const cleanDate =
+        typeof date === 'string' ? date.split('T')[0] : new Date(date).toISOString().split('T')[0];
 
       // Format times to HH:MM
-      const formatTime = (t) => {
+      const formatTime = t => {
         if (!t) return null;
         const match = t.match(/^(\d{1,2})[:h](\d{2})/i); // Matches HH:MM or HHhMM
         return match ? `${match[1].padStart(2, '0')}:${match[2]}` : null;
@@ -290,7 +304,9 @@ export default async function googleCalendarRoutes(fastify) {
       const endHM = formatTime(endTime) || startHM;
 
       if (!startHM) {
-        return reply.status(400).send({ error: `Invalid startTime format: "${startTime}". Expected HH:MM` });
+        return reply
+          .status(400)
+          .send({ error: `Invalid startTime format: "${startTime}". Expected HH:MM` });
       }
 
       // Build event object
@@ -316,7 +332,10 @@ export default async function googleCalendarRoutes(fastify) {
         event.end.dateTime = `${cleanDate}T${endHM_fixed}:00`;
       }
 
-      fastify.log.info({ summary: event.summary, start: event.start.dateTime }, 'Syncing to Google');
+      fastify.log.info(
+        { summary: event.summary, start: event.start.dateTime },
+        'Syncing to Google'
+      );
 
       let result;
       if (googleEventId) {
@@ -349,44 +368,50 @@ export default async function googleCalendarRoutes(fastify) {
       return {
         success: true,
         googleEventId: result.data.id,
-        htmlLink: result.data.htmlLink
+        htmlLink: result.data.htmlLink,
       };
     } catch (error) {
       fastify.log.error(error, 'Google Calendar sync error');
       return reply.status(500).send({
         error: 'Calendar sync failed',
         details: error.message,
-        code: error.code
+        code: error.code,
       });
     }
   });
 
   // Delete event from Google Calendar
-  fastify.delete('/event/:googleEventId', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { googleEventId } = request.params;
+  fastify.delete(
+    '/event/:googleEventId',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { googleEventId } = request.params;
 
-    try {
-      const client = await getAuthClient(userId);
-      const calendar = google.calendar({ version: 'v3', auth: client });
+      try {
+        const client = await getAuthClient(userId);
+        const calendar = google.calendar({ version: 'v3', auth: client });
 
-      // Get calendar_id
-      const userResult = await query('SELECT calendar_id FROM google_tokens WHERE user_id = $1', [userId]);
-      const calendar_id = userResult.rows[0]?.calendar_id || 'primary';
+        // Get calendar_id
+        const userResult = await query('SELECT calendar_id FROM google_tokens WHERE user_id = $1', [
+          userId,
+        ]);
+        const calendar_id = userResult.rows[0]?.calendar_id || 'primary';
 
-      await calendar.events.delete({
-        calendarId: calendar_id,
-        eventId: googleEventId,
-      });
+        await calendar.events.delete({
+          calendarId: calendar_id,
+          eventId: googleEventId,
+        });
 
-      return { success: true };
-    } catch (error) {
-      // Ignore 404 errors (event already deleted)
-      if (error.code === 404) {
         return { success: true };
+      } catch (error) {
+        // Ignore 404 errors (event already deleted)
+        if (error.code === 404) {
+          return { success: true };
+        }
+        fastify.log.error(error, 'Google Calendar delete error');
+        return reply.status(500).send({ error: 'Delete failed', details: error.message });
       }
-      fastify.log.error(error, 'Google Calendar delete error');
-      return reply.status(500).send({ error: 'Delete failed', details: error.message });
     }
-  });
+  );
 }

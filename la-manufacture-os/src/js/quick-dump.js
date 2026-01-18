@@ -119,7 +119,7 @@ export const openQuickDump = (state, onTasksAdded) => {
       micBtn.classList.remove('listening');
     };
 
-    recognition.onresult = (event) => {
+    recognition.onresult = event => {
       let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -135,7 +135,7 @@ export const openQuickDump = (state, onTasksAdded) => {
       textarea.scrollTop = textarea.scrollHeight;
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = event => {
       console.error('Speech recognition error:', event.error);
       isListening = false;
       micBtn.classList.remove('listening');
@@ -161,7 +161,7 @@ export const openQuickDump = (state, onTasksAdded) => {
   const handleSubmit = async () => {
     const text = textarea.value.trim();
     if (!text) {
-      toast('Ecris quelque chose d\'abord!');
+      toast("Ecris quelque chose d'abord!");
       return;
     }
 
@@ -211,11 +211,17 @@ export const openQuickDump = (state, onTasksAdded) => {
         if (isApiMode) {
           console.log('[QuickDump] Reloading state from API...');
           const apiState = await loadStateFromApi();
-          console.log('[QuickDump] apiState:', apiState ? `${apiState.tasks?.length} tasks` : 'null');
+          console.log(
+            '[QuickDump] apiState:',
+            apiState ? `${apiState.tasks?.length} tasks` : 'null'
+          );
           if (apiState) {
             // Log the last few tasks to see what dates they have
             const lastTasks = apiState.tasks.slice(-5);
-            console.log('[QuickDump] Last 5 tasks:', lastTasks.map(t => ({ id: t.id, text: t.text, date: t.date, is_event: t.is_event })));
+            console.log(
+              '[QuickDump] Last 5 tasks:',
+              lastTasks.map(t => ({ id: t.id, text: t.text, date: t.date, is_event: t.is_event }))
+            );
 
             state.tasks = apiState.tasks;
             state.settings = apiState.settings || state.settings;
@@ -246,7 +252,7 @@ export const openQuickDump = (state, onTasksAdded) => {
   cancelBtn.addEventListener('click', closeQuickDump);
 
   // Ctrl+Enter to submit
-  textarea.addEventListener('keydown', (e) => {
+  textarea.addEventListener('keydown', e => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       handleSubmit();
@@ -257,7 +263,7 @@ export const openQuickDump = (state, onTasksAdded) => {
   });
 
   // Click outside to close (only if no text entered)
-  overlay.addEventListener('click', (e) => {
+  overlay.addEventListener('click', e => {
     if (e.target === overlay) {
       if (textarea.value.trim()) {
         // Don't close if there's text - flash the modal instead
@@ -283,7 +289,7 @@ export const closeQuickDump = () => {
 
 // Keyboard shortcut (Ctrl+Shift+N or Cmd+Shift+N)
 export const initQuickDumpShortcut = (state, onTasksAdded) => {
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'N') {
       e.preventDefault();
       openQuickDump(state, onTasksAdded);

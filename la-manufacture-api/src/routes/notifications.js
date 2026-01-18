@@ -2,7 +2,7 @@ import { query } from '../db/connection.js';
 
 export default async function notificationsRoutes(fastify) {
   // Get all notifications for current user
-  fastify.get('/', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query(
@@ -16,7 +16,7 @@ export default async function notificationsRoutes(fastify) {
   });
 
   // Get unread count (for badge)
-  fastify.get('/unread-count', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/unread-count', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query(
@@ -47,13 +47,10 @@ export default async function notificationsRoutes(fastify) {
   });
 
   // Mark all as read
-  fastify.post('/mark-all-read', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.post('/mark-all-read', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
-    await query(
-      `UPDATE notifications SET read = TRUE WHERE user_id = $1`,
-      [userId]
-    );
+    await query(`UPDATE notifications SET read = TRUE WHERE user_id = $1`, [userId]);
 
     return { success: true };
   });

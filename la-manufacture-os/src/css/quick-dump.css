@@ -91,7 +91,7 @@
 
 .score-progress {
   fill: none;
-  stroke: #30D158;
+  stroke: #30d158;
   stroke-width: 8;
   stroke-linecap: round;
   transition: stroke-dasharray 0.5s ease;
@@ -137,7 +137,7 @@
 
 .bar-fill {
   width: 100%;
-  background: linear-gradient(180deg, #30D158, #34C759);
+  background: linear-gradient(180deg, #30d158, #34c759);
   border-radius: 4px;
   transition: height 0.3s ease;
   min-height: 4px;
@@ -192,12 +192,12 @@
 }
 
 .swipe-indicator.swipe-done {
-  color: #30D158;
+  color: #30d158;
   background: rgba(48, 209, 88, 0.2);
 }
 
 .swipe-indicator.swipe-tomorrow {
-  color: #FF9F0A;
+  color: #ff9f0a;
   background: rgba(255, 159, 10, 0.2);
 }
 
@@ -247,9 +247,23 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 .quick-dump-header {
@@ -262,7 +276,7 @@
 .quick-dump-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #0A84FF, #BF5AF2);
+  background: linear-gradient(135deg, #0a84ff, #bf5af2);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -314,7 +328,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0A84FF, #BF5AF2);
+  background: linear-gradient(135deg, #0a84ff, #bf5af2);
   border: none;
   cursor: pointer;
   display: flex;
@@ -341,7 +355,7 @@
 }
 
 .quick-dump-mic-btn.listening {
-  background: linear-gradient(135deg, #FF453A, #FF6961);
+  background: linear-gradient(135deg, #ff453a, #ff6961);
   animation: pulse-mic 1s ease-in-out infinite;
 }
 
@@ -350,8 +364,13 @@
 }
 
 @keyframes pulse-mic {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .quick-dump-textarea::placeholder {
@@ -360,7 +379,7 @@
 
 .quick-dump-textarea:focus {
   outline: none;
-  border-color: #0A84FF;
+  border-color: #0a84ff;
 }
 
 .quick-dump-tips {
@@ -422,7 +441,7 @@
 }
 
 .quick-dump-btn.primary {
-  background: linear-gradient(135deg, #0A84FF, #0066CC);
+  background: linear-gradient(135deg, #0a84ff, #0066cc);
   color: white;
 }
 
@@ -443,8 +462,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Quick dump trigger button */
@@ -455,7 +478,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0A84FF, #BF5AF2);
+  background: linear-gradient(135deg, #0a84ff, #bf5af2);
   border: none;
   cursor: pointer;
   display: flex;

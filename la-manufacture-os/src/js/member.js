@@ -75,7 +75,9 @@ async function loadTasks() {
       return;
     }
 
-    tasksList.innerHTML = tasks.map(task => `
+    tasksList.innerHTML = tasks
+      .map(
+        task => `
       <div class="task-card ${task.done ? 'done' : ''}">
         <div class="task-header">
           <input type="checkbox" ${task.done ? 'checked' : ''} onchange="window.toggleTask(${task.id}, this.checked)">
@@ -87,10 +89,13 @@ async function loadTasks() {
           ${task.time_spent ? `<span>${task.time_spent}min</span>` : ''}
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   } catch (error) {
     console.error('Error loading tasks:', error);
-    document.getElementById('tasksList').innerHTML = `<p class="error">Erreur: ${error.message}</p>`;
+    document.getElementById('tasksList').innerHTML =
+      `<p class="error">Erreur: ${error.message}</p>`;
   }
 }
 
@@ -107,7 +112,9 @@ async function loadProjects() {
       return;
     }
 
-    projectsList.innerHTML = projects.map(project => `
+    projectsList.innerHTML = projects
+      .map(
+        project => `
       <div class="project-card">
         <h3>${project.name}</h3>
         <p>${project.description || 'Pas de description'}</p>
@@ -116,10 +123,13 @@ async function loadProjects() {
           ${project.deadline ? `<span>Échéance: ${new Date(project.deadline).toLocaleDateString('fr-FR')}</span>` : ''}
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   } catch (error) {
     console.error('Error loading projects:', error);
-    document.getElementById('projectsList').innerHTML = `<p class="error">Erreur: ${error.message}</p>`;
+    document.getElementById('projectsList').innerHTML =
+      `<p class="error">Erreur: ${error.message}</p>`;
   }
 }
 

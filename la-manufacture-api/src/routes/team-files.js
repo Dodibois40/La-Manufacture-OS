@@ -1,6 +1,13 @@
 import { query } from '../db/connection.js';
 import { randomUUID } from 'crypto';
-import { createWriteStream, createReadStream, existsSync, mkdirSync, unlinkSync, statSync } from 'fs';
+import {
+  createWriteStream,
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  unlinkSync,
+  statSync,
+} from 'fs';
 import { pipeline } from 'stream/promises';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -32,17 +39,11 @@ export default async function teamFilesRoutes(fastify) {
     }
 
     // Verifier le type de fichier (PDF, images principalement)
-    const allowedMimes = [
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp'
-    ];
+    const allowedMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
     if (!allowedMimes.includes(data.mimetype)) {
       return reply.status(400).send({
-        error: 'Type de fichier non autorise. Formats acceptes: PDF, JPEG, PNG, GIF, WebP'
+        error: 'Type de fichier non autorise. Formats acceptes: PDF, JPEG, PNG, GIF, WebP',
       });
     }
 
@@ -95,12 +96,12 @@ export default async function teamFilesRoutes(fastify) {
       if (existsSync(filepath)) {
         unlinkSync(filepath);
       }
-      return reply.status(500).send({ error: 'Erreur lors de l\'upload' });
+      return reply.status(500).send({ error: "Erreur lors de l'upload" });
     }
   });
 
   // GET /api/team/files - Liste des fichiers (Manager)
-  fastify.get('/files', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/files', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const { member_id } = request.query;
 
@@ -143,7 +144,10 @@ export default async function teamFilesRoutes(fastify) {
     }
 
     reply.header('Content-Type', file.mime_type);
-    reply.header('Content-Disposition', `attachment; filename="${encodeURIComponent(file.original_name)}"`);
+    reply.header(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(file.original_name)}"`
+    );
 
     return reply.send(createReadStream(filepath));
   });
@@ -166,7 +170,10 @@ export default async function teamFilesRoutes(fastify) {
     }
 
     reply.header('Content-Type', file.mime_type);
-    reply.header('Content-Disposition', `inline; filename="${encodeURIComponent(file.original_name)}"`);
+    reply.header(
+      'Content-Disposition',
+      `inline; filename="${encodeURIComponent(file.original_name)}"`
+    );
 
     return reply.send(createReadStream(filepath));
   });

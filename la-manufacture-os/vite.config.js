@@ -26,7 +26,7 @@ export default defineConfig({
       },
       output: {
         manualChunks: {
-          'clerk': ['@clerk/clerk-js'],
+          clerk: ['@clerk/clerk-js'],
         },
       },
     },

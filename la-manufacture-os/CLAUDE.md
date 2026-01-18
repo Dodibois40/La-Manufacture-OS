@@ -3,6 +3,7 @@
 ## Design Philosophy
 
 **Style**: Apple/iOS Design Language - Dark Mode Premium
+
 - Glassmorphism avec `backdrop-filter: blur()`
 - Animations fluides avec `cubic-bezier` et springs
 - Couleurs: fond noir (#000, #1c1c1e), accent bleu (#0A84FF), texte blanc avec opacités
@@ -10,16 +11,19 @@
 ## Règles CSS Strictes
 
 ### Alignement
+
 - Les éléments d'une section doivent être alignés entre eux
 - Utiliser `justify-content: space-between` pour espacer les éléments aux extrémités
 - Vérifier que les boutons et contenus sont sur la même grille visuelle
 
 ### Boutons
+
 - Style "lien" pour actions secondaires: `background: transparent; border: none;`
 - Ne pas mettre de `box-shadow` sur les boutons texte
 - Utiliser `width: auto` pour éviter l'étirement
 
 ### Spacing
+
 - Padding standard: 16px, 20px, 24px
 - Gap entre éléments: 8px, 12px, 16px
 - Border-radius: 12px (petit), 16px (moyen), 24px (grand)
@@ -27,11 +31,13 @@
 ## Règles JS
 
 ### Pas de features inutiles
+
 - Supprimer les hints/shortcuts visibles (ex: "Ctrl+K pour...")
 - Pas de texte placeholder quand il n'apporte rien
 - Les citations doivent être visibles en permanence, pas seulement quand vide
 
 ### État vide
+
 - Message simple et discret
 - Pas d'icônes/emojis moches
 - Garder les éléments de navigation toujours visibles
@@ -63,18 +69,22 @@ src/
 ## Morning Briefing - Règles importantes
 
 ### Rotation de la Terre
+
 **IMPORTANT**: Pour que les continents tournent vers la DROITE (sens réaliste vu de l'espace):
+
 - Le `background-position` doit aller vers des valeurs NÉGATIVES
 - Animation correcte: `from { background-position: 0 0; } to { background-position: -100% 0; }`
 - Ne JAMAIS utiliser `translateX` pour la rotation (cause des artefacts/rectangles noirs)
 
 ### Son de démarrage
+
 - Style inspiré PS1: notes cristallines éthérées avec grande reverb
 - Fichier: `src/js/startup-sound.js`
 - Ne pas utiliser de "BOOM" style Hans Zimmer, trop agressif
 - Notes recommandées: Do-Sol-Do (C5, G5, C6) avec harmoniques
 
 ### Test du briefing
+
 - Ajouter `?forceBrief` à l'URL pour forcer l'affichage
 - Le briefing ne s'affiche qu'une fois par jour sinon
 
@@ -96,6 +106,7 @@ src/
 Avant chaque commit ou à la demande, effectuer une revue de code:
 
 ### 1. CSS - Vérifications
+
 ```
 □ Pas de styles dupliqués entre fichiers
 □ Pas de !important sauf nécessité absolue
@@ -106,6 +117,7 @@ Avant chaque commit ou à la demande, effectuer une revue de code:
 ```
 
 ### 2. JS - Vérifications
+
 ```
 □ Pas de console.log oubliés
 □ Pas de code commenté inutile
@@ -116,6 +128,7 @@ Avant chaque commit ou à la demande, effectuer une revue de code:
 ```
 
 ### 3. HTML - Vérifications
+
 ```
 □ Pas d'éléments vides ou inutiles
 □ IDs uniques et cohérents
@@ -124,6 +137,7 @@ Avant chaque commit ou à la demande, effectuer une revue de code:
 ```
 
 ### 4. Performance
+
 ```
 □ Pas de re-render inutiles
 □ Images optimisées
@@ -132,6 +146,7 @@ Avant chaque commit ou à la demande, effectuer une revue de code:
 ```
 
 ### 5. UX
+
 ```
 □ Feedback visuel sur les interactions (hover, active)
 □ Transitions fluides (pas de changements brusques)
@@ -140,7 +155,9 @@ Avant chaque commit ou à la demande, effectuer une revue de code:
 ```
 
 ### Commande de revue
+
 Pour lancer une revue complète:
+
 1. Lister tous les fichiers modifiés
 2. Vérifier chaque point de la checklist
 3. Corriger les problèmes trouvés

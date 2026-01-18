@@ -67,6 +67,7 @@
 ### Alternative : Autres fournisseurs email
 
 **Outlook/Hotmail**
+
 ```env
 SMTP_HOST=smtp-mail.outlook.com
 SMTP_PORT=587
@@ -75,6 +76,7 @@ SMTP_PASS=votre-mot-de-passe
 ```
 
 **SendGrid (pour production)**
+
 ```env
 SMTP_HOST=smtp.sendgrid.net
 SMTP_PORT=587
@@ -94,11 +96,13 @@ npm run dev
 ```
 
 **Vérifications** :
+
 - ✅ `🔄 Running database migrations...`
 - ✅ `✅ Database migrations completed`
 - ✅ `🚀 La Manufacture API running on http://0.0.0.0:3333`
 
 **Si erreur de migration** :
+
 - Vérifiez que DATABASE_URL est correct
 - Vérifiez votre connexion internet
 - Le schéma se créera automatiquement !
@@ -106,12 +110,14 @@ npm run dev
 ### 2. Démarrer le Frontend
 
 **Nouveau terminal** :
+
 ```bash
 cd la-manufacture-os
 npm run dev
 ```
 
 **Accès** :
+
 - Frontend : http://localhost:3000
 - Backend API : http://localhost:3333
 
@@ -168,10 +174,12 @@ npm run dev
 ## 🔧 Dépannage
 
 ### Erreur : "getaddrinfo ENOTFOUND"
+
 - **Cause** : DATABASE_URL incorrect ou manquant
 - **Solution** : Vérifiez votre .env, l'URL doit être complète
 
 ### Erreur : "Email send error"
+
 - **Cause** : SMTP mal configuré
 - **Solution** :
   - Vérifiez SMTP_USER et SMTP_PASS
@@ -179,14 +187,17 @@ npm run dev
   - Vérifiez que la validation 2 étapes est active (Gmail)
 
 ### Erreur : "Invitation non trouvée"
+
 - **Cause** : Token expiré (7 jours)
 - **Solution** : Demandez au manager de renvoyer l'invitation
 
 ### Erreur : "Email ne correspond pas"
+
 - **Cause** : Email Clerk ≠ Email invitation
 - **Solution** : Utilisez le même email pour Clerk
 
 ### Le membre ne voit rien sur son dashboard
+
 - **Cause** : Aucun projet/tâche assigné
 - **Solution** : Le manager doit assigner des projets au membre
 
@@ -195,18 +206,21 @@ npm run dev
 ## 📊 Commandes Utiles
 
 ### Vérifier la base de données
+
 ```bash
 cd la-manufacture-api
 node -e "import('pg').then(({default:pg})=>{const c=new pg.Pool({connectionString:process.env.DATABASE_URL});c.query('SELECT version()',(e,r)=>{console.log(e||r.rows[0]);c.end()})})"
 ```
 
 ### Tester l'envoi d'email
+
 ```bash
 # Depuis la-manufacture-api
 node -e "import('./src/services/email.js').then(m=>m.sendTestEmail('votre-email@gmail.com'))"
 ```
 
 ### Réinitialiser la base de données
+
 ```bash
 # Attention : Supprime toutes les données !
 cd la-manufacture-api
@@ -219,12 +233,12 @@ npm run dev
 
 ## 🎯 Récapitulatif des URLs
 
-| Page | URL | Description |
-|------|-----|-------------|
-| Dashboard Manager | http://localhost:3000/team.html | Gestion équipe et invitations |
+| Page                | URL                                                | Description                          |
+| ------------------- | -------------------------------------------------- | ------------------------------------ |
+| Dashboard Manager   | http://localhost:3000/team.html                    | Gestion équipe et invitations        |
 | Accepter invitation | http://localhost:3000/accept-invite.html?token=XXX | Page d'acceptation (lien dans email) |
-| Dashboard Membre | http://localhost:3000/member.html | Espace membre (tâches/projets) |
-| API Health | http://localhost:3333/health | Vérifier si API fonctionne |
+| Dashboard Membre    | http://localhost:3000/member.html                  | Espace membre (tâches/projets)       |
+| API Health          | http://localhost:3333/health                       | Vérifier si API fonctionne           |
 
 ---
 
@@ -255,6 +269,7 @@ Si vous avez des problèmes :
 5. Vérifiez que les ports 3000 et 3333 ne sont pas utilisés
 
 **Logs utiles** :
+
 ```bash
 # Backend
 cd la-manufacture-api

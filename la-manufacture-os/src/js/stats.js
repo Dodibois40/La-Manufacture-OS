@@ -2,7 +2,7 @@
 import { isoLocal } from './utils.js';
 
 // Calculate stats from tasks
-export const calculateTaskStats = (tasks) => {
+export const calculateTaskStats = tasks => {
   const today = isoLocal(new Date());
   const weekAgo = isoLocal(new Date(Date.now() - 7 * 86400000));
   const monthAgo = isoLocal(new Date(Date.now() - 30 * 86400000));
@@ -30,13 +30,15 @@ export const calculateTaskStats = (tasks) => {
       day: new Date(date).toLocaleDateString('fr-FR', { weekday: 'short' }),
       total: dayTasks.length,
       done: dayDone.length,
-      rate: dayTasks.length > 0 ? Math.round((dayDone.length / dayTasks.length) * 100) : 0
+      rate: dayTasks.length > 0 ? Math.round((dayDone.length / dayTasks.length) * 100) : 0,
     });
   }
 
   // Best day
-  const bestDay = dailyStats.reduce((best, day) =>
-    day.done > best.done ? day : best, dailyStats[0]);
+  const bestDay = dailyStats.reduce(
+    (best, day) => (day.done > best.done ? day : best),
+    dailyStats[0]
+  );
 
   // Productivity score based on completion rate only
   const completionRate = weekTasks.length > 0 ? (weekDone.length / weekTasks.length) * 100 : 0;
@@ -54,7 +56,7 @@ export const calculateTaskStats = (tasks) => {
 };
 
 // Render stats view - Clean, focused on clarity
-export const renderStatsView = (tasks) => {
+export const renderStatsView = tasks => {
   const stats = calculateTaskStats(tasks);
 
   return `
@@ -104,7 +106,9 @@ export const renderStatsView = (tasks) => {
       <div class="stats-card">
         <h3>Cette semaine</h3>
         <div class="week-chart">
-          ${stats.dailyStats.map(day => `
+          ${stats.dailyStats
+            .map(
+              day => `
             <div class="day-bar">
               <div class="bar-container">
                 <div class="bar-fill" style="height: ${Math.max(5, day.rate)}%"></div>
@@ -112,7 +116,9 @@ export const renderStatsView = (tasks) => {
               <span class="day-label">${day.day}</span>
               <span class="day-count">${day.done}/${day.total}</span>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
         <p class="week-summary">
           ${stats.week.done}/${stats.week.total} tâches cette semaine

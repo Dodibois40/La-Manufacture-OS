@@ -11,6 +11,7 @@ Validé par Thibaud le 6 janvier 2026.
 **La Manufacture OS** est ton système d'organisation personnel avec intelligence artificielle.
 
 **Version actuelle** : V7 (Option C complète)
+
 - V6.5 : Version locale (localStorage) ✅
 - V7 : Version avec backend API + AI ✅
 
@@ -55,6 +56,7 @@ C:\TODO\
 ## ✨ Fonctionnalités Complètes
 
 ### Core Features (V6.5)
+
 - ✅ **Jour** : Vue quotidienne + badge "En retard"
 - ✅ **Semaine** : Résumé hebdo (Lun→Dim)
 - ✅ **Inbox** : Capture rapide multi-lignes
@@ -64,6 +66,7 @@ C:\TODO\
 - ✅ **Raccourcis** : Ctrl/⌘ + Enter
 
 ### Nouvelles Features (V7)
+
 - ✅ **Authentication** : JWT + bcrypt
 - ✅ **Statuts** : open, en_attente, delegue, bloque, termine
 - ✅ **Délégation** : champs owner + assignee
@@ -122,14 +125,14 @@ Voir **[TEST-LOCAL.md](TEST-LOCAL.md)** pour les instructions détaillées.
 
 ## 📚 Documentation
 
-| Fichier | Description | Pour qui |
-|---------|-------------|----------|
-| `README-PROJET.md` | Ce fichier (vue d'ensemble) | Thibaud + Dorian |
-| `GUIDE-DORIAN.md` | Guide déploiement simplifié | Dorian |
-| `DEPLOIEMENT.md` | Guide technique complet | Dorian (référence) |
-| `TEST-LOCAL.md` | Tests en local | Thibaud |
-| `la-manufacture-os/README.md` | Doc frontend | Dev |
-| `la-manufacture-api/README.md` | Doc backend | Dev |
+| Fichier                        | Description                 | Pour qui           |
+| ------------------------------ | --------------------------- | ------------------ |
+| `README-PROJET.md`             | Ce fichier (vue d'ensemble) | Thibaud + Dorian   |
+| `GUIDE-DORIAN.md`              | Guide déploiement simplifié | Dorian             |
+| `DEPLOIEMENT.md`               | Guide technique complet     | Dorian (référence) |
+| `TEST-LOCAL.md`                | Tests en local              | Thibaud            |
+| `la-manufacture-os/README.md`  | Doc frontend                | Dev                |
+| `la-manufacture-api/README.md` | Doc backend                 | Dev                |
 
 ---
 
@@ -152,6 +155,7 @@ Pour Dorian, préparer :
 ## 📊 Stack Technique
 
 ### Frontend
+
 - **Build** : Vite 7
 - **Style** : CSS Vanilla (modulaire)
 - **JS** : ES6 Modules
@@ -159,6 +163,7 @@ Pour Dorian, préparer :
 - **Domaine** : app.lamanufacture64.com
 
 ### Backend
+
 - **Runtime** : Node.js 20+
 - **Framework** : Fastify
 - **Database** : PostgreSQL (Railway)
@@ -168,6 +173,7 @@ Pour Dorian, préparer :
 - **Hosting** : Railway
 
 ### DevOps
+
 - **CI/CD** : GitHub → Auto-deploy (Netlify + Railway)
 - **Backup** : Railway auto-backup PostgreSQL
 - **Monitoring** : Logs Railway + Netlify Analytics
@@ -192,6 +198,7 @@ Pour Dorian, préparer :
 ## ✅ Checklist Pré-Déploiement
 
 ### Code
+
 - [x] Frontend build réussi (`npm run build`)
 - [x] Backend routes testées
 - [x] Schéma DB créé
@@ -200,6 +207,7 @@ Pour Dorian, préparer :
 - [x] Documentation complète
 
 ### Fichiers
+
 - [x] `.env.example` créés (frontend + backend)
 - [x] `.gitignore` créés
 - [x] `README.md` à jour
@@ -207,6 +215,7 @@ Pour Dorian, préparer :
 - [x] `railway.json` créé
 
 ### Guides
+
 - [x] GUIDE-DORIAN.md rédigé
 - [x] DEPLOIEMENT.md rédigé
 - [x] TEST-LOCAL.md rédigé
@@ -226,6 +235,7 @@ Pour Dorian, préparer :
 4. Tester en local d'abord (voir [TEST-LOCAL.md](TEST-LOCAL.md))
 
 **Docs officielles :**
+
 - Railway : https://docs.railway.app
 - Netlify : https://docs.netlify.com
 - Fastify : https://www.fastify.io
@@ -251,6 +261,7 @@ Pour Dorian, préparer :
 👉 **Dorian : Déployer en suivant [GUIDE-DORIAN.md](GUIDE-DORIAN.md)**
 
 Une fois déployé, l'app sera accessible sur :
+
 - **Frontend** : https://app.lamanufacture64.com
 - **API** : https://la-manufacture-api.up.railway.app (ou URL Railway générée)
 
@@ -258,5 +269,5 @@ Une fois déployé, l'app sera accessible sur :
 
 **Bon déploiement ! 🚀**
 
-*Projet créé avec Claude Code*
-*Janvier 2026*
+_Projet créé avec Claude Code_
+_Janvier 2026_

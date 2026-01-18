@@ -53,6 +53,7 @@ Va sur **http://localhost:3001**
 ### 1. Démarrer le backend
 
 Terminal 1 :
+
 ```bash
 cd C:\TODO\la-manufacture-api
 
@@ -72,6 +73,7 @@ npm run dev
 ```
 
 Tu devrais voir :
+
 ```
 🚀 La Manufacture API running on http://localhost:3333
 📊 Environment: development
@@ -86,6 +88,7 @@ npm run db:migrate
 ### 3. Configurer le frontend pour mode API
 
 Terminal 2 :
+
 ```bash
 cd C:\TODO\la-manufacture-os
 
@@ -101,6 +104,7 @@ npm run dev
 Va sur **http://localhost:3001**
 
 Tu devrais voir un message en console :
+
 ```
 🔧 Running in API mode
 ```
@@ -108,6 +112,7 @@ Tu devrais voir un message en console :
 ### 5. Tests à faire
 
 #### Auth
+
 - [ ] **Register** :
   - [ ] Créer un compte (email, password, nom)
   - [ ] Vérifier redirection après inscription
@@ -117,6 +122,7 @@ Tu devrais voir un message en console :
   - [ ] Vérifier que les données persistent
 
 #### Tasks
+
 - [ ] **Créer une tâche**
 - [ ] **Modifier une tâche** (texte, urgent, statut)
 - [ ] **Cocher une tâche** (done)
@@ -124,21 +130,25 @@ Tu devrais voir un message en console :
 - [ ] **Time tracking** : ajouter du temps à une tâche
 
 #### Inbox
+
 - [ ] **Parser multiple lignes**
 - [ ] **Parsing intelligent** (dates, urgent, owner)
 - [ ] **Création en masse**
 
 #### Carry-over
+
 - [ ] **Créer une tâche hier** (date passée)
 - [ ] **Voir l'alerte "En retard"**
 - [ ] **Reporter automatiquement** (bouton carry-over)
 
 #### Settings
+
 - [ ] **Modifier responsables**
 - [ ] **Changer carry-over mode** (move/duplicate)
 - [ ] **Activer/désactiver AI**
 
 #### AI Features (si clé Claude configurée)
+
 - [ ] **Focus Mode** : Claude choisit la tâche
 - [ ] **AI Coach** : Briefing matinal
 - [ ] **Parse Dump** : Parser texte brut avec AI
@@ -146,13 +156,15 @@ Tu devrais voir un message en console :
 ### 6. Vérifier l'API
 
 Ouvre **http://localhost:3333/health** → tu devrais voir :
+
 ```json
-{"status":"ok","timestamp":"2026-01-06T..."}
+{ "status": "ok", "timestamp": "2026-01-06T..." }
 ```
 
 ### 7. Vérifier la base de données
 
 Si PostgreSQL local ou Railway :
+
 - Ouvre un client SQL (DBeaver, TablePlus, pgAdmin...)
 - Connecte-toi avec `DATABASE_URL`
 - Vérifie les tables : `users`, `tasks`, `settings`, etc.
@@ -169,6 +181,7 @@ Si PostgreSQL local ou Railway :
 **Cause** : Le backend ne tourne pas ou mauvaise URL
 
 **Solution** :
+
 1. Vérifie que le backend tourne sur port 3333
 2. Vérifie `.env` dans le frontend : `VITE_API_URL=http://localhost:3333`
 3. Redémarre le frontend (`Ctrl+C` puis `npm run dev`)
@@ -178,6 +191,7 @@ Si PostgreSQL local ou Railway :
 **Cause** : PostgreSQL non accessible
 
 **Solution** :
+
 1. Vérifie `DATABASE_URL` dans `.env`
 2. Si PostgreSQL local : démarre le service
 3. Sinon, utilise Railway :
@@ -189,6 +203,7 @@ Si PostgreSQL local ou Railway :
 **Cause** : Dépendances pas installées
 
 **Solution** :
+
 ```bash
 cd C:\TODO\la-manufacture-api
 npm install
@@ -205,6 +220,7 @@ npm install
 **Cause** : Frontend et backend pas synchronisés
 
 **Solution** :
+
 1. Vérifie `FRONTEND_URL` dans le backend `.env`
 2. Vérifie `VITE_API_URL` dans le frontend `.env`
 3. Redémarre les deux services
@@ -214,27 +230,29 @@ npm install
 ## 📊 Tableau de Test
 
 ### Mode Local
-| Feature | Testé | ✅/❌ | Notes |
-|---------|-------|------|-------|
-| Jour | [ ] | | |
-| Semaine | [ ] | | |
-| Inbox | [ ] | | |
-| Config | [ ] | | |
-| localStorage persist | [ ] | | |
+
+| Feature              | Testé | ✅/❌ | Notes |
+| -------------------- | ----- | ----- | ----- |
+| Jour                 | [ ]   |       |       |
+| Semaine              | [ ]   |       |       |
+| Inbox                | [ ]   |       |       |
+| Config               | [ ]   |       |       |
+| localStorage persist | [ ]   |       |       |
 
 ### Mode API
-| Feature | Testé | ✅/❌ | Notes |
-|---------|-------|------|-------|
-| Register | [ ] | | |
-| Login | [ ] | | |
-| Create task | [ ] | | |
-| Update task | [ ] | | |
-| Delete task | [ ] | | |
-| Carry-over | [ ] | | |
-| Time tracking | [ ] | | |
-| Settings | [ ] | | |
-| Focus Mode | [ ] | | Nécessite clé Claude |
-| AI Coach | [ ] | | Nécessite clé Claude |
+
+| Feature       | Testé | ✅/❌ | Notes                |
+| ------------- | ----- | ----- | -------------------- |
+| Register      | [ ]   |       |                      |
+| Login         | [ ]   |       |                      |
+| Create task   | [ ]   |       |                      |
+| Update task   | [ ]   |       |                      |
+| Delete task   | [ ]   |       |                      |
+| Carry-over    | [ ]   |       |                      |
+| Time tracking | [ ]   |       |                      |
+| Settings      | [ ]   |       |                      |
+| Focus Mode    | [ ]   |       | Nécessite clé Claude |
+| AI Coach      | [ ]   |       | Nécessite clé Claude |
 
 ---
 
@@ -251,6 +269,7 @@ Avant de passer à Dorian pour déploiement :
 - [ ] Tous les fichiers commités sur Git
 
 **Commande finale avant push :**
+
 ```bash
 cd C:\TODO\la-manufacture-os
 npm run build  # Vérifie que le build prod fonctionne

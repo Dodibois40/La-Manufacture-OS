@@ -42,7 +42,9 @@ export default async function emailRoutes(fastify) {
       const today = new Date().toISOString().split('T')[0];
 
       // Get user's default owner
-      const settingsResult = await query('SELECT owners FROM settings WHERE user_id = $1', [userId]);
+      const settingsResult = await query('SELECT owners FROM settings WHERE user_id = $1', [
+        userId,
+      ]);
       const defaultOwner = settingsResult.rows[0]?.owners?.[0] || 'Thibaud';
 
       const taskResult = await query(
@@ -70,7 +72,7 @@ export default async function emailRoutes(fastify) {
   });
 
   // Get unprocessed emails
-  fastify.get('/inbox', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/inbox', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query(
@@ -82,43 +84,52 @@ export default async function emailRoutes(fastify) {
   });
 
   // Process email manually
-  fastify.post('/inbox/:id/process', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id } = request.params;
-    const { taskText, date } = request.body;
+  fastify.post(
+    '/inbox/:id/process',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id } = request.params;
+      const { taskText, date } = request.body;
 
-    try {
-      // Get email
-      const emailResult = await query('SELECT * FROM email_inbox WHERE id = $1 AND user_id = $2', [id, userId]);
+      try {
+        // Get email
+        const emailResult = await query(
+          'SELECT * FROM email_inbox WHERE id = $1 AND user_id = $2',
+          [id, userId]
+        );
 
-      if (emailResult.rows.length === 0) {
-        return reply.status(404).send({ error: 'Email not found' });
-      }
+        if (emailResult.rows.length === 0) {
+          return reply.status(404).send({ error: 'Email not found' });
+        }
 
-      // Get user's default owner
-      const settingsResult = await query('SELECT owners FROM settings WHERE user_id = $1', [userId]);
-      const defaultOwner = settingsResult.rows[0]?.owners?.[0] || 'Thibaud';
+        // Get user's default owner
+        const settingsResult = await query('SELECT owners FROM settings WHERE user_id = $1', [
+          userId,
+        ]);
+        const defaultOwner = settingsResult.rows[0]?.owners?.[0] || 'Thibaud';
 
-      // Create task
-      const taskResult = await query(
-        `INSERT INTO tasks (user_id, text, date, owner, status, done)
+        // Create task
+        const taskResult = await query(
+          `INSERT INTO tasks (user_id, text, date, owner, status, done)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
-        [userId, taskText, date, defaultOwner, 'open', false]
-      );
+          [userId, taskText, date, defaultOwner, 'open', false]
+        );
 
-      const task = taskResult.rows[0];
+        const task = taskResult.rows[0];
 
-      // Mark email as processed
-      await query(
-        'UPDATE email_inbox SET processed = TRUE, task_id = $1 WHERE id = $2',
-        [task.id, id]
-      );
+        // Mark email as processed
+        await query('UPDATE email_inbox SET processed = TRUE, task_id = $1 WHERE id = $2', [
+          task.id,
+          id,
+        ]);
 
-      return { success: true, task };
-    } catch (error) {
-      fastify.log.error(error);
-      return reply.status(500).send({ error: 'Email processing failed' });
+        return { success: true, task };
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.status(500).send({ error: 'Email processing failed' });
+      }
     }
-  });
+  );
 }

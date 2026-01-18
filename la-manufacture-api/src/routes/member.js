@@ -3,7 +3,7 @@ import { requireMember, canAccessProject, canAccessTask } from '../middleware/au
 
 export default async function memberRoutes(fastify) {
   // GET /api/member/projects - Get projects assigned to member
-  fastify.get('/projects', { preHandler: [fastify.authenticate, requireMember] }, async (request) => {
+  fastify.get('/projects', { preHandler: [fastify.authenticate, requireMember] }, async request => {
     const { userId } = request.user;
     const { status } = request.query;
 
@@ -57,7 +57,7 @@ export default async function memberRoutes(fastify) {
   });
 
   // GET /api/member/tasks - Get tasks assigned to member
-  fastify.get('/tasks', { preHandler: [fastify.authenticate, requireMember] }, async (request) => {
+  fastify.get('/tasks', { preHandler: [fastify.authenticate, requireMember] }, async request => {
     const { userId } = request.user;
     const { date, project_id } = request.query;
 
@@ -109,165 +109,183 @@ export default async function memberRoutes(fastify) {
   });
 
   // PATCH /api/member/tasks/:id - Update task status/time
-  fastify.patch('/:id', { preHandler: [fastify.authenticate, requireMember, canAccessTask] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id } = request.params;
-    const { done, status, time_spent, urgent } = request.body;
+  fastify.patch(
+    '/:id',
+    { preHandler: [fastify.authenticate, requireMember, canAccessTask] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id } = request.params;
+      const { done, status, time_spent, urgent } = request.body;
 
-    try {
-      // Build update query
-      const updates = [];
-      const values = [];
-      let paramIndex = 1;
+      try {
+        // Build update query
+        const updates = [];
+        const values = [];
+        let paramIndex = 1;
 
-      if (done !== undefined) {
-        updates.push(`done = $${paramIndex++}`);
-        values.push(done);
+        if (done !== undefined) {
+          updates.push(`done = $${paramIndex++}`);
+          values.push(done);
 
-        // Update done_at timestamp
-        if (done) {
-          updates.push(`done_at = CURRENT_TIMESTAMP`);
-        } else {
-          updates.push(`done_at = NULL`);
+          // Update done_at timestamp
+          if (done) {
+            updates.push(`done_at = CURRENT_TIMESTAMP`);
+          } else {
+            updates.push(`done_at = NULL`);
+          }
         }
+
+        if (status !== undefined) {
+          updates.push(`status = $${paramIndex++}`);
+          values.push(status);
+        }
+
+        if (time_spent !== undefined) {
+          updates.push(`time_spent = $${paramIndex++}`);
+          values.push(time_spent);
+        }
+
+        if (urgent !== undefined) {
+          updates.push(`urgent = $${paramIndex++}`);
+          values.push(urgent);
+        }
+
+        if (updates.length === 0) {
+          return reply.status(400).send({ error: 'Aucune mise à jour fournie' });
+        }
+
+        // Add updated_at
+        updates.push('updated_at = CURRENT_TIMESTAMP');
+
+        // Add id parameter
+        values.push(id);
+
+        const result = await query(
+          `UPDATE team_tasks SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+          values
+        );
+
+        if (result.rows.length === 0) {
+          return reply.status(404).send({ error: 'Tâche non trouvée' });
+        }
+
+        return { task: result.rows[0] };
+      } catch (error) {
+        request.log.error(error);
+        return reply
+          .status(500)
+          .send({ error: 'Erreur lors de la mise à jour de la tâche', details: error.message });
       }
-
-      if (status !== undefined) {
-        updates.push(`status = $${paramIndex++}`);
-        values.push(status);
-      }
-
-      if (time_spent !== undefined) {
-        updates.push(`time_spent = $${paramIndex++}`);
-        values.push(time_spent);
-      }
-
-      if (urgent !== undefined) {
-        updates.push(`urgent = $${paramIndex++}`);
-        values.push(urgent);
-      }
-
-      if (updates.length === 0) {
-        return reply.status(400).send({ error: 'Aucune mise à jour fournie' });
-      }
-
-      // Add updated_at
-      updates.push('updated_at = CURRENT_TIMESTAMP');
-
-      // Add id parameter
-      values.push(id);
-
-      const result = await query(
-        `UPDATE team_tasks SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
-        values
-      );
-
-      if (result.rows.length === 0) {
-        return reply.status(404).send({ error: 'Tâche non trouvée' });
-      }
-
-      return { task: result.rows[0] };
-    } catch (error) {
-      request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la mise à jour de la tâche', details: error.message });
     }
-  });
+  );
 
   // POST /api/member/tasks/:id/time - Log time on task
-  fastify.post('/:id/time', { preHandler: [fastify.authenticate, requireMember, canAccessTask] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id: taskId } = request.params;
-    const { minutes, description, date } = request.body;
+  fastify.post(
+    '/:id/time',
+    { preHandler: [fastify.authenticate, requireMember, canAccessTask] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id: taskId } = request.params;
+      const { minutes, description, date } = request.body;
 
-    if (!minutes || minutes <= 0) {
-      return reply.status(400).send({ error: 'Temps invalide (doit être > 0)' });
-    }
-
-    try {
-      // Get team member ID
-      const memberResult = await query(
-        'SELECT id FROM team_members WHERE invited_user_id = $1',
-        [userId]
-      );
-      const teamMemberId = memberResult.rows[0]?.id;
-
-      // Create time log
-      const logDate = date || new Date().toISOString().split('T')[0];
-
-      const result = await query(
-        `INSERT INTO task_time_logs (team_task_id, user_id, team_member_id, minutes, description, date)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING *`,
-        [taskId, userId, teamMemberId, minutes, description || null, logDate]
-      );
-
-      // Update task time_spent
-      await query(
-        'UPDATE team_tasks SET time_spent = time_spent + $1 WHERE id = $2',
-        [minutes, taskId]
-      );
-
-      return { timeLog: result.rows[0] };
-    } catch (error) {
-      request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de l\'enregistrement du temps', details: error.message });
-    }
-  });
-
-  // POST /api/member/projects/:id/time - Log time on project
-  fastify.post('/projects/:id/time', { preHandler: [fastify.authenticate, requireMember, canAccessProject] }, async (request, reply) => {
-    const { userId } = request.user;
-    const { id: projectId } = request.params;
-    const { minutes, description, date } = request.body;
-
-    if (!minutes || minutes <= 0) {
-      return reply.status(400).send({ error: 'Temps invalide (doit être > 0)' });
-    }
-
-    try {
-      // Get team member ID
-      const memberResult = await query(
-        'SELECT id FROM team_members WHERE invited_user_id = $1',
-        [userId]
-      );
-      const teamMemberId = memberResult.rows[0]?.id;
-
-      // Create time log
-      const logDate = date || new Date().toISOString().split('T')[0];
-
-      const result = await query(
-        `INSERT INTO project_time_logs (project_id, user_id, team_member_id, minutes, description, date)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING *`,
-        [projectId, userId, teamMemberId, minutes, description || null, logDate]
-      );
-
-      return { timeLog: result.rows[0] };
-    } catch (error) {
-      request.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de l\'enregistrement du temps', details: error.message });
-    }
-  });
-
-  // GET /api/member/time-logs - Get member's time logs
-  fastify.get('/time-logs', { preHandler: [fastify.authenticate, requireMember] }, async (request) => {
-    const { userId } = request.user;
-    const { project_id, start_date, end_date } = request.query;
-
-    try {
-      // Get team member ID
-      const memberResult = await query(
-        'SELECT id FROM team_members WHERE invited_user_id = $1',
-        [userId]
-      );
-      const teamMemberId = memberResult.rows[0]?.id;
-
-      if (!teamMemberId) {
-        return { taskLogs: [], projectLogs: [], totalMinutes: 0 };
+      if (!minutes || minutes <= 0) {
+        return reply.status(400).send({ error: 'Temps invalide (doit être > 0)' });
       }
 
-      // Build queries for task and project logs
-      let taskSql = `
+      try {
+        // Get team member ID
+        const memberResult = await query('SELECT id FROM team_members WHERE invited_user_id = $1', [
+          userId,
+        ]);
+        const teamMemberId = memberResult.rows[0]?.id;
+
+        // Create time log
+        const logDate = date || new Date().toISOString().split('T')[0];
+
+        const result = await query(
+          `INSERT INTO task_time_logs (team_task_id, user_id, team_member_id, minutes, description, date)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING *`,
+          [taskId, userId, teamMemberId, minutes, description || null, logDate]
+        );
+
+        // Update task time_spent
+        await query('UPDATE team_tasks SET time_spent = time_spent + $1 WHERE id = $2', [
+          minutes,
+          taskId,
+        ]);
+
+        return { timeLog: result.rows[0] };
+      } catch (error) {
+        request.log.error(error);
+        return reply
+          .status(500)
+          .send({ error: "Erreur lors de l'enregistrement du temps", details: error.message });
+      }
+    }
+  );
+
+  // POST /api/member/projects/:id/time - Log time on project
+  fastify.post(
+    '/projects/:id/time',
+    { preHandler: [fastify.authenticate, requireMember, canAccessProject] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id: projectId } = request.params;
+      const { minutes, description, date } = request.body;
+
+      if (!minutes || minutes <= 0) {
+        return reply.status(400).send({ error: 'Temps invalide (doit être > 0)' });
+      }
+
+      try {
+        // Get team member ID
+        const memberResult = await query('SELECT id FROM team_members WHERE invited_user_id = $1', [
+          userId,
+        ]);
+        const teamMemberId = memberResult.rows[0]?.id;
+
+        // Create time log
+        const logDate = date || new Date().toISOString().split('T')[0];
+
+        const result = await query(
+          `INSERT INTO project_time_logs (project_id, user_id, team_member_id, minutes, description, date)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING *`,
+          [projectId, userId, teamMemberId, minutes, description || null, logDate]
+        );
+
+        return { timeLog: result.rows[0] };
+      } catch (error) {
+        request.log.error(error);
+        return reply
+          .status(500)
+          .send({ error: "Erreur lors de l'enregistrement du temps", details: error.message });
+      }
+    }
+  );
+
+  // GET /api/member/time-logs - Get member's time logs
+  fastify.get(
+    '/time-logs',
+    { preHandler: [fastify.authenticate, requireMember] },
+    async request => {
+      const { userId } = request.user;
+      const { project_id, start_date, end_date } = request.query;
+
+      try {
+        // Get team member ID
+        const memberResult = await query('SELECT id FROM team_members WHERE invited_user_id = $1', [
+          userId,
+        ]);
+        const teamMemberId = memberResult.rows[0]?.id;
+
+        if (!teamMemberId) {
+          return { taskLogs: [], projectLogs: [], totalMinutes: 0 };
+        }
+
+        // Build queries for task and project logs
+        let taskSql = `
         SELECT
           ttl.*,
           tt.text as task_text,
@@ -276,7 +294,7 @@ export default async function memberRoutes(fastify) {
         JOIN team_tasks tt ON ttl.team_task_id = tt.id
         WHERE ttl.user_id = $1
       `;
-      let projectSql = `
+        let projectSql = `
         SELECT
           ptl.*,
           p.name as project_name
@@ -285,60 +303,61 @@ export default async function memberRoutes(fastify) {
         WHERE ptl.user_id = $1
       `;
 
-      const taskParams = [userId];
-      const projectParams = [userId];
-      let paramIndex = 2;
+        const taskParams = [userId];
+        const projectParams = [userId];
+        let paramIndex = 2;
 
-      if (project_id) {
-        projectSql += ` AND ptl.project_id = $${paramIndex}`;
-        projectParams.push(project_id);
-        paramIndex++;
+        if (project_id) {
+          projectSql += ` AND ptl.project_id = $${paramIndex}`;
+          projectParams.push(project_id);
+          paramIndex++;
+        }
+
+        if (start_date) {
+          taskSql += ` AND ttl.date >= $${paramIndex}`;
+          projectSql += ` AND ptl.date >= $${paramIndex}`;
+          taskParams.push(start_date);
+          projectParams.push(start_date);
+          paramIndex++;
+        }
+
+        if (end_date) {
+          taskSql += ` AND ttl.date <= $${paramIndex}`;
+          projectSql += ` AND ptl.date <= $${paramIndex}`;
+          taskParams.push(end_date);
+          projectParams.push(end_date);
+          paramIndex++;
+        }
+
+        taskSql += ' ORDER BY ttl.date DESC, ttl.logged_at DESC';
+        projectSql += ' ORDER BY ptl.date DESC, ptl.logged_at DESC';
+
+        const [taskLogs, projectLogs] = await Promise.all([
+          query(taskSql, taskParams),
+          query(projectSql, projectParams),
+        ]);
+
+        // Calculate total minutes
+        const totalTaskMinutes = taskLogs.rows.reduce((sum, log) => sum + log.minutes, 0);
+        const totalProjectMinutes = projectLogs.rows.reduce((sum, log) => sum + log.minutes, 0);
+        const totalMinutes = totalTaskMinutes + totalProjectMinutes;
+
+        return {
+          taskLogs: taskLogs.rows,
+          projectLogs: projectLogs.rows,
+          totalMinutes,
+          totalTaskMinutes,
+          totalProjectMinutes,
+        };
+      } catch (error) {
+        request.log.error(error);
+        throw error;
       }
-
-      if (start_date) {
-        taskSql += ` AND ttl.date >= $${paramIndex}`;
-        projectSql += ` AND ptl.date >= $${paramIndex}`;
-        taskParams.push(start_date);
-        projectParams.push(start_date);
-        paramIndex++;
-      }
-
-      if (end_date) {
-        taskSql += ` AND ttl.date <= $${paramIndex}`;
-        projectSql += ` AND ptl.date <= $${paramIndex}`;
-        taskParams.push(end_date);
-        projectParams.push(end_date);
-        paramIndex++;
-      }
-
-      taskSql += ' ORDER BY ttl.date DESC, ttl.logged_at DESC';
-      projectSql += ' ORDER BY ptl.date DESC, ptl.logged_at DESC';
-
-      const [taskLogs, projectLogs] = await Promise.all([
-        query(taskSql, taskParams),
-        query(projectSql, projectParams),
-      ]);
-
-      // Calculate total minutes
-      const totalTaskMinutes = taskLogs.rows.reduce((sum, log) => sum + log.minutes, 0);
-      const totalProjectMinutes = projectLogs.rows.reduce((sum, log) => sum + log.minutes, 0);
-      const totalMinutes = totalTaskMinutes + totalProjectMinutes;
-
-      return {
-        taskLogs: taskLogs.rows,
-        projectLogs: projectLogs.rows,
-        totalMinutes,
-        totalTaskMinutes,
-        totalProjectMinutes,
-      };
-    } catch (error) {
-      request.log.error(error);
-      throw error;
     }
-  });
+  );
 
   // GET /api/member/profile - Get member profile
-  fastify.get('/profile', { preHandler: [fastify.authenticate, requireMember] }, async (request) => {
+  fastify.get('/profile', { preHandler: [fastify.authenticate, requireMember] }, async request => {
     const { userId } = request.user;
 
     try {
@@ -382,7 +401,8 @@ export default async function memberRoutes(fastify) {
           project_count: parseInt(profile.project_count),
           pending_tasks: parseInt(profile.pending_tasks),
           completed_tasks: parseInt(profile.completed_tasks),
-          total_time_minutes: parseInt(profile.total_task_time) + parseInt(profile.total_project_time),
+          total_time_minutes:
+            parseInt(profile.total_task_time) + parseInt(profile.total_project_time),
           total_task_time_minutes: parseInt(profile.total_task_time),
           total_project_time_minutes: parseInt(profile.total_project_time),
         },

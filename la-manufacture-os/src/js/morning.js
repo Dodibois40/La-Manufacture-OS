@@ -3,20 +3,18 @@ import { playStartupSound } from './startup-sound.js';
 
 // Preload Earth textures for smooth display
 const preloadTextures = () => {
-  const textures = [
-    '/earth-day.webp',
-    '/earth-clouds.webp',
-    '/earth-night.webp'
-  ];
+  const textures = ['/earth-day.webp', '/earth-clouds.webp', '/earth-night.webp'];
 
-  return Promise.all(textures.map(src => {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => resolve(src);
-      img.onerror = () => resolve(src); // Continue even if failed
-      img.src = src;
-    });
-  }));
+  return Promise.all(
+    textures.map(src => {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(src);
+        img.onerror = () => resolve(src); // Continue even if failed
+        img.src = src;
+      });
+    })
+  );
 };
 
 export const initMorningBriefing = async (state, user = null) => {
@@ -98,7 +96,7 @@ export const initMorningBriefing = async (state, user = null) => {
       el.classList.add('hidden');
       try {
         localStorage.setItem('last_briefing', today);
-      } catch (e) { }
+      } catch (e) {}
     }, 600);
 
     // Cleanup
@@ -128,7 +126,7 @@ export const initFocusTimer = () => {
       seconds--;
       if (seconds <= 0) {
         clearInterval(interval);
-        alert("Focus terminé ! Pause.");
+        alert('Focus terminé ! Pause.');
         el.classList.remove('active');
       }
       const m = Math.floor(seconds / 60);

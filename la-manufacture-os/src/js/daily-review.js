@@ -11,7 +11,7 @@ let reviewShown = false;
 let reviewInterval = null;
 
 // Check if we should show the daily review
-const shouldShowReview = (state) => {
+const shouldShowReview = state => {
   const now = new Date();
   const today = isoLocal(now);
   const hour = now.getHours();
@@ -59,7 +59,10 @@ const createReviewModal = (state, renderCallback) => {
       </div>
 
       <div class="review-tasks" id="reviewTasks">
-        ${allIncomplete.slice(0, 5).map(t => `
+        ${allIncomplete
+          .slice(0, 5)
+          .map(
+            t => `
           <div class="review-task" data-id="${t.id}">
             <span class="review-task-text">${t.text}</span>
             <div class="review-task-actions">
@@ -74,7 +77,9 @@ const createReviewModal = (state, renderCallback) => {
               </button>
             </div>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
         ${allIncomplete.length > 5 ? `<p class="review-more">+${allIncomplete.length - 5} autres taches...</p>` : ''}
       </div>
 
@@ -99,7 +104,7 @@ const createReviewModal = (state, renderCallback) => {
 
   // Handle individual task actions
   overlay.querySelectorAll('.review-action-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', e => {
       const taskEl = e.target.closest('.review-task');
       const taskId = taskEl.dataset.id;
       const action = e.target.closest('.review-action-btn').dataset.action;
@@ -154,7 +159,7 @@ const createReviewModal = (state, renderCallback) => {
   });
 
   // Click outside to close
-  overlay.addEventListener('click', (e) => {
+  overlay.addEventListener('click', e => {
     if (e.target === overlay) {
       closeReview(overlay, renderCallback);
     }

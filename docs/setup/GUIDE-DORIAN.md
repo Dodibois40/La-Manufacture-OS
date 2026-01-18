@@ -98,6 +98,7 @@ EMAIL_WEBHOOK_SECRET=GENERER-UN-SECRET-ALEATOIRE
 ```
 
 **Notes importantes :**
+
 - `JWT_SECRET` : Generer avec `openssl rand -base64 32` ou un generateur en ligne
 - `ANTHROPIC_API_KEY` : Obtenir sur https://console.anthropic.com
 - `FRONTEND_URL` : Sera mis a jour apres le deploiement Netlify
@@ -155,9 +156,9 @@ git push -u origin main
 
 Dans Netlify : **Site configuration** → **Environment variables**, ajouter :
 
-| Variable | Valeur |
-|----------|--------|
-| `VITE_MODE` | `api` |
+| Variable       | Valeur                                 |
+| -------------- | -------------------------------------- |
+| `VITE_MODE`    | `api`                                  |
 | `VITE_API_URL` | `https://[URL-RAILWAY].up.railway.app` |
 
 Remplacer `[URL-RAILWAY]` par l'URL du backend obtenue a l'etape 1.6.
@@ -214,6 +215,7 @@ Value: [SITE-NETLIFY].netlify.app
 **Symptome** : `Access-Control-Allow-Origin` error dans la console
 
 **Solution** :
+
 1. Verifier que `FRONTEND_URL` dans Railway correspond EXACTEMENT a l'URL Netlify
 2. Inclure le protocole `https://`
 3. Pas de slash final
@@ -224,6 +226,7 @@ Value: [SITE-NETLIFY].netlify.app
 **Symptome** : Erreur de connexion PostgreSQL
 
 **Solution** :
+
 1. Verifier que PostgreSQL est demarre dans Railway
 2. Verifier que `DATABASE_URL` utilise `${{Postgres.DATABASE_URL}}`
 3. Relancer les migrations
@@ -233,6 +236,7 @@ Value: [SITE-NETLIFY].netlify.app
 **Symptome** : Le build fail sur Netlify
 
 **Solution** :
+
 1. Verifier les logs de build pour l'erreur exacte
 2. Tester localement : `npm run build`
 3. Verifier que les variables d'environnement sont definies
@@ -242,6 +246,7 @@ Value: [SITE-NETLIFY].netlify.app
 **Symptome** : Deconnexion immediate apres login
 
 **Solution** :
+
 1. Les deux sites doivent etre en HTTPS
 2. `FRONTEND_URL` doit correspondre exactement
 
@@ -251,21 +256,21 @@ Value: [SITE-NETLIFY].netlify.app
 
 ### API Endpoints
 
-| Methode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/health` | Health check |
-| POST | `/api/auth/register` | Inscription |
-| POST | `/api/auth/login` | Connexion |
-| POST | `/api/auth/logout` | Deconnexion |
-| GET | `/api/auth/me` | User courant |
-| GET | `/api/tasks` | Liste des taches |
-| POST | `/api/tasks` | Creer une tache |
-| PATCH | `/api/tasks/:id` | Modifier une tache |
-| DELETE | `/api/tasks/:id` | Supprimer une tache |
-| GET | `/api/settings` | Parametres |
-| PATCH | `/api/settings` | Modifier parametres |
-| POST | `/api/ai/focus-mode` | Mode focus IA |
-| GET | `/api/ai/coach/morning` | Briefing matin IA |
+| Methode | Endpoint                | Description         |
+| ------- | ----------------------- | ------------------- |
+| GET     | `/health`               | Health check        |
+| POST    | `/api/auth/register`    | Inscription         |
+| POST    | `/api/auth/login`       | Connexion           |
+| POST    | `/api/auth/logout`      | Deconnexion         |
+| GET     | `/api/auth/me`          | User courant        |
+| GET     | `/api/tasks`            | Liste des taches    |
+| POST    | `/api/tasks`            | Creer une tache     |
+| PATCH   | `/api/tasks/:id`        | Modifier une tache  |
+| DELETE  | `/api/tasks/:id`        | Supprimer une tache |
+| GET     | `/api/settings`         | Parametres          |
+| PATCH   | `/api/settings`         | Modifier parametres |
+| POST    | `/api/ai/focus-mode`    | Mode focus IA       |
+| GET     | `/api/ai/coach/morning` | Briefing matin IA   |
 
 ### Schema Base de Donnees
 
@@ -292,4 +297,4 @@ Value: [SITE-NETLIFY].netlify.app
 
 ---
 
-*Derniere mise a jour : Janvier 2026*
+_Derniere mise a jour : Janvier 2026_

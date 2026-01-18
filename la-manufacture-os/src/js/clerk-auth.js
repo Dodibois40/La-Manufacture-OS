@@ -16,7 +16,7 @@ let tokenExpiry = 0;
 const withTimeout = (promise, ms, errorMsg) => {
   return Promise.race([
     promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms))
+    new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms)),
   ]);
 };
 
@@ -27,20 +27,22 @@ async function loadClerkSDK() {
   if (clerkLoadPromise) return clerkLoadPromise;
 
   console.log('[Clerk] Loading SDK dynamically...');
-  clerkLoadPromise = import('@clerk/clerk-js').then(module => {
-    // Handle both named export and default export
-    Clerk = module.Clerk || module.default;
-    if (!Clerk) {
-      console.error('[Clerk] SDK module structure:', Object.keys(module));
-      throw new Error('Clerk class not found in SDK module');
-    }
-    console.log('[Clerk] SDK loaded successfully');
-    return Clerk;
-  }).catch(err => {
-    console.error('[Clerk] Failed to load SDK:', err);
-    clerkLoadPromise = null; // Reset so we can retry
-    throw err;
-  });
+  clerkLoadPromise = import('@clerk/clerk-js')
+    .then(module => {
+      // Handle both named export and default export
+      Clerk = module.Clerk || module.default;
+      if (!Clerk) {
+        console.error('[Clerk] SDK module structure:', Object.keys(module));
+        throw new Error('Clerk class not found in SDK module');
+      }
+      console.log('[Clerk] SDK loaded successfully');
+      return Clerk;
+    })
+    .catch(err => {
+      console.error('[Clerk] Failed to load SDK:', err);
+      clerkLoadPromise = null; // Reset so we can retry
+      throw err;
+    });
 
   return clerkLoadPromise;
 }
@@ -49,8 +51,7 @@ async function loadClerkSDK() {
 const isIOSWebKit = () => {
   const ua = navigator.userAgent;
   // Check for iOS devices or iPad on iOS 13+ (which reports as Mac)
-  return /iPad|iPhone|iPod/.test(ua) ||
-    (ua.includes('Mac') && 'ontouchend' in document);
+  return /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
 };
 
 // Initialize Clerk with timeout for iOS
@@ -84,7 +85,7 @@ export async function initClerk() {
         standardBrowser: true,
       }),
       loadTimeout,
-      `Clerk.load() timeout ${loadTimeout/1000}s`
+      `Clerk.load() timeout ${loadTimeout / 1000}s`
     );
 
     console.log('[Clerk] load() complete');
@@ -152,9 +153,16 @@ export async function signInWithEmail(email, password) {
       console.error('[Clerk] Init failed during login:', initErr);
       // More specific error for iOS
       if (iosDevice && initErr.message?.includes('timeout')) {
-        return { success: false, error: 'Timeout iOS - vérifie que Safari autorise les cookies. Paramètres > Safari > Bloquer les cookies = Autoriser.' };
+        return {
+          success: false,
+          error:
+            'Timeout iOS - vérifie que Safari autorise les cookies. Paramètres > Safari > Bloquer les cookies = Autoriser.',
+        };
       }
-      return { success: false, error: 'Connexion serveur échouée: ' + (initErr.message || 'Réessaie.') };
+      return {
+        success: false,
+        error: 'Connexion serveur échouée: ' + (initErr.message || 'Réessaie.'),
+      };
     }
   }
 
@@ -179,11 +187,20 @@ export async function signInWithEmail(email, password) {
       );
     } catch (createErr) {
       console.error('[Clerk] signIn.create error:', createErr);
-      const errMsg = createErr.errors?.[0]?.longMessage || createErr.errors?.[0]?.message || createErr.message || 'Erreur login';
+      const errMsg =
+        createErr.errors?.[0]?.longMessage ||
+        createErr.errors?.[0]?.message ||
+        createErr.message ||
+        'Erreur login';
       return { success: false, error: errMsg };
     }
 
-    console.log('[Clerk] signIn.create returned:', result?.status, 'firstFactorVerification:', result?.firstFactorVerification?.status);
+    console.log(
+      '[Clerk] signIn.create returned:',
+      result?.status,
+      'firstFactorVerification:',
+      result?.firstFactorVerification?.status
+    );
 
     if (result.status === 'complete') {
       console.log('[Clerk] Status complete, setting active...');
@@ -213,7 +230,10 @@ export async function signInWithEmail(email, password) {
             console.error('[Clerk] iOS reload failed:', reloadErr);
           }
           // If we get here, login succeeded on server but local session failed
-          return { success: false, error: 'Session créée mais sync iOS échouée. Recharge la page.' };
+          return {
+            success: false,
+            error: 'Session créée mais sync iOS échouée. Recharge la page.',
+          };
         }
         throw setActiveErr;
       }
@@ -234,17 +254,30 @@ export async function signInWithEmail(email, password) {
             success: false,
             status: 'needs_email_code',
             signIn: result,
-            error: 'Code envoyé par email. Vérifie ta boîte mail.'
+            error: 'Code envoyé par email. Vérifie ta boîte mail.',
           };
         } catch (prepErr) {
           console.error('[Clerk] Failed to send email code:', prepErr);
-          return { success: false, error: 'Impossible d\'envoyer le code email: ' + (prepErr.message || 'erreur') };
+          return {
+            success: false,
+            error: "Impossible d'envoyer le code email: " + (prepErr.message || 'erreur'),
+          };
         }
       } else if (hasTotp) {
-        return { success: false, status: 'needs_totp', signIn: result, error: '2FA TOTP requis. Désactive-le dans Clerk.' };
+        return {
+          success: false,
+          status: 'needs_totp',
+          signIn: result,
+          error: '2FA TOTP requis. Désactive-le dans Clerk.',
+        };
       } else {
         const factorTypes = factors.map(f => f.strategy).join(', ') || 'aucun';
-        return { success: false, status: 'needs_second_factor', signIn: result, error: `2FA requis (types: ${factorTypes})` };
+        return {
+          success: false,
+          status: 'needs_second_factor',
+          signIn: result,
+          error: `2FA requis (types: ${factorTypes})`,
+        };
       }
     } else {
       console.log('[Clerk] Unexpected status:', result.status);
@@ -298,7 +331,8 @@ export async function completeEmailCode(signIn, code) {
     }
   } catch (err) {
     console.error('[Clerk] Email code error:', err);
-    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Code invalide';
+    const message =
+      err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Code invalide';
     return { success: false, error: message };
   }
 }
@@ -332,7 +366,8 @@ export async function complete2FA(signIn, code) {
     }
   } catch (err) {
     console.error('[Clerk] 2FA error:', err);
-    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Code invalide';
+    const message =
+      err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Code invalide';
     return { success: false, error: message };
   }
 }
@@ -380,7 +415,8 @@ export async function verifyEmailCode(signUp, code) {
     }
   } catch (err) {
     console.error('Verification error:', err);
-    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Verification failed';
+    const message =
+      err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Verification failed';
     return { success: false, error: message };
   }
 }
@@ -399,7 +435,8 @@ export async function forgotPassword(email) {
     return { success: true, signIn: result };
   } catch (err) {
     console.error('Forgot password error:', err);
-    const message = err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Failed to send reset code';
+    const message =
+      err.errors?.[0]?.longMessage || err.errors?.[0]?.message || 'Failed to send reset code';
     return { success: false, error: message };
   }
 }
@@ -476,7 +513,7 @@ export function onAuthStateChange(callback) {
   callback(isSignedIn(), getClerkUser());
 
   // Listen for changes
-  return clerk.addListener((event) => {
+  return clerk.addListener(event => {
     callback(isSignedIn(), getClerkUser());
   });
 }

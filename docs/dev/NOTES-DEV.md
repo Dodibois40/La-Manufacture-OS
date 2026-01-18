@@ -2,12 +2,12 @@
 
 ## Hébergement des services
 
-| Service | Hébergeur | URL |
-|---------|-----------|-----|
-| **Frontend** | Netlify | (voir dashboard Netlify) |
-| **API Backend** | Railway | https://lovely-exploration-production.up.railway.app |
-| **Base de données** | Railway (PostgreSQL) | (via DATABASE_URL dans Railway) |
-| **Auth** | Clerk | clerk.com |
+| Service             | Hébergeur            | URL                                                  |
+| ------------------- | -------------------- | ---------------------------------------------------- |
+| **Frontend**        | Netlify              | (voir dashboard Netlify)                             |
+| **API Backend**     | Railway              | https://lovely-exploration-production.up.railway.app |
+| **Base de données** | Railway (PostgreSQL) | (via DATABASE_URL dans Railway)                      |
+| **Auth**            | Clerk                | clerk.com                                            |
 
 **GitHub Repo** : `Dodibois40/La-Manufacture-OS`
 
@@ -20,6 +20,7 @@
 **Problème** : Les tâches créées via l'IA n'apparaissaient pas dans le calendrier.
 
 **Cause** :
+
 - L'IA Claude retourne des dates en ISO avec timezone : `2026-01-19T00:00:00.000Z` (UTC)
 - PostgreSQL stocke cette valeur telle quelle
 - Le frontend requête avec une date simple : `date = '2026-01-19'`
@@ -27,6 +28,7 @@
 - Résultat : `2026-01-19 00:00:00+00` (UTC) ≠ `2026-01-19` (interprété comme UTC+1) → PAS DE MATCH
 
 **Solution** :
+
 ```javascript
 // AVANT (bugué)
 const taskDate = item.date || currentDate;
@@ -48,6 +50,7 @@ const taskDate = item.date ? item.date.split('T')[0] : currentDate;
 **Cause** : Le prompt IA ne détectait pas les délimiteurs implicites du texte parlé.
 
 **Solution** : Ajout d'une section dans le prompt système pour détecter :
+
 - Changements de contexte (nouvelle date, nouveau sujet)
 - Marqueurs implicites : "et lundi...", "et mardi...", "aussi..."
 - Règle d'or : "En cas de doute, SÉPARE les items"
@@ -63,6 +66,7 @@ const taskDate = item.date ? item.date.split('T')[0] : currentDate;
 **Cause** : Le prompt disait `"demain" → ${currentDate} + 1 jour` au lieu de fournir la date calculée. Claude devait faire le calcul lui-même, ce qui causait des erreurs.
 
 **Solution** : Calculer explicitement les dates relatives côté serveur et les fournir dans le prompt :
+
 ```javascript
 // Avant (bugué)
 // Le prompt disait: "demain" → 2026-01-18 + 1 jour
@@ -86,11 +90,13 @@ const tomorrowDate = tomorrow.toISOString().split('T')[0];
 **Problème** : Les tâches créées via le Quick Dump n'apparaissaient pas dans le calendrier, même si l'API confirmait leur création.
 
 **Cause** :
+
 - L'API retourne des dates au format ISO avec timezone : `"2026-01-19T00:00:00.000Z"`
 - Le frontend compare avec des dates simples : `"2026-01-19"`
 - La comparaison stricte `t.date === selectedDate` échoue car les formats diffèrent
 
 **Solution** :
+
 ```javascript
 // AVANT (bugué)
 .filter(t => t.date === selectedDate)
@@ -100,6 +106,7 @@ const tomorrowDate = tomorrow.toISOString().split('T')[0];
 ```
 
 **Fichiers concernés** :
+
 - `la-manufacture-os/src/js/views.js` - renderDayDetail, renderDay, createCalendarDay
 - `la-manufacture-os/src/js/daily-review.js`
 - `la-manufacture-os/src/js/morning.js`

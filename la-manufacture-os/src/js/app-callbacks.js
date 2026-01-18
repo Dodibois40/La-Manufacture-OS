@@ -4,5 +4,5 @@
  */
 export const appCallbacks = {
   render: null,
-  setView: null
+  setView: null,
 };

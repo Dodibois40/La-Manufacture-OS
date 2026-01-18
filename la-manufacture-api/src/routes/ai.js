@@ -22,7 +22,7 @@ export default async function aiRoutes(fastify) {
       const tasks = tasksResult.rows;
 
       if (tasks.length === 0) {
-        return { message: 'Aucune tâche pour aujourd\'hui ! 🎉', task: null };
+        return { message: "Aucune tâche pour aujourd'hui ! 🎉", task: null };
       }
 
       // Prepare prompt for Claude
@@ -39,10 +39,12 @@ Format : "[Numéro] | [Motivation]"`;
       const message = await anthropic.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 150,
-        messages: [{
-          role: 'user',
-          content: prompt
-        }]
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
       });
 
       const responseText = message.content[0].text;
@@ -59,7 +61,7 @@ Format : "[Numéro] | [Motivation]"`;
       return {
         task: selectedTask,
         motivation: motivation || 'Fais ça maintenant !',
-        allTasks: tasks.length
+        allTasks: tasks.length,
       };
     } catch (error) {
       fastify.log.error(error);
@@ -105,10 +107,12 @@ Ton: direct, pro, encourageant. Max 100 mots.`;
       const message = await anthropic.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: prompt
-        }]
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
       });
 
       const briefing = message.content[0].text;
@@ -124,8 +128,8 @@ Ton: direct, pro, encourageant. Max 100 mots.`;
         stats: {
           today: todayTasks.rows.length,
           late: lateTasks.rows.length,
-          urgent: todayTasks.rows.filter(t => t.urgent).length
-        }
+          urgent: todayTasks.rows.filter(t => t.urgent).length,
+        },
       };
     } catch (error) {
       fastify.log.error(error);
@@ -178,10 +182,12 @@ RÉPONDS UNIQUEMENT avec un JSON array valide :
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250514',
         max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: prompt
-        }]
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
       });
 
       const responseText = message.content[0].text;
@@ -252,10 +258,12 @@ Reponds UNIQUEMENT en JSON:
       const message = await anthropic.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 200,
-        messages: [{
-          role: 'user',
-          content: prompt
-        }]
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
       });
 
       const responseText = message.content[0].text;
@@ -333,10 +341,9 @@ Reponds UNIQUEMENT en JSON:
       const activeProjects = projectsResult.rows.map(p => p.name);
 
       // Tags existants
-      const tagsResult = await query(
-        'SELECT name FROM tags WHERE user_id = $1 ORDER BY name',
-        [userId]
-      );
+      const tagsResult = await query('SELECT name FROM tags WHERE user_id = $1 ORDER BY name', [
+        userId,
+      ]);
       const existingTags = tagsResult.rows.map(t => t.name);
 
       // Membres d'équipe
@@ -1051,7 +1058,7 @@ pas juste que tu parses du texte. Tu es son EXTENSION COGNITIVE.`;
         d.setDate(d.getDate() + i);
         weekDays.push({
           name: dayNames[d.getDay()],
-          date: d.toISOString().split('T')[0]
+          date: d.toISOString().split('T')[0],
         });
       }
       const weekDaysStr = weekDays.map(d => `${d.name} → ${d.date}`).join(', ');
@@ -1118,10 +1125,12 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 2000,
         system: systemPrompt,
-        messages: [{
-          role: 'user',
-          content: userPrompt
-        }]
+        messages: [
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
       });
 
       const responseText = message.content[0].text;
@@ -1142,25 +1151,27 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
 
         // Fallback: créer une task simple
         aiResponse = {
-          items: [{
-            type: 'task',
-            text: text,
-            title: null,
-            content: null,
-            date: currentDate,
-            start_time: null,
-            end_time: null,
-            location: null,
-            project: null,
-            urgent: false,
-            important: false,
-            tags: [],
-            color: null,
-            metadata: {
-              original_text: text,
-              confidence: 0.5
-            }
-          }]
+          items: [
+            {
+              type: 'task',
+              text: text,
+              title: null,
+              content: null,
+              date: currentDate,
+              start_time: null,
+              end_time: null,
+              location: null,
+              project: null,
+              urgent: false,
+              important: false,
+              tags: [],
+              color: null,
+              metadata: {
+                original_text: text,
+                confidence: 0.5,
+              },
+            },
+          ],
         };
       }
 
@@ -1191,7 +1202,7 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
                 item.start_time || null,
                 item.end_time || null,
                 item.location || null,
-                false
+                false,
               ]
             );
 
@@ -1205,10 +1216,10 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
               );
 
               if (projectMatch.rows.length > 0) {
-                await query(
-                  'UPDATE tasks SET project_id = $1 WHERE id = $2',
-                  [projectMatch.rows[0].id, createdTask.id]
-                );
+                await query('UPDATE tasks SET project_id = $1 WHERE id = $2', [
+                  projectMatch.rows[0].id,
+                  createdTask.id,
+                ]);
                 createdTask.project_id = projectMatch.rows[0].id;
               }
             }
@@ -1218,10 +1229,10 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
             if (item.type === 'event' && createdTask.start_time) {
               syncResult = await syncEventToGoogleInternal(fastify, userId, createdTask);
               if (syncResult.success && syncResult.eventId) {
-                await query(
-                  'UPDATE tasks SET google_event_id = $1 WHERE id = $2',
-                  [syncResult.eventId, createdTask.id]
-                );
+                await query('UPDATE tasks SET google_event_id = $1 WHERE id = $2', [
+                  syncResult.eventId,
+                  createdTask.id,
+                ]);
                 createdTask.google_event_id = syncResult.eventId;
               }
             }
@@ -1232,9 +1243,8 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
               text: createdTask.text,
               date: createdTask.date,
               google_synced: !!createdTask.google_event_id,
-              google_sync_status: syncResult.reason || (syncResult.success ? 'success' : 'failed')
+              google_sync_status: syncResult.reason || (syncResult.success ? 'success' : 'failed'),
             });
-
           } else if (item.type === 'note') {
             // ===== CRÉATION NOTE =====
 
@@ -1242,13 +1252,7 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
               `INSERT INTO notes (user_id, title, content, color, is_pinned)
                VALUES ($1, $2, $3, $4, $5)
                RETURNING *`,
-              [
-                userId,
-                item.title || 'Note',
-                item.content || '',
-                item.color || null,
-                false
-              ]
+              [userId, item.title || 'Note', item.content || '', item.color || null, false]
             );
 
             const createdNote = noteResult.rows[0];
@@ -1283,10 +1287,10 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
               );
 
               if (projectMatch.rows.length > 0) {
-                await query(
-                  'UPDATE notes SET project_id = $1 WHERE id = $2',
-                  [projectMatch.rows[0].id, createdNote.id]
-                );
+                await query('UPDATE notes SET project_id = $1 WHERE id = $2', [
+                  projectMatch.rows[0].id,
+                  createdNote.id,
+                ]);
                 createdNote.project_id = projectMatch.rows[0].id;
               }
             }
@@ -1295,7 +1299,7 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
               type: 'note',
               id: createdNote.id,
               title: createdNote.title,
-              tags: item.tags || []
+              tags: item.tags || [],
             });
           }
         } catch (itemError) {
@@ -1307,7 +1311,8 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
       // ===== 7. TRACKING POUR AMÉLIORATION CONTINUE =====
 
       const processingTime = Date.now() - startTime;
-      const confidenceAvg = items.reduce((sum, i) => sum + (i.metadata?.confidence || 0.5), 0) / items.length;
+      const confidenceAvg =
+        items.reduce((sum, i) => sum + (i.metadata?.confidence || 0.5), 0) / items.length;
 
       await query(
         `INSERT INTO ai_inbox_decisions (user_id, input_text, ai_response, items_created, confidence_avg, processing_time_ms)
@@ -1318,7 +1323,7 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
           JSON.stringify(aiResponse),
           JSON.stringify(itemsCreated),
           confidenceAvg,
-          processingTime
+          processingTime,
         ]
       );
 
@@ -1331,16 +1336,15 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
           total: itemsCreated.length,
           tasks: itemsCreated.filter(i => i.type === 'task').length,
           events: itemsCreated.filter(i => i.type === 'event').length,
-          notes: itemsCreated.filter(i => i.type === 'note').length
+          notes: itemsCreated.filter(i => i.type === 'note').length,
         },
-        processing_time_ms: processingTime
+        processing_time_ms: processingTime,
       };
-
     } catch (error) {
       fastify.log.error('Process inbox error:', error);
       return reply.status(500).send({
         error: 'Inbox processing failed',
-        details: error.message
+        details: error.message,
       });
     }
   });

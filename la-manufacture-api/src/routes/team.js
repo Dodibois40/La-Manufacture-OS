@@ -6,7 +6,7 @@ export default async function teamRoutes(fastify) {
   // ============================================
 
   // GET /api/team/members - Liste des membres de l'equipe
-  fastify.get('/members', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/members', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
 
     const result = await query(
@@ -55,10 +55,10 @@ export default async function teamRoutes(fastify) {
     }
 
     // Verifier que le membre appartient a l'utilisateur
-    const check = await query(
-      'SELECT id FROM team_members WHERE id = $1 AND user_id = $2',
-      [memberId, userId]
-    );
+    const check = await query('SELECT id FROM team_members WHERE id = $1 AND user_id = $2', [
+      memberId,
+      userId,
+    ]);
 
     if (check.rows.length === 0) {
       return reply.status(404).send({ error: 'Membre non trouve ou acces refuse' });
@@ -98,7 +98,9 @@ export default async function teamRoutes(fastify) {
       return { member: result.rows[0] };
     } catch (error) {
       reply.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la mise a jour du membre', details: error.message });
+      return reply
+        .status(500)
+        .send({ error: 'Erreur lors de la mise a jour du membre', details: error.message });
     }
   });
 
@@ -122,13 +124,17 @@ export default async function teamRoutes(fastify) {
 
       if (result.rows.length === 0) {
         reply.log.warn(`Delete member: member ${memberId} not found for user ${userId}`);
-        return reply.status(404).send({ error: 'Membre non trouve (deja supprime ou acces refuse)' });
+        return reply
+          .status(404)
+          .send({ error: 'Membre non trouve (deja supprime ou acces refuse)' });
       }
 
       return { success: true };
     } catch (error) {
       reply.log.error(error);
-      return reply.status(500).send({ error: 'Erreur lors de la suppression du membre', details: error.message });
+      return reply
+        .status(500)
+        .send({ error: 'Erreur lors de la suppression du membre', details: error.message });
     }
   });
 
@@ -137,7 +143,7 @@ export default async function teamRoutes(fastify) {
   // ============================================
 
   // GET /api/team/tasks - Liste des taches de l'equipe
-  fastify.get('/tasks', { preHandler: [fastify.authenticate] }, async (request) => {
+  fastify.get('/tasks', { preHandler: [fastify.authenticate] }, async request => {
     const { userId } = request.user;
     const { member_id, date } = request.query;
 
@@ -201,7 +207,7 @@ export default async function teamRoutes(fastify) {
     const result = await query(sql, params);
     return {
       member: memberCheck.rows[0],
-      tasks: result.rows
+      tasks: result.rows,
     };
   });
 
@@ -215,10 +221,10 @@ export default async function teamRoutes(fastify) {
     }
 
     // Verifier que le membre appartient a l'utilisateur
-    const memberCheck = await query(
-      'SELECT id FROM team_members WHERE id = $1 AND user_id = $2',
-      [team_member_id, userId]
-    );
+    const memberCheck = await query('SELECT id FROM team_members WHERE id = $1 AND user_id = $2', [
+      team_member_id,
+      userId,
+    ]);
 
     if (memberCheck.rows.length === 0) {
       return reply.status(404).send({ error: 'Membre non trouve' });
@@ -340,7 +346,7 @@ export default async function teamRoutes(fastify) {
 
     return {
       manager: { id: managerCheck.rows[0].id, name: managerCheck.rows[0].name },
-      members: members.rows
+      members: members.rows,
     };
   });
 }

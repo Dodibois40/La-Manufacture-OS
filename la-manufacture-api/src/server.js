@@ -33,7 +33,7 @@ import {
   requireMember,
   loadTeamMemberProfile,
   canAccessProject,
-  canAccessTask
+  canAccessTask,
 } from './middleware/authorization.js';
 
 dotenv.config();
@@ -55,23 +55,32 @@ await runMigrations();
 const fastify = Fastify({
   logger: {
     level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    transport: process.env.NODE_ENV !== 'production' ? {
-      target: 'pino-pretty',
-      options: { colorize: true }
-    } : undefined,
+    transport:
+      process.env.NODE_ENV !== 'production'
+        ? {
+            target: 'pino-pretty',
+            options: { colorize: true },
+          }
+        : undefined,
   },
 });
 
 // Register plugins
-const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(url => url.trim());
+const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map(url => url.trim());
 await fastify.register(cors, {
   origin: (origin, cb) => {
     // In development, allow any localhost or local IP origin
-    if (!origin || /localhost|127\.0\.0\.1|192\.168\./.test(origin) || frontendUrl.includes(origin)) {
+    if (
+      !origin ||
+      /localhost|127\.0\.0\.1|192\.168\./.test(origin) ||
+      frontendUrl.includes(origin)
+    ) {
       cb(null, true);
       return;
     }
-    cb(new Error("Not allowed by CORS"), false);
+    cb(new Error('Not allowed by CORS'), false);
   },
   credentials: true,
   methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -89,12 +98,12 @@ await fastify.register(compress, {
 await fastify.register(multipart, {
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max
-  }
+  },
 });
 
 // Clerk client for user management
 const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY
+  secretKey: process.env.CLERK_SECRET_KEY,
 });
 
 // Register Clerk plugin
@@ -112,10 +121,7 @@ fastify.decorate('authenticate', async function (request, reply) {
   }
 
   // Get or create local user from Clerk
-  const localUser = await pool.query(
-    'SELECT id FROM users WHERE clerk_id = $1',
-    [auth.userId]
-  );
+  const localUser = await pool.query('SELECT id FROM users WHERE clerk_id = $1', [auth.userId]);
 
   if (localUser.rows.length > 0) {
     request.user = { userId: localUser.rows[0].id, clerkId: auth.userId };
@@ -145,17 +151,22 @@ fastify.decorate('authenticate', async function (request, reply) {
       );
       request.user = { userId: result.rows[0].id, clerkId: auth.userId };
 
-      fastify.log.info('User created/updated successfully:', { userId: result.rows[0].id, clerkId: auth.userId });
+      fastify.log.info('User created/updated successfully:', {
+        userId: result.rows[0].id,
+        clerkId: auth.userId,
+      });
     } catch (err) {
       fastify.log.error('Error creating/updating user from Clerk:', {
         message: err.message,
         code: err.code,
         detail: err.detail,
         constraint: err.constraint,
-        clerkId: auth.userId
+        clerkId: auth.userId,
       });
 
-      return reply.status(500).send({ error: 'Failed to create/update user', details: err.message });
+      return reply
+        .status(500)
+        .send({ error: 'Failed to create/update user', details: err.message });
     }
   }
 });
@@ -208,4 +219,3 @@ const start = async () => {
 };
 
 start();
-
