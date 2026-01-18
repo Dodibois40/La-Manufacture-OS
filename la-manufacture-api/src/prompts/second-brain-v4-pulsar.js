@@ -64,6 +64,8 @@ export const MetadataSchema = z.object({
         })
         .optional(),
     })
+    .nullable()
+    .transform(val => val ?? {})
     .default({}),
   source_lang: z.enum(['fr', 'en', 'es', 'de']).optional(),
 });
