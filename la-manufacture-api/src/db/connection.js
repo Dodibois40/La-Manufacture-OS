@@ -1,6 +1,11 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
 
+// Fix Date parsing to string
+pg.types.setTypeParser(1082, function (stringValue) {
+  return stringValue;
+});
+
 dotenv.config();
 
 const { Pool } = pg;

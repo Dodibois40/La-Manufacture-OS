@@ -500,10 +500,13 @@ const initApp = async () => {
 
       // Quick dump handler for API mode
       const handleTasksAdded = async (tasks) => {
+        console.log('[handleTasksAdded] Called with tasks.length:', tasks.length);
         // Si array vide = items créés via l'API (process-inbox), recharger le state
         if (tasks.length === 0) {
+          console.log('[handleTasksAdded] Reloading state from API (tasks.length === 0)...');
           const apiState = await loadStateFromApi();
           if (apiState) {
+            console.log('[handleTasksAdded] Got apiState with', apiState.tasks?.length, 'tasks');
             state.tasks = apiState.tasks;
             state.settings = apiState.settings || state.settings;
           }
@@ -535,8 +538,11 @@ const initApp = async () => {
             }
           }
         }
+        console.log('[handleTasksAdded] About to saveState and render. state.tasks.length:', state.tasks.length);
+        console.log('[handleTasksAdded] currentView:', currentView);
         saveState(state);
         render();
+        console.log('[handleTasksAdded] render() completed');
       };
 
       const quickDumpBtn = document.getElementById('quickDumpBtn');

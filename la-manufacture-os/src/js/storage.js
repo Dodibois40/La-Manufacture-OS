@@ -1,5 +1,6 @@
 import { nowISO, storageOK } from './utils.js';
 import { api, isApiMode } from './api-client.js';
+import { isSignedIn } from './clerk-auth.js';
 
 const STORE_KEY = 'lm_os_state_v65';
 const AUTH_KEY = 'lm_os_auth';
@@ -118,7 +119,13 @@ export const loadState = () => {
 
 // Load state from API
 export const loadStateFromApi = async () => {
-  if (!isApiMode || !isLoggedIn()) {
+  // Check both legacy auth (isLoggedIn) and Clerk auth (isSignedIn)
+  const clerkSignedIn = isSignedIn();
+  const legacyLoggedIn = isLoggedIn();
+  const isAuthenticated = legacyLoggedIn || clerkSignedIn;
+  console.log('[loadStateFromApi] isApiMode:', isApiMode, 'legacyLoggedIn:', legacyLoggedIn, 'clerkSignedIn:', clerkSignedIn, 'isAuthenticated:', isAuthenticated);
+  if (!isApiMode || !isAuthenticated) {
+    console.log('[loadStateFromApi] Falling back to local storage');
     return loadState();
   }
 
@@ -163,7 +170,8 @@ export const saveState = (state) => {
 // Task API operations
 export const taskApi = {
   async create(task) {
-    if (!isApiMode || !isLoggedIn()) {
+    const isAuthenticated = isLoggedIn() || isSignedIn();
+    if (!isApiMode || !isAuthenticated) {
       return task;
     }
     try {
@@ -176,7 +184,8 @@ export const taskApi = {
   },
 
   async update(id, updates) {
-    if (!isApiMode || !isLoggedIn()) {
+    const isAuthenticated = isLoggedIn() || isSignedIn();
+    if (!isApiMode || !isAuthenticated) {
       return updates;
     }
     try {
@@ -189,7 +198,8 @@ export const taskApi = {
   },
 
   async delete(id) {
-    if (!isApiMode || !isLoggedIn()) {
+    const isAuthenticated = isLoggedIn() || isSignedIn();
+    if (!isApiMode || !isAuthenticated) {
       return true;
     }
     try {
@@ -212,7 +222,8 @@ export function initStorageUI() {
 
   if (storageBadge) {
     if (isApiMode) {
-      storageBadge.textContent = isLoggedIn() ? 'API Sync' : 'API Mode';
+      const isAuthenticated = isLoggedIn() || isSignedIn();
+      storageBadge.textContent = isAuthenticated ? 'API Sync' : 'API Mode';
       storageBadge.classList.remove('bad');
       storageBadge.classList.add('good');
     } else {

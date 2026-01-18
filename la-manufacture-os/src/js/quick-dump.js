@@ -191,6 +191,21 @@ export const openQuickDump = (state, onTasksAdded) => {
       if (messages.length > 0) {
         toast(`✅ ${messages.join(', ')} créé(s)!`, 'success');
 
+        // Check for sync errors
+        const syncErrors = response.items.filter(i => i.google_sync_status === 'not_connected');
+        if (syncErrors.length > 0) {
+          setTimeout(() => {
+            toast('⚠️ Google Calendar non connecté', 'warning');
+          }, 2000);
+        } else if (response.items.some(i => i.google_sync_status === 'api_error')) {
+          setTimeout(() => {
+            toast('⚠️ Erreur synchro Google', 'warning');
+          }, 2000);
+        }
+
+        // Log the items created by the API
+        console.log('[QuickDump] Items created:', response.items);
+
         // Reload state from API directly (items are already in DB)
         console.log('[QuickDump] isApiMode:', isApiMode);
         if (isApiMode) {
@@ -198,6 +213,10 @@ export const openQuickDump = (state, onTasksAdded) => {
           const apiState = await loadStateFromApi();
           console.log('[QuickDump] apiState:', apiState ? `${apiState.tasks?.length} tasks` : 'null');
           if (apiState) {
+            // Log the last few tasks to see what dates they have
+            const lastTasks = apiState.tasks.slice(-5);
+            console.log('[QuickDump] Last 5 tasks:', lastTasks.map(t => ({ id: t.id, text: t.text, date: t.date, is_event: t.is_event })));
+
             state.tasks = apiState.tasks;
             state.settings = apiState.settings || state.settings;
             console.log('[QuickDump] state.tasks updated:', state.tasks.length);
@@ -205,7 +224,7 @@ export const openQuickDump = (state, onTasksAdded) => {
         }
 
         // Trigger render
-        onTasksAdded([]);
+        await onTasksAdded([]);
 
         closeQuickDump();
       } else {

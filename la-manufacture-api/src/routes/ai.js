@@ -681,14 +681,15 @@ Réponds UNIQUEMENT avec JSON valide (pas de texte avant/après) : { "items": [.
             }
 
             // Auto-sync to Google Calendar if event with start_time
+            let syncResult = { success: false, reason: 'skipped' };
             if (item.type === 'event' && createdTask.start_time) {
-              const googleEventId = await syncEventToGoogleInternal(fastify, userId, createdTask);
-              if (googleEventId) {
+              syncResult = await syncEventToGoogleInternal(fastify, userId, createdTask);
+              if (syncResult.success && syncResult.eventId) {
                 await query(
                   'UPDATE tasks SET google_event_id = $1 WHERE id = $2',
-                  [googleEventId, createdTask.id]
+                  [syncResult.eventId, createdTask.id]
                 );
-                createdTask.google_event_id = googleEventId;
+                createdTask.google_event_id = syncResult.eventId;
               }
             }
 
@@ -697,7 +698,8 @@ Réponds UNIQUEMENT avec JSON valide (pas de texte avant/après) : { "items": [.
               id: createdTask.id,
               text: createdTask.text,
               date: createdTask.date,
-              google_synced: !!createdTask.google_event_id
+              google_synced: !!createdTask.google_event_id,
+              google_sync_status: syncResult.reason || (syncResult.success ? 'success' : 'failed')
             });
 
           } else if (item.type === 'note') {

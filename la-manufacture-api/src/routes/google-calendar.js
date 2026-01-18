@@ -10,7 +10,7 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
       [userId]
     );
     if (tokensResult.rows.length === 0) {
-      return null; // Google not connected, skip silently
+      return { success: false, reason: 'not_connected' };
     }
 
     const tokens = tokensResult.rows[0];
@@ -51,7 +51,7 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
     const startHM = formatTime(task.start_time);
     if (!startHM) {
       fastify.log.warn({ taskId: task.id, start_time: task.start_time }, 'Auto-sync: Invalid start_time format');
-      return null;
+      return { success: false, reason: 'invalid_time' };
     }
 
     let endHM = formatTime(task.end_time);
@@ -87,11 +87,11 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
     });
 
     fastify.log.info({ taskId: task.id, googleEventId: result.data.id }, 'Auto-sync: Success');
-    return result.data.id;
+    return { success: true, eventId: result.data.id };
 
   } catch (error) {
     fastify.log.error({ userId, taskId: task.id, error: error.message }, 'Auto-sync: Failed');
-    return null; // Don't throw - event creation should succeed even if sync fails
+    return { success: false, reason: 'api_error', error: error.message };
   }
 }
 

@@ -988,6 +988,7 @@ const createCalendarDay = (dayNumber, otherMonth, state, date = null, isToday = 
 };
 
 const renderDayDetail = (state) => {
+  console.log('[renderDayDetail] Called. selectedDate:', selectedDate, 'state.tasks.length:', state.tasks?.length);
   const titleEl = document.getElementById('selectedDayTitle');
   const listEl = document.getElementById('dayTasksList');
   const addBtn = document.getElementById('addTaskToDay');
@@ -1009,6 +1010,8 @@ const renderDayDetail = (state) => {
   const tasks = state.tasks
     .map(t => ensureTask(t, 'Moi'))
     .filter(t => (t.date || '').split('T')[0] === selectedDate);
+
+  console.log('[renderDayDetail] Filtered tasks for', selectedDate, ':', tasks.length, tasks.map(t => ({ id: t.id, text: t.text, date: t.date })));
 
   listEl.innerHTML = '';
 
