@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
 import compress from '@fastify/compress';
 import multipart from '@fastify/multipart';
+import rateLimit from '@fastify/rate-limit';
 import { clerkPlugin, getAuth } from '@clerk/fastify';
 import { createClerkClient } from '@clerk/backend';
 import dotenv from 'dotenv';
@@ -101,6 +102,25 @@ await fastify.register(multipart, {
   },
 });
 
+// Rate limiting - protection contre les abus
+await fastify.register(rateLimit, {
+  max: 100, // 100 requêtes max
+  timeWindow: '1 minute',
+  // Limites spécifiques pour les routes sensibles
+  keyGenerator: request => {
+    return request.user?.userId || request.ip;
+  },
+  errorResponseBuilder: (_request, context) => {
+    return {
+      statusCode: 429,
+      error: 'Too Many Requests',
+      message: 'Trop de requêtes. Veuillez réessayer dans quelques instants.',
+      code: 'RATE_LIMIT_EXCEEDED',
+      retryAfter: context.after,
+    };
+  },
+});
+
 // Clerk client for user management
 const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
@@ -173,6 +193,21 @@ fastify.decorate('authenticate', async function (request, reply) {
 
 // Export clerkClient for routes
 fastify.decorate('clerkClient', clerkClient);
+
+// Optional auth decorator - ne bloque pas si pas authentifié, mais charge l'user si token présent
+fastify.decorate('optionalAuth', async function (request) {
+  try {
+    const auth = getAuth(request);
+    if (auth.userId) {
+      const localUser = await pool.query('SELECT id FROM users WHERE clerk_id = $1', [auth.userId]);
+      if (localUser.rows.length > 0) {
+        request.user = { userId: localUser.rows[0].id, clerkId: auth.userId };
+      }
+    }
+  } catch {
+    // Silently ignore auth errors for optional auth
+  }
+});
 
 // Decorate fastify with authorization middleware
 fastify.decorate('requireManager', requireManager);

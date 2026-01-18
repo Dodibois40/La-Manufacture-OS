@@ -13,19 +13,21 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@clerk/fastify": "^2.0.0",
+    "@anthropic-ai/sdk": "^0.32.1",
     "@clerk/backend": "^1.0.0",
+    "@clerk/fastify": "^2.0.0",
     "@fastify/compress": "^8.0.1",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
     "@fastify/multipart": "^9.0.0",
+    "@fastify/rate-limit": "^10.3.0",
     "@fastify/static": "^8.0.0",
-    "@anthropic-ai/sdk": "^0.32.1",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",
     "googleapis": "^140.0.0",
     "nodemailer": "^7.0.12",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

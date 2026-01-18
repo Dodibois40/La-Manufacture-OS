@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { query } from '../db/connection.js';
 import { syncEventToGoogleInternal } from './google-calendar.js';
+import buildSecondBrainPrompt from '../prompts/second-brain-v2.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -1348,4 +1349,656 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
       });
     }
   });
+
+  // ============================================================
+  // INBOX V2 - Second Brain avec Intelligence Prédictive
+  // ============================================================
+  // Version améliorée avec :
+  // - Section 14: Intelligence Prédictive (patterns, chaînes)
+  // - Section 15: Profil Utilisateur Adaptatif
+  // - Section 16: Suggestions Proactives
+  // - Section 17: Mémoire Contextuelle
+  fastify.post(
+    '/process-inbox-v2',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { text } = request.body;
+      const startTime = Date.now();
+
+      if (!text || text.trim().length === 0) {
+        return reply.status(400).send({ error: 'Missing text' });
+      }
+
+      try {
+        // ===== 1. CHARGER CONTEXTE UTILISATEUR =====
+
+        // Projets actifs
+        const projectsResult = await query(
+          "SELECT id, name FROM projects WHERE user_id = $1 AND status != 'archived' ORDER BY name",
+          [userId]
+        );
+        const activeProjects = projectsResult.rows.map(p => p.name);
+
+        // Tags existants
+        const tagsResult = await query('SELECT name FROM tags WHERE user_id = $1 ORDER BY name', [
+          userId,
+        ]);
+        const existingTags = tagsResult.rows.map(t => t.name);
+
+        // Membres d'équipe
+        const membersResult = await query(
+          'SELECT name FROM team_members WHERE user_id = $1 AND active = TRUE ORDER BY name',
+          [userId]
+        );
+        const teamMembers = membersResult.rows.map(m => m.name);
+
+        // ===== 2. CHARGER PROFIL & MÉMOIRE (si tables existent) =====
+
+        let userProfile = null;
+        let memoryContext = null;
+
+        try {
+          // Profil utilisateur
+          const profileResult = await query('SELECT * FROM user_profiles WHERE user_id = $1', [
+            userId,
+          ]);
+          if (profileResult.rows.length > 0) {
+            const p = profileResult.rows[0];
+            userProfile = {
+              profession: p.profession,
+              domain: p.domain,
+              role_level: p.role_level,
+              communication_style: {
+                formality: p.formality,
+                verbosity: p.verbosity,
+                tone: p.tone,
+              },
+              work_preferences: p.work_preferences,
+              vocabulary: p.vocabulary,
+            };
+          }
+
+          // Mémoire contextuelle (entités apprises, corrections récentes)
+          const entitiesResult = await query(
+            'SELECT entity_type, entity_name, entity_data FROM learned_entities WHERE user_id = $1 ORDER BY frequency DESC LIMIT 50',
+            [userId]
+          );
+
+          const correctionsResult = await query(
+            'SELECT corrected_field, original_value, corrected_value, learned_rule FROM ai_corrections WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10',
+            [userId]
+          );
+
+          if (entitiesResult.rows.length > 0 || correctionsResult.rows.length > 0) {
+            const learnedEntities = {};
+            entitiesResult.rows.forEach(e => {
+              if (!learnedEntities[e.entity_type]) learnedEntities[e.entity_type] = {};
+              learnedEntities[e.entity_type][e.entity_name] = e.entity_data;
+            });
+
+            memoryContext = {
+              learned_entities: learnedEntities,
+              corrections_history: correctionsResult.rows,
+            };
+          }
+        } catch {
+          // Tables n'existent pas encore, continuer sans mémoire
+          fastify.log.info('Memory tables not yet created, running without memory context');
+        }
+
+        // ===== 3. CONSTRUIRE PROMPT V2 =====
+
+        const { systemPrompt, userPrompt, temporal } = buildSecondBrainPrompt(text, {
+          activeProjects,
+          existingTags,
+          teamMembers,
+          userProfile,
+          memoryContext,
+        });
+
+        // ===== 4. APPEL CLAUDE API =====
+
+        const message = await anthropic.messages.create({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 3000, // Plus de tokens pour les suggestions
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }],
+        });
+
+        const responseText = message.content[0].text;
+
+        // ===== 5. PARSE RÉPONSE JSON =====
+
+        let aiResponse;
+        try {
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) throw new Error('No JSON found');
+          aiResponse = JSON.parse(jsonMatch[0]);
+        } catch (parseError) {
+          fastify.log.error('AI response JSON parse failed:', parseError);
+          fastify.log.error('Raw response:', responseText);
+
+          aiResponse = {
+            items: [
+              {
+                type: 'task',
+                text: text,
+                date: temporal.currentDate,
+                urgent: false,
+                metadata: { confidence: 0.5 },
+              },
+            ],
+            proactive_suggestions: [],
+          };
+        }
+
+        // ===== 6. CRÉATION ITEMS EN BDD =====
+
+        const itemsCreated = [];
+        const items = aiResponse.items || [];
+
+        for (const item of items) {
+          try {
+            if (item.type === 'task' || item.type === 'event') {
+              const taskDate = item.date || temporal.currentDate;
+
+              const taskResult = await query(
+                `INSERT INTO tasks (user_id, text, date, urgent, owner, is_event, start_time, end_time, location, done)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+               RETURNING *`,
+                [
+                  userId,
+                  item.text,
+                  taskDate,
+                  item.urgent || false,
+                  item.metadata?.people?.[0] || 'Moi',
+                  item.type === 'event',
+                  item.start_time || null,
+                  item.end_time || null,
+                  item.location || null,
+                  false,
+                ]
+              );
+
+              const createdTask = taskResult.rows[0];
+
+              // Auto-matching projet
+              if (item.project) {
+                const projectMatch = await query(
+                  'SELECT id FROM projects WHERE user_id = $1 AND name ILIKE $2 LIMIT 1',
+                  [userId, item.project]
+                );
+                if (projectMatch.rows.length > 0) {
+                  await query('UPDATE tasks SET project_id = $1 WHERE id = $2', [
+                    projectMatch.rows[0].id,
+                    createdTask.id,
+                  ]);
+                }
+              }
+
+              // Auto-sync to Google Calendar if event
+              let syncResult = { success: false, reason: 'skipped' };
+              if (item.type === 'event' && createdTask.start_time) {
+                syncResult = await syncEventToGoogleInternal(fastify, userId, createdTask);
+                if (syncResult.success && syncResult.eventId) {
+                  await query('UPDATE tasks SET google_event_id = $1 WHERE id = $2', [
+                    syncResult.eventId,
+                    createdTask.id,
+                  ]);
+                }
+              }
+
+              itemsCreated.push({
+                type: item.type,
+                id: createdTask.id,
+                text: createdTask.text,
+                date: createdTask.date,
+                google_synced: !!syncResult.success,
+                predictive: item.metadata?.predictive || null,
+              });
+            } else if (item.type === 'note') {
+              const noteResult = await query(
+                `INSERT INTO notes (user_id, title, content, color, is_pinned)
+               VALUES ($1, $2, $3, $4, $5)
+               RETURNING *`,
+                [userId, item.title || 'Note', item.content || '', item.color || null, false]
+              );
+
+              const createdNote = noteResult.rows[0];
+
+              // Auto-création tags
+              if (item.tags && item.tags.length > 0) {
+                for (const tagName of item.tags) {
+                  const tagResult = await query(
+                    `INSERT INTO tags (user_id, name, color)
+                   VALUES ($1, $2, $3)
+                   ON CONFLICT (user_id, name) DO UPDATE SET name = EXCLUDED.name
+                   RETURNING id`,
+                    [userId, tagName.toLowerCase(), null]
+                  );
+                  await query(
+                    `INSERT INTO note_tags (note_id, tag_id)
+                   VALUES ($1, $2)
+                   ON CONFLICT DO NOTHING`,
+                    [createdNote.id, tagResult.rows[0].id]
+                  );
+                }
+              }
+
+              itemsCreated.push({
+                type: 'note',
+                id: createdNote.id,
+                title: createdNote.title,
+                tags: item.tags || [],
+              });
+            }
+          } catch (itemError) {
+            fastify.log.error('Error creating item:', itemError);
+          }
+        }
+
+        // ===== 7. SAUVEGARDER SUGGESTIONS PROACTIVES =====
+
+        const suggestions = aiResponse.proactive_suggestions || [];
+        const savedSuggestions = [];
+
+        try {
+          for (const suggestion of suggestions.slice(0, 7)) {
+            if (suggestion.priority_score >= 0.5) {
+              const sugResult = await query(
+                `INSERT INTO proactive_suggestions
+               (user_id, source_item_id, source_item_type, suggestion_type, suggested_task, suggested_date, priority_score, reason, status)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
+               RETURNING id`,
+                [
+                  userId,
+                  itemsCreated[suggestion.trigger_item_index]?.id || null,
+                  itemsCreated[suggestion.trigger_item_index]?.type || null,
+                  suggestion.suggestion_type,
+                  suggestion.suggested_task,
+                  suggestion.suggested_date || null,
+                  suggestion.priority_score,
+                  suggestion.reason,
+                ]
+              );
+              savedSuggestions.push({
+                id: sugResult.rows[0].id,
+                ...suggestion,
+              });
+            }
+          }
+        } catch {
+          fastify.log.info('Proactive suggestions table not yet created');
+        }
+
+        // ===== 8. APPRENTISSAGE - Sauvegarder entités détectées =====
+
+        try {
+          for (const item of items) {
+            const signals = item.metadata?.learning_signals;
+            if (signals?.new_entity_detected) {
+              const entity = signals.new_entity_detected;
+              await query(
+                `INSERT INTO learned_entities (user_id, entity_type, entity_name, entity_data)
+               VALUES ($1, $2, $3, $4)
+               ON CONFLICT (user_id, entity_type, entity_name)
+               DO UPDATE SET frequency = learned_entities.frequency + 1, updated_at = NOW()`,
+                [userId, 'person', entity.name, JSON.stringify(entity)]
+              );
+            }
+          }
+        } catch {
+          fastify.log.info('Learning entities table not yet created');
+        }
+
+        // ===== 9. TRACKING =====
+
+        const processingTime = Date.now() - startTime;
+        const confidenceAvg =
+          items.length > 0
+            ? items.reduce((sum, i) => sum + (i.metadata?.confidence || 0.5), 0) / items.length
+            : 0.5;
+
+        await query(
+          `INSERT INTO ai_inbox_decisions
+         (user_id, input_text, ai_response, items_created, confidence_avg, processing_time_ms, suggestions_generated, patterns_detected)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            userId,
+            text,
+            JSON.stringify(aiResponse),
+            JSON.stringify(itemsCreated),
+            confidenceAvg,
+            processingTime,
+            JSON.stringify(savedSuggestions),
+            JSON.stringify(
+              items.filter(i => i.metadata?.predictive?.detected_patterns?.length > 0)
+            ),
+          ]
+        );
+
+        // ===== 10. RETOUR RÉSULTAT =====
+
+        return {
+          success: true,
+          version: 'v2',
+          items: itemsCreated,
+          proactive_suggestions: savedSuggestions,
+          stats: {
+            total: itemsCreated.length,
+            tasks: itemsCreated.filter(i => i.type === 'task').length,
+            events: itemsCreated.filter(i => i.type === 'event').length,
+            notes: itemsCreated.filter(i => i.type === 'note').length,
+            suggestions: savedSuggestions.length,
+          },
+          processing_time_ms: processingTime,
+          memory_used: !!memoryContext,
+          profile_used: !!userProfile,
+        };
+      } catch (error) {
+        fastify.log.error('Process inbox V2 error:', error);
+        return reply.status(500).send({
+          error: 'Inbox V2 processing failed',
+          details: error.message,
+        });
+      }
+    }
+  );
+
+  // ============================================================================
+  // FEEDBACK LOOP - Système d'apprentissage continu (Tracker Record)
+  // ============================================================================
+
+  /**
+   * POST /ai/feedback/:decisionId
+   * Enregistre le feedback utilisateur sur une décision IA
+   * Permet au système d'apprendre des corrections
+   */
+  fastify.post(
+    '/feedback/:decisionId',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { decisionId } = request.params;
+      const {
+        feedback, // 'correct' | 'incorrect' | 'partial'
+        corrections, // Array of { field, original, corrected, comment }
+        rating, // 1-5 satisfaction score
+        comment, // Optional general comment
+      } = request.body;
+
+      try {
+        // 1. Récupérer la décision originale
+        const decisionResult = await query(
+          `SELECT * FROM ai_inbox_decisions WHERE id = $1 AND user_id = $2`,
+          [decisionId, userId]
+        );
+
+        if (decisionResult.rows.length === 0) {
+          return reply.status(404).send({ error: 'Decision not found' });
+        }
+
+        const decision = decisionResult.rows[0];
+
+        // 2. Mettre à jour la décision avec le feedback
+        await query(
+          `UPDATE ai_inbox_decisions
+         SET user_feedback = $1,
+             user_corrections = $2,
+             learning_signals = COALESCE(learning_signals, '{}'::jsonb) || $3::jsonb
+         WHERE id = $4`,
+          [
+            feedback,
+            JSON.stringify(corrections || []),
+            JSON.stringify({
+              rating,
+              comment,
+              feedback_at: new Date().toISOString(),
+            }),
+            decisionId,
+          ]
+        );
+
+        // 3. Si corrections, les enregistrer pour apprentissage
+        const learnedRules = [];
+        if (corrections && corrections.length > 0) {
+          for (const correction of corrections) {
+            // Générer une règle apprise via Claude
+            const rulePrompt = `Analyse cette correction utilisateur et génère une règle d'apprentissage:
+
+Input original: "${decision.input_text}"
+Champ corrigé: ${correction.field}
+Valeur IA: "${correction.original}"
+Valeur correcte: "${correction.corrected}"
+Commentaire: "${correction.comment || 'Aucun'}"
+
+Génère une règle JSON avec:
+- pattern: regex ou mots-clés qui déclenchent cette règle
+- action: ce qu'il faut faire quand le pattern match
+- confidence: niveau de confiance (0.7-1.0)
+- scope: 'global' ou 'user_specific'
+
+Réponds UNIQUEMENT en JSON valide.`;
+
+            const ruleResponse = await anthropic.messages.create({
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: 500,
+              messages: [{ role: 'user', content: rulePrompt }],
+            });
+
+            let learnedRule = {};
+            try {
+              const ruleText = ruleResponse.content[0].text;
+              const jsonMatch = ruleText.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                learnedRule = JSON.parse(jsonMatch[0]);
+              }
+            } catch (e) {
+              learnedRule = {
+                pattern: correction.original,
+                action: `replace_with:${correction.corrected}`,
+                confidence: 0.8,
+                scope: 'user_specific',
+              };
+            }
+
+            // Insérer dans ai_corrections
+            const insertResult = await query(
+              `INSERT INTO ai_corrections
+             (user_id, original_input, ai_output, corrected_field, original_value, corrected_value, user_comment, learned_rule)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             RETURNING id`,
+              [
+                userId,
+                decision.input_text,
+                decision.ai_response,
+                correction.field,
+                correction.original,
+                correction.corrected,
+                correction.comment,
+                JSON.stringify(learnedRule),
+              ]
+            );
+
+            learnedRules.push({
+              correction_id: insertResult.rows[0].id,
+              field: correction.field,
+              rule: learnedRule,
+            });
+
+            // 4. Si correction sur une entité, mettre à jour learned_entities
+            if (
+              correction.field === 'owner' ||
+              correction.field === 'project' ||
+              correction.field === 'tag'
+            ) {
+              await query(
+                `INSERT INTO learned_entities (user_id, entity_type, canonical_name, aliases, frequency, last_used_at)
+               VALUES ($1, $2, $3, $4, 1, NOW())
+               ON CONFLICT (user_id, entity_type, canonical_name)
+               DO UPDATE SET
+                 aliases = array_cat(learned_entities.aliases, $4),
+                 frequency = learned_entities.frequency + 1,
+                 last_used_at = NOW()`,
+                [
+                  userId,
+                  correction.field === 'owner' ? 'person' : correction.field,
+                  correction.corrected,
+                  [correction.original],
+                ]
+              );
+            }
+          }
+        }
+
+        // 5. Mettre à jour le profil utilisateur si pattern détecté
+        if (feedback === 'correct' && decision.patterns_detected) {
+          await query(
+            `UPDATE user_profiles
+           SET preferences = COALESCE(preferences, '{}'::jsonb) ||
+               jsonb_build_object('validated_patterns',
+                 COALESCE(preferences->'validated_patterns', '[]'::jsonb) || $1::jsonb
+               ),
+               updated_at = NOW()
+           WHERE user_id = $2`,
+            [JSON.stringify(decision.patterns_detected), userId]
+          );
+        }
+
+        // 6. Log pour analytics
+        await query(
+          `INSERT INTO ai_interactions (user_id, type, prompt, response, tokens_used)
+         VALUES ($1, 'feedback', $2, $3, 0)`,
+          [
+            userId,
+            JSON.stringify({
+              decision_id: decisionId,
+              feedback,
+              corrections_count: corrections?.length || 0,
+            }),
+            JSON.stringify({ rules_learned: learnedRules.length, rating }),
+          ]
+        );
+
+        return {
+          success: true,
+          message:
+            feedback === 'correct'
+              ? 'Merci ! Cela renforce mon apprentissage.'
+              : `${learnedRules.length} règle(s) apprises de vos corrections.`,
+          rules_learned: learnedRules,
+          stats: {
+            total_corrections: learnedRules.length,
+            feedback_recorded: true,
+          },
+        };
+      } catch (error) {
+        fastify.log.error('Feedback error:', error);
+        return reply
+          .status(500)
+          .send({ error: 'Feedback recording failed', details: error.message });
+      }
+    }
+  );
+
+  /**
+   * GET /ai/learning-stats
+   * Statistiques d'apprentissage pour l'utilisateur
+   */
+  fastify.get('/learning-stats', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
+
+    try {
+      const stats = await query(
+        `
+        SELECT
+          (SELECT COUNT(*) FROM ai_corrections WHERE user_id = $1) as total_corrections,
+          (SELECT COUNT(*) FROM ai_corrections WHERE user_id = $1 AND applied_count > 0) as rules_applied,
+          (SELECT COUNT(*) FROM learned_entities WHERE user_id = $1) as entities_learned,
+          (SELECT COUNT(*) FROM user_patterns WHERE user_id = $1 AND is_active = true) as active_patterns,
+          (SELECT COUNT(*) FROM ai_inbox_decisions WHERE user_id = $1 AND user_feedback = 'correct') as correct_decisions,
+          (SELECT COUNT(*) FROM ai_inbox_decisions WHERE user_id = $1 AND user_feedback IS NOT NULL) as total_feedback,
+          (SELECT AVG(CASE user_feedback
+            WHEN 'correct' THEN 1.0
+            WHEN 'partial' THEN 0.5
+            WHEN 'incorrect' THEN 0.0
+          END) FROM ai_inbox_decisions WHERE user_id = $1 AND user_feedback IS NOT NULL) as accuracy_rate
+        `,
+        [userId]
+      );
+
+      const recentCorrections = await query(
+        `
+        SELECT corrected_field, original_value, corrected_value, learned_rule, created_at
+        FROM ai_corrections
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        LIMIT 5
+      `,
+        [userId]
+      );
+
+      return {
+        stats: stats.rows[0],
+        recent_corrections: recentCorrections.rows,
+        learning_health:
+          stats.rows[0].accuracy_rate >= 0.8
+            ? 'excellent'
+            : stats.rows[0].accuracy_rate >= 0.6
+              ? 'good'
+              : 'learning',
+      };
+    } catch (error) {
+      fastify.log.error('Learning stats error:', error);
+      return reply.status(500).send({ error: 'Failed to get learning stats' });
+    }
+  });
+
+  /**
+   * POST /ai/suggestion-feedback/:suggestionId
+   * Feedback sur une suggestion proactive
+   */
+  fastify.post(
+    '/suggestion-feedback/:suggestionId',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { suggestionId } = request.params;
+      const { action } = request.body; // 'accepted' | 'dismissed' | 'snoozed'
+
+      try {
+        await query(
+          `UPDATE proactive_suggestions
+         SET status = $1, acted_at = NOW()
+         WHERE id = $2 AND user_id = $3`,
+          [action, suggestionId, userId]
+        );
+
+        // Si accepté, augmenter le score des suggestions similaires
+        if (action === 'accepted') {
+          const suggestion = await query(
+            `SELECT suggestion_type, trigger_context FROM proactive_suggestions WHERE id = $1`,
+            [suggestionId]
+          );
+
+          if (suggestion.rows.length > 0) {
+            // Enregistrer comme pattern positif
+            await query(
+              `INSERT INTO user_patterns (user_id, pattern_type, pattern_data, is_active, success_count)
+             VALUES ($1, 'suggestion_preference', $2, true, 1)
+             ON CONFLICT (user_id, pattern_type, pattern_data)
+             DO UPDATE SET success_count = user_patterns.success_count + 1`,
+              [userId, JSON.stringify({ type: suggestion.rows[0].suggestion_type })]
+            );
+          }
+        }
+
+        return { success: true, action };
+      } catch (error) {
+        fastify.log.error('Suggestion feedback error:', error);
+        return reply.status(500).send({ error: 'Suggestion feedback failed' });
+      }
+    }
+  );
 }
