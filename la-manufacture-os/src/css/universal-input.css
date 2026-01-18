@@ -117,7 +117,7 @@
   height: 100px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #0a84ff 0%, #5856d6 100%);
+  background: #f59e0b;
   color: white;
   cursor: pointer;
   display: flex;
@@ -130,8 +130,8 @@
     box-shadow 0.2s ease,
     background 0.3s ease;
   box-shadow:
-    0 4px 20px rgba(10, 132, 255, 0.3),
-    0 0 0 0 rgba(10, 132, 255, 0.4);
+    0 4px 20px rgba(245, 158, 11, 0.3),
+    0 0 0 0 rgba(245, 158, 11, 0.4);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -313,7 +313,7 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #5856d6 0%, #af52de 100%);
+  background: #f59e0b;
   color: white;
   font-size: 10px;
   font-weight: 700;
