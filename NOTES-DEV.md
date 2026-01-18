@@ -1,5 +1,18 @@
 # Notes de développement - La Manufacture
 
+## Hébergement des services
+
+| Service | Hébergeur | URL |
+|---------|-----------|-----|
+| **Frontend** | Netlify | (voir dashboard Netlify) |
+| **API Backend** | Railway | https://lovely-exploration-production.up.railway.app |
+| **Base de données** | Railway (PostgreSQL) | (via DATABASE_URL dans Railway) |
+| **Auth** | Clerk | clerk.com |
+
+**GitHub Repo** : `Dodibois40/La-Manufacture-OS`
+
+---
+
 ## Problèmes résolus à ne pas reproduire
 
 ### 1. Timezone / Dates PostgreSQL (Janvier 2026)
