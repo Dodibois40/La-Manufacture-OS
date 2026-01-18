@@ -616,7 +616,7 @@ export const renderDay = (state) => {
   // Get today's tasks
   const todayTasks = state.tasks
     .map(t => ensureTask(t, 'Moi'))
-    .filter(t => t.date === today)
+    .filter(t => (t.date || '').split('T')[0] === today)
     .sort((a, b) => (b.urgent === true) - (a.urgent === true) || (a.done === true) - (b.done === true));
 
   // Combined count for edit button
@@ -967,7 +967,7 @@ const createCalendarDay = (dayNumber, otherMonth, state, date = null, isToday = 
   cell.appendChild(number);
 
   if (iso && !otherMonth) {
-    const tasks = state.tasks.filter(t => t.date === iso);
+    const tasks = state.tasks.filter(t => (t.date || '').split('T')[0] === iso);
     const openTasks = tasks.filter(t => !t.done).length;
 
     if (tasks.length > 0) {
@@ -1008,7 +1008,7 @@ const renderDayDetail = (state) => {
 
   const tasks = state.tasks
     .map(t => ensureTask(t, 'Moi'))
-    .filter(t => t.date === selectedDate);
+    .filter(t => (t.date || '').split('T')[0] === selectedDate);
 
   listEl.innerHTML = '';
 

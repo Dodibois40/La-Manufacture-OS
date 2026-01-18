@@ -39,7 +39,7 @@ export const initMorningBriefing = async (state) => {
 
   // Stats calculation
   const tasks = state.tasks || [];
-  const todayCount = tasks.filter(t => !t.done && t.date === today).length;
+  const todayCount = tasks.filter(t => !t.done && (t.date || '').split('T')[0] === today).length;
   const urgentCount = tasks.filter(t => !t.done && t.urgent).length;
 
   const html = `

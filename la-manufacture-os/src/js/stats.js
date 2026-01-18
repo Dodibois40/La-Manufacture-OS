@@ -8,7 +8,7 @@ export const calculateTaskStats = (tasks) => {
   const monthAgo = isoLocal(new Date(Date.now() - 30 * 86400000));
 
   const completedTasks = tasks.filter(t => t.done);
-  const todayTasks = tasks.filter(t => t.date === today);
+  const todayTasks = tasks.filter(t => (t.date || '').split('T')[0] === today);
   const todayDone = todayTasks.filter(t => t.done);
 
   // Weekly stats
@@ -23,7 +23,7 @@ export const calculateTaskStats = (tasks) => {
   const dailyStats = [];
   for (let i = 6; i >= 0; i--) {
     const date = isoLocal(new Date(Date.now() - i * 86400000));
-    const dayTasks = tasks.filter(t => t.date === date);
+    const dayTasks = tasks.filter(t => (t.date || '').split('T')[0] === date);
     const dayDone = dayTasks.filter(t => t.done);
     dailyStats.push({
       date,

@@ -37,7 +37,7 @@ const createReviewModal = (state, renderCallback) => {
 
   // Get incomplete tasks
   const overdueTasks = state.tasks.filter(t => !t.done && t.date < today);
-  const todayTasks = state.tasks.filter(t => !t.done && t.date === today);
+  const todayTasks = state.tasks.filter(t => !t.done && (t.date || '').split('T')[0] === today);
   const allIncomplete = [...overdueTasks, ...todayTasks];
 
   if (allIncomplete.length === 0) return;
