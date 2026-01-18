@@ -1,0 +1,75 @@
+name: QUASAR Parser Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'la-manufacture-api/src/prompts/**'
+      - 'la-manufacture-api/tests/test-parser-*.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'la-manufacture-api/src/prompts/**'
+      - 'la-manufacture-api/tests/test-parser-*.js'
+  workflow_dispatch:
+
+jobs:
+  test-quasar:
+    name: QUASAR V6 Test Suite
+    runs-on: ubuntu-latest
+
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: la-manufacture-api/package-lock.json
+
+      - name: Install dependencies
+        working-directory: la-manufacture-api
+        run: npm ci
+
+      - name: Run Hardcore Tests (15)
+        working-directory: la-manufacture-api
+        run: node tests/test-parser-v5-hardcore.js
+        timeout-minutes: 5
+
+      - name: Run Ultimate Tests (50)
+        working-directory: la-manufacture-api
+        run: node tests/test-parser-v5-ultimate.js
+        timeout-minutes: 10
+
+      - name: Run Streaming Tests
+        working-directory: la-manufacture-api
+        run: node tests/test-parser-streaming.js
+        timeout-minutes: 5
+
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: la-manufacture-api/package-lock.json
+
+      - name: Install dependencies
+        working-directory: la-manufacture-api
+        run: npm ci
+
+      - name: Check formatting
+        working-directory: la-manufacture-api
+        run: npx prettier --check "src/**/*.js" "tests/**/*.js"
