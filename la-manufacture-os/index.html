@@ -39,6 +39,8 @@
     <link rel="stylesheet" href="/src/css/quick-dump.css" />
     <link rel="stylesheet" href="/src/css/universal-input.css" />
     <link rel="stylesheet" href="/src/css/mobile.css" />
+    <link rel="stylesheet" href="/src/css/notes.css" />
+    <link rel="stylesheet" href="/src/css/team.css" />
 
     <!-- CRITICAL: Show auth form INSTANTLY on non-localhost (before any JS loads) -->
     <style id="instant-auth-style">
@@ -545,6 +547,181 @@
           </button>
         </div>
       </div>
+
+      <!-- Vue: NOTES (SPA) -->
+      <div class="view" id="view-notes">
+        <div class="view-header">
+          <h2 class="settings-title">IDÉES</h2>
+        </div>
+
+        <!-- Toolbar: Search + Filters -->
+        <div class="notes-toolbar">
+          <div class="search-bar">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              class="search-input"
+              id="notesSearchInput"
+              placeholder="Rechercher dans vos notes..."
+            />
+          </div>
+
+          <div class="filters">
+            <button class="filter-chip active" data-filter="all">Toutes</button>
+            <button class="filter-chip" data-filter="pinned">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 17v5m-7-3l7-7 7 7" />
+              </svg>
+              Épinglées
+            </button>
+            <select class="filter-select" id="notesProjectFilter">
+              <option value="">Tous les projets</option>
+            </select>
+            <button class="btn btn-primary" id="createNoteBtn">+ Nouvelle idée</button>
+          </div>
+        </div>
+
+        <!-- Notes Container (Google Keep style) -->
+        <div class="notes-container" id="notesContainer"></div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="notesEmptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+            />
+          </svg>
+          <h3>Aucune idée</h3>
+          <p>Créez votre première idée pour commencer</p>
+          <button class="btn btn-primary" id="emptyCreateNoteBtn">+ Créer une idée</button>
+        </div>
+      </div>
+
+      <!-- Vue: TEAM (SPA) -->
+      <div class="view" id="view-team">
+        <div class="view-header">
+          <h2 class="settings-title">ÉQUIPE</h2>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-wrapper">
+          <div class="tabs">
+            <button class="tab active" data-tab="membres">Membres</button>
+            <button class="tab" data-tab="invitations">Invitations</button>
+            <button class="tab" data-tab="projets">Projets</button>
+            <button class="tab" data-tab="documents">Documents</button>
+          </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- Membres Tab -->
+          <div class="tab-pane active" id="team-membres">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Membres de l'équipe
+                </label>
+                <p class="help-text">Pour ajouter un membre, utilisez l'onglet "Invitations"</p>
+              </div>
+              <div class="team-grid" id="teamMembersGrid"></div>
+            </div>
+          </div>
+
+          <!-- Invitations Tab -->
+          <div class="tab-pane" id="team-invitations">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                    ></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  Invitations envoyées
+                </label>
+                <button class="btn btn-primary" id="inviteMemberBtn">+ Inviter</button>
+              </div>
+              <div class="invitations-list" id="teamInvitationsList"></div>
+            </div>
+          </div>
+
+          <!-- Projets Tab -->
+          <div class="tab-pane" id="team-projets">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                    />
+                  </svg>
+                  Projets
+                </label>
+                <button class="btn btn-primary" id="addProjectBtn">+ Créer</button>
+              </div>
+              <div class="team-grid" id="teamProjectsGrid"></div>
+            </div>
+          </div>
+
+          <!-- Documents Tab -->
+          <div class="tab-pane" id="team-documents">
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <label class="settings-label">
+                  <svg
+                    class="label-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                    <polyline points="13 2 13 9 20 9" />
+                  </svg>
+                  Documents partagés
+                </label>
+                <button class="btn btn-primary" id="uploadDocBtn">+ Upload</button>
+              </div>
+              <div class="files-list" id="teamFilesList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Navigation Dock - Minimal SpaceX style -->
@@ -660,6 +837,202 @@
         <div class="share-current-section">
           <h4>Partage avec</h4>
           <div class="share-current-list" id="currentShares"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Create/Edit Note -->
+    <div class="modal-overlay" id="noteModal">
+      <div class="modal modal-large">
+        <div class="modal-header">
+          <h2 class="modal-title" id="noteModalTitle">Créer une note</h2>
+          <button class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="noteId" />
+          <div class="input-group">
+            <label class="input-label">Titre</label>
+            <input
+              type="text"
+              class="input"
+              id="noteTitle"
+              placeholder="Titre de la note"
+              maxlength="255"
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Contenu</label>
+            <textarea
+              class="input textarea note-content"
+              id="noteContent"
+              placeholder="Écrivez votre note..."
+            ></textarea>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Couleur</label>
+            <div class="color-picker">
+              <button class="color-btn" data-color="" title="Aucune"></button>
+              <button class="color-btn" data-color="blue" title="Technique/Dev"></button>
+              <button class="color-btn" data-color="green" title="Idée/Créativité"></button>
+              <button class="color-btn" data-color="yellow" title="Attention"></button>
+              <button class="color-btn" data-color="orange" title="Urgent"></button>
+              <button class="color-btn" data-color="red" title="Critique"></button>
+              <button class="color-btn" data-color="purple" title="Stratégie"></button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="notePinned" />
+              <span>Épingler cette note</span>
+            </label>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Lier à un projet</label>
+            <div style="display: flex; gap: 8px">
+              <select class="input" id="noteProject" style="flex: 1">
+                <option value="">Aucun projet</option>
+              </select>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="quickAddProjectBtn"
+                title="Créer un projet"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Lier à une tâche</label>
+            <select class="input" id="noteTask">
+              <option value="">Aucune tâche</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Partager avec</label>
+            <div class="shares-list" id="sharesList"></div>
+            <button class="btn btn-secondary btn-sm" id="shareNoteBtn">+ Partager</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary">Annuler</button>
+          <button class="btn btn-danger hidden" id="deleteNoteBtn">Supprimer</button>
+          <button class="btn btn-primary" id="saveNoteBtn">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Share Note -->
+    <div class="modal-overlay" id="shareModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Partager la note</h2>
+          <button class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <label class="input-label">Membre</label>
+            <select class="input" id="shareMember">
+              <option value="">Sélectionner un membre</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Permission</label>
+            <select class="input" id="sharePermission">
+              <option value="view">Lecture seule</option>
+              <option value="edit">Édition</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary">Annuler</button>
+          <button class="btn btn-primary" id="confirmShareBtn">Partager</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Invite Member -->
+    <div class="modal-overlay" id="inviteMemberModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Inviter un membre</h2>
+          <button class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <p style="color: #666; margin-bottom: 20px; font-size: 14px">
+            Le membre recevra un email avec un lien d'invitation pour créer son compte et accéder à
+            ses tâches.
+          </p>
+          <div class="input-group">
+            <label class="input-label">Email du membre *</label>
+            <input
+              type="email"
+              class="input"
+              id="inviteEmail"
+              placeholder="membre@example.com"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Nom du membre *</label>
+            <input
+              type="text"
+              class="input"
+              id="inviteName"
+              placeholder="Ex: Nicolas Dupont"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Couleur d'avatar (optionnel)</label>
+            <input type="color" class="input" id="inviteColor" value="#3b82f6" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary">Annuler</button>
+          <button class="btn btn-primary" id="sendInviteBtn">Envoyer l'invitation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Add/Edit Project -->
+    <div class="modal-overlay" id="projectModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title" id="projectModalTitle">Créer un projet</h2>
+          <button class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="projectId" />
+          <div class="input-group">
+            <label class="input-label">Nom du projet</label>
+            <input
+              type="text"
+              class="input"
+              id="projectName"
+              placeholder="Ex: Fabrication ligne Nord"
+            />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Description</label>
+            <textarea
+              class="input textarea"
+              id="projectDescription"
+              placeholder="Décrivez le projet..."
+            ></textarea>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Assigné à (plusieurs membres possibles)</label>
+            <div class="checkbox-list" id="projectMembersList"></div>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Date limite</label>
+            <input type="date" class="input" id="projectDeadline" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary">Annuler</button>
+          <button class="btn btn-primary" id="saveProjectBtn">Créer</button>
         </div>
       </div>
     </div>

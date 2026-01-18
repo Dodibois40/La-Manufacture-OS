@@ -79,11 +79,21 @@ const initDockMagnification = () => {
 };
 
 // Navigation
-const views = ['day', 'week', 'config', 'auth'];
+const views = ['day', 'week', 'config', 'auth', 'notes', 'team'];
 let currentView = 'day';
+
+// Close all modals (for SPA navigation)
+const closeAllModals = () => {
+  document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+    modal.classList.remove('active');
+  });
+};
 
 export const setView = name => {
   const nav = document.querySelector('nav');
+
+  // Close any open modals when switching views
+  closeAllModals();
 
   if (name === 'auth') {
     if (nav) nav.style.display = 'none';
@@ -103,7 +113,7 @@ export const setView = name => {
 };
 
 // Master render - now only renders the active view for performance
-export const render = (viewName = currentView) => {
+export const render = async (viewName = currentView) => {
   // Only render the currently active view to avoid unnecessary DOM operations
   switch (viewName) {
     case 'day':
@@ -114,6 +124,24 @@ export const render = (viewName = currentView) => {
       break;
     case 'config':
       renderConfig(state);
+      break;
+    case 'notes':
+      // Dynamic import for notes view
+      try {
+        const { initNotesView } = await import('./notes-view.js');
+        await initNotesView();
+      } catch (err) {
+        console.error('[App] Failed to load notes view:', err);
+      }
+      break;
+    case 'team':
+      // Dynamic import for team view
+      try {
+        const { initTeamView } = await import('./team-view.js');
+        await initTeamView();
+      } catch (err) {
+        console.error('[App] Failed to load team view:', err);
+      }
       break;
     // No need to render auth view - it's static
   }
@@ -491,12 +519,8 @@ const initApp = async () => {
       // Initialize navigation listeners (needed for API mode since initApp returns early)
       document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
       document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
-      document.getElementById('nav-notes')?.addEventListener('click', () => {
-        window.location.href = '/notes.html';
-      });
-      document.getElementById('nav-team')?.addEventListener('click', () => {
-        window.location.href = '/team.html';
-      });
+      document.getElementById('nav-notes')?.addEventListener('click', () => setView('notes'));
+      document.getElementById('nav-team')?.addEventListener('click', () => setView('team'));
       document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
 
       // macOS Dock Magnification Effect
@@ -642,12 +666,8 @@ const initApp = async () => {
   document.getElementById('nav-day')?.addEventListener('click', () => setView('day'));
   document.getElementById('nav-week')?.addEventListener('click', () => setView('week'));
   // nav-inbox is set up later after handleTasksAdded is defined
-  document.getElementById('nav-notes')?.addEventListener('click', () => {
-    window.location.href = '/notes.html';
-  });
-  document.getElementById('nav-team')?.addEventListener('click', () => {
-    window.location.href = '/team.html';
-  });
+  document.getElementById('nav-notes')?.addEventListener('click', () => setView('notes'));
+  document.getElementById('nav-team')?.addEventListener('click', () => setView('team'));
   document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
 
   // macOS Dock Magnification Effect
