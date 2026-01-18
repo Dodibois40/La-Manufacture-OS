@@ -589,8 +589,8 @@ const enterEditModeDetail = () => {
   const addBtn = document.getElementById('addTaskToDay');
 
   if (editBar) editBar.classList.add('active');
-  if (editBtn) editBtn.style.display = 'none';
-  if (addBtn) addBtn.style.display = 'none';
+  if (editBtn) editBtn.classList.add('hidden');
+  if (addBtn) addBtn.classList.add('hidden');
 
   updateSelectedCountDetail();
   appCallbacks.render?.();
@@ -605,8 +605,8 @@ const exitEditModeDetail = () => {
   const addBtn = document.getElementById('addTaskToDay');
 
   if (editBar) editBar.classList.remove('active');
-  if (editBtn) editBtn.style.display = 'inline-flex';
-  if (addBtn) addBtn.style.display = 'inline-flex';
+  if (editBtn) editBtn.classList.remove('hidden');
+  if (addBtn) addBtn.classList.remove('hidden');
 
   appCallbacks.render?.();
 };
@@ -1153,8 +1153,8 @@ const renderDayDetail = (state) => {
   if (!selectedDate) {
     titleEl.textContent = 'Sélectionne un jour';
     listEl.innerHTML = '<div class="empty-state">Clique sur un jour pour voir ses tâches</div>';
-    addBtn.style.display = 'none';
-    if (editBtn) editBtn.style.display = 'none';
+    addBtn.classList.add('hidden');
+    if (editBtn) editBtn.classList.add('hidden');
     visibleTaskIdsDetail = [];
     return;
   }
@@ -1174,8 +1174,14 @@ const renderDayDetail = (state) => {
 
   // Show/hide buttons based on tasks and edit mode
   if (!editModeDetail) {
-    addBtn.style.display = 'inline-flex';
-    if (editBtn) editBtn.style.display = tasks.length > 0 ? 'inline-flex' : 'none';
+    addBtn.classList.remove('hidden');
+    if (editBtn) {
+      if (tasks.length > 0) {
+        editBtn.classList.remove('hidden');
+      } else {
+        editBtn.classList.add('hidden');
+      }
+    }
   }
 
   listEl.innerHTML = '';
