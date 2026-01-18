@@ -164,6 +164,29 @@
   letter-spacing: -0.02em;
 }
 
+.day-detail-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Edit bar for day detail - smaller version */
+.edit-bar-detail {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  gap: 8px;
+  border-radius: 10px;
+}
+
+.edit-bar-detail span {
+  font-size: 0.85rem;
+}
+
+.edit-bar-detail .edit-bar-btn {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
 /* .btn-link styles are in components.css */
 
 .day-tasks-list {

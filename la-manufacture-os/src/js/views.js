@@ -1,6 +1,7 @@
 import { isoLocal, ensureTask, nowISO, toast, celebrate } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
 import { isApiMode, api } from './api-client.js';
+import { isSignedIn } from './clerk-auth.js';
 import { openShareModal } from './share.js';
 import { initSwipeGestures } from './swipe.js';
 import { appCallbacks } from './app-callbacks.js';
@@ -150,36 +151,46 @@ export const stopQuoteRotation = () => {
   }
 };
 
-// Edit mode state
+// Edit mode state (main day view)
 let editMode = false;
 let selectedTasks = new Set();
+
+// Edit mode state (day detail view in planning)
+let editModeDetail = false;
+let selectedTasksDetail = new Set();
 
 // Focus 3 collapse state (session only)
 let moreTasksExpanded = false;
 let doneTasksExpanded = false;
 let overdueExpanded = false;
 
-const taskRow = (t, state) => {
+const taskRow = (t, state, options = {}) => {
   const task = ensureTask(t, 'Moi');
   const el = document.createElement('div');
   el.className = 'task' + (task.done ? ' completed' : '');
   el.dataset.taskId = task.id;
 
+  // Determine which edit mode to use
+  const isDetailMode = options.isDetailView || false;
+  const currentEditMode = isDetailMode ? editModeDetail : editMode;
+  const currentSelectedTasks = isDetailMode ? selectedTasksDetail : selectedTasks;
+  const updateCount = isDetailMode ? updateSelectedCountDetail : updateSelectedCount;
+
   // In edit mode, add selectable class
-  if (editMode) {
+  if (currentEditMode) {
     el.classList.add('selectable');
-    if (selectedTasks.has(task.id)) {
+    if (currentSelectedTasks.has(task.id)) {
       el.classList.add('selected');
     }
     el.addEventListener('click', () => {
-      if (selectedTasks.has(task.id)) {
-        selectedTasks.delete(task.id);
+      if (currentSelectedTasks.has(task.id)) {
+        currentSelectedTasks.delete(task.id);
         el.classList.remove('selected');
       } else {
-        selectedTasks.add(task.id);
+        currentSelectedTasks.add(task.id);
         el.classList.add('selected');
       }
-      updateSelectedCount();
+      updateCount();
     });
   } else {
     // Double-tap/double-click to mark as done
@@ -532,6 +543,14 @@ const updateSelectedCount = () => {
   }
 };
 
+const updateSelectedCountDetail = () => {
+  const countEl = document.getElementById('selectedCountDetail');
+  if (countEl) {
+    const count = selectedTasksDetail.size;
+    countEl.textContent = `${count} sélectionnée${count > 1 ? 's' : ''}`;
+  }
+};
+
 const enterEditMode = () => {
   editMode = true;
   selectedTasks.clear();
@@ -560,10 +579,75 @@ const exitEditMode = () => {
   appCallbacks.render?.();
 };
 
-export const initEditMode = (state, renderCallback) => {
+// Day detail edit mode functions
+const enterEditModeDetail = () => {
+  editModeDetail = true;
+  selectedTasksDetail.clear();
+
+  const editBar = document.getElementById('editBarDetail');
+  const editBtn = document.getElementById('editDayDetailBtn');
+  const addBtn = document.getElementById('addTaskToDay');
+
+  if (editBar) editBar.classList.add('active');
+  if (editBtn) editBtn.style.display = 'none';
+  if (addBtn) addBtn.style.display = 'none';
+
+  updateSelectedCountDetail();
+  appCallbacks.render?.();
+};
+
+const exitEditModeDetail = () => {
+  editModeDetail = false;
+  selectedTasksDetail.clear();
+
+  const editBar = document.getElementById('editBarDetail');
+  const editBtn = document.getElementById('editDayDetailBtn');
+  const addBtn = document.getElementById('addTaskToDay');
+
+  if (editBar) editBar.classList.remove('active');
+  if (editBtn) editBtn.style.display = 'inline-flex';
+  if (addBtn) addBtn.style.display = 'inline-flex';
+
+  appCallbacks.render?.();
+};
+
+// Select all visible tasks (for main day view)
+let visibleTaskIds = [];
+const selectAllTasks = () => {
+  if (visibleTaskIds.length === 0) return;
+
+  // If all are selected, deselect all
+  const allSelected = visibleTaskIds.every(id => selectedTasks.has(id));
+  if (allSelected) {
+    selectedTasks.clear();
+  } else {
+    visibleTaskIds.forEach(id => selectedTasks.add(id));
+  }
+  updateSelectedCount();
+  appCallbacks.render?.();
+};
+
+// Select all visible tasks (for day detail view)
+let visibleTaskIdsDetail = [];
+const selectAllTasksDetail = () => {
+  if (visibleTaskIdsDetail.length === 0) return;
+
+  // If all are selected, deselect all
+  const allSelected = visibleTaskIdsDetail.every(id => selectedTasksDetail.has(id));
+  if (allSelected) {
+    selectedTasksDetail.clear();
+  } else {
+    visibleTaskIdsDetail.forEach(id => selectedTasksDetail.add(id));
+  }
+  updateSelectedCountDetail();
+  appCallbacks.render?.();
+};
+
+export const initEditMode = (state) => {
   const editModeBtn = document.getElementById('editModeBtn');
   const cancelEditBtn = document.getElementById('cancelEditBtn');
   const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+  const selectAllBtn = document.getElementById('selectAllBtn');
 
   if (editModeBtn) {
     editModeBtn.addEventListener('click', enterEditMode);
@@ -573,19 +657,86 @@ export const initEditMode = (state, renderCallback) => {
     cancelEditBtn.addEventListener('click', exitEditMode);
   }
 
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener('click', selectAllTasks);
+  }
+
   if (deleteSelectedBtn) {
-    deleteSelectedBtn.addEventListener('click', () => {
+    deleteSelectedBtn.addEventListener('click', async () => {
       if (selectedTasks.size === 0) {
         toast('Aucune tâche sélectionnée');
         return;
       }
 
       const count = selectedTasks.size;
+      const idsToDelete = [...selectedTasks];
+
+      // Delete from API if connected
+      const isAuthenticated = isLoggedIn() || isSignedIn();
+      if (isApiMode && isAuthenticated) {
+        for (const id of idsToDelete) {
+          try {
+            await taskApi.delete(id);
+          } catch (e) {
+            console.error('Failed to delete task:', id, e);
+          }
+        }
+      }
+
       state.tasks = state.tasks.filter(t => !selectedTasks.has(t.id));
       saveState(state);
 
       toast(`${count} tâche${count > 1 ? 's' : ''} supprimée${count > 1 ? 's' : ''}`);
       exitEditMode();
+    });
+  }
+};
+
+export const initDayDetailEditMode = (state) => {
+  const editBtn = document.getElementById('editDayDetailBtn');
+  const cancelBtn = document.getElementById('cancelEditDetailBtn');
+  const deleteBtn = document.getElementById('deleteSelectedDetailBtn');
+  const selectAllBtn = document.getElementById('selectAllDetailBtn');
+
+  if (editBtn) {
+    editBtn.addEventListener('click', enterEditModeDetail);
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', exitEditModeDetail);
+  }
+
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener('click', selectAllTasksDetail);
+  }
+
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', async () => {
+      if (selectedTasksDetail.size === 0) {
+        toast('Aucune tâche sélectionnée');
+        return;
+      }
+
+      const count = selectedTasksDetail.size;
+      const idsToDelete = [...selectedTasksDetail];
+
+      // Delete from API if connected
+      const isAuthenticated = isLoggedIn() || isSignedIn();
+      if (isApiMode && isAuthenticated) {
+        for (const id of idsToDelete) {
+          try {
+            await taskApi.delete(id);
+          } catch (e) {
+            console.error('Failed to delete task:', id, e);
+          }
+        }
+      }
+
+      state.tasks = state.tasks.filter(t => !selectedTasksDetail.has(t.id));
+      saveState(state);
+
+      toast(`${count} tâche${count > 1 ? 's' : ''} supprimée${count > 1 ? 's' : ''}`);
+      exitEditModeDetail();
     });
   }
 };
@@ -621,6 +772,9 @@ export const renderDay = (state) => {
 
   // Combined count for edit button
   const allTasks = [...overdueTasks, ...todayTasks];
+
+  // Track visible task IDs for select all
+  visibleTaskIds = allTasks.map(t => t.id);
 
   // Hide edit button if no tasks
   const editModeBtn = document.getElementById('editModeBtn');
@@ -992,6 +1146,7 @@ const renderDayDetail = (state) => {
   const titleEl = document.getElementById('selectedDayTitle');
   const listEl = document.getElementById('dayTasksList');
   const addBtn = document.getElementById('addTaskToDay');
+  const editBtn = document.getElementById('editDayDetailBtn');
 
   if (!titleEl || !listEl || !addBtn) return;
 
@@ -999,13 +1154,14 @@ const renderDayDetail = (state) => {
     titleEl.textContent = 'Sélectionne un jour';
     listEl.innerHTML = '<div class="empty-state">Clique sur un jour pour voir ses tâches</div>';
     addBtn.style.display = 'none';
+    if (editBtn) editBtn.style.display = 'none';
+    visibleTaskIdsDetail = [];
     return;
   }
 
-  const date = new Date(selectedDate + 'T00:00:00');
+  const d = new Date(selectedDate + 'T00:00:00');
   const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  titleEl.textContent = `${dayNames[date.getDay()]} ${date.getDate()}`;
-  addBtn.style.display = 'inline-flex';
+  titleEl.textContent = `${dayNames[d.getDay()]} ${d.getDate()}`;
 
   const tasks = state.tasks
     .map(t => ensureTask(t, 'Moi'))
@@ -1013,13 +1169,22 @@ const renderDayDetail = (state) => {
 
   console.log('[renderDayDetail] Filtered tasks for', selectedDate, ':', tasks.length, tasks.map(t => ({ id: t.id, text: t.text, date: t.date })));
 
+  // Track visible task IDs for select all
+  visibleTaskIdsDetail = tasks.map(t => t.id);
+
+  // Show/hide buttons based on tasks and edit mode
+  if (!editModeDetail) {
+    addBtn.style.display = 'inline-flex';
+    if (editBtn) editBtn.style.display = tasks.length > 0 ? 'inline-flex' : 'none';
+  }
+
   listEl.innerHTML = '';
 
   if (tasks.length === 0) {
     listEl.innerHTML = '<div class="empty-state">Aucune tâche ce jour-là</div>';
   } else {
     tasks.forEach(task => {
-      listEl.appendChild(taskRow(task, state));
+      listEl.appendChild(taskRow(task, state, { isDetailView: true }));
     });
   }
 };

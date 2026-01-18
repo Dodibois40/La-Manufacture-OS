@@ -2,7 +2,7 @@ import { toast } from './utils.js';
 import { loadState, saveState, initStorageUI, loadStateFromApi } from './storage.js';
 import { isApiMode, api } from './api-client.js';
 import { appCallbacks } from './app-callbacks.js';
-import { renderDay, renderWeek, initEditMode, initPlanningControls } from './views.js';
+import { renderDay, renderWeek, initEditMode, initDayDetailEditMode, initPlanningControls } from './views.js';
 import { renderConfig, initConfig } from './config.js';
 import { initCommandBar } from './commandbar.js';
 import { runAutoCarryOver } from './carryover.js';
@@ -490,7 +490,8 @@ const initApp = async () => {
 
       // Init modules (needed for API mode)
       initConfig(state, render, setView);
-      initEditMode(state, render);
+      initEditMode(state);
+      initDayDetailEditMode(state);
       initPlanningControls(state, render);
       initCommandBar(state, render);
       initMorningBriefing(state);
@@ -627,7 +628,8 @@ const initApp = async () => {
 
   // Init modules
   initConfig(state, render, setView);
-  initEditMode(state, render);
+  initEditMode(state);
+  initDayDetailEditMode(state);
   initPlanningControls(state, render);
   initCommandBar(state, render);
   initMorningBriefing(state);
