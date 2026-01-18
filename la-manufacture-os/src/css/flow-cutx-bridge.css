@@ -1,0 +1,202 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║                    FLOW-CutX Design System Bridge                              ║
+   ║        Harmonisation FLOW → CutX tout en gardant l'identité FLOW               ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/*
+ * Ce fichier définit les variables bridge entre FLOW et CutX.
+ *
+ * Règles d'harmonisation :
+ * - Accent principal : Bleu #0a84ff (FLOW - inchangé)
+ * - Accent secondaire : Amber #f59e0b (CutX)
+ * - Glassmorphism : Garder blur 25px (FLOW)
+ * - Fonts : Inter + JetBrains Mono (CutX)
+ * - Radius : Réduits vers CutX (4-12px)
+ * - Fond : #141413 (CutX)
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════
+     CutX BASE TOKENS (référence)
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Surfaces CutX (5 niveaux opaques) */
+  --cx-surface-0: #141413;
+  --cx-surface-1: #1a1a19;
+  --cx-surface-2: #1f1f1e;
+  --cx-surface-3: #252524;
+  --cx-surface-4: #2b2b29;
+
+  /* Accents CutX */
+  --cx-accent-olive: #8b9a4b;
+  --cx-accent-olive-hover: #9dac5a;
+  --cx-accent-olive-muted: rgba(139, 154, 75, 0.15);
+  --cx-accent-amber: #f59e0b;
+  --cx-accent-amber-hover: #fbbf24;
+
+  /* Bordures CutX */
+  --cx-border-subtle: rgba(255, 255, 255, 0.06);
+  --cx-border-default: rgba(255, 255, 255, 0.1);
+  --cx-border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Textes CutX (4 niveaux) */
+  --cx-text-primary: rgba(255, 255, 255, 0.95);
+  --cx-text-secondary: rgba(255, 255, 255, 0.72);
+  --cx-text-tertiary: rgba(255, 255, 255, 0.5);
+  --cx-text-muted: rgba(255, 255, 255, 0.32);
+
+  /* Radius CutX */
+  --cx-radius-sm: 4px;
+  --cx-radius-md: 6px;
+  --cx-radius-lg: 8px;
+  --cx-radius-xl: 12px;
+
+  /* Transitions CutX */
+  --cx-transition-fast: 120ms ease-out;
+  --cx-transition-base: 200ms ease-out;
+  --cx-transition-slow: 300ms ease-out;
+
+  /* ═══════════════════════════════════════════════════════════════
+     FLOW BRIDGE TOKENS (adapté CutX)
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* --- Surfaces FLOW (adoptant fond CutX) --- */
+  --flow-surface-0: #141413; /* Fond app → CutX */
+  --flow-surface-1: #1a1a19; /* Sidebar → CutX */
+  --flow-surface-2: #1f1f1e; /* Cards base → CutX */
+  --flow-surface-3: #252524; /* Hover → CutX */
+  --flow-surface-4: #2b2b29; /* Active → CutX */
+
+  /* Surfaces avec glassmorphism (identité FLOW) */
+  --flow-surface-glass: rgba(28, 28, 30, 0.6);
+  --flow-surface-glass-hover: rgba(44, 44, 46, 0.7);
+  --flow-surface-overlay: rgba(0, 0, 0, 0.85);
+
+  /* --- Accents FLOW --- */
+  /* Principal : BLEU iOS (identité FLOW - INCHANGÉ) */
+  --flow-accent: #0a84ff;
+  --flow-accent-hover: #3399ff;
+  --flow-accent-glow: rgba(10, 132, 255, 0.25);
+  --flow-accent-muted: rgba(10, 132, 255, 0.15);
+  --flow-accent-subtle: rgba(10, 132, 255, 0.08);
+
+  /* Secondaire : AMBER (adopté de CutX) */
+  --flow-accent-secondary: #f59e0b;
+  --flow-accent-secondary-hover: #fbbf24;
+  --flow-accent-secondary-glow: rgba(245, 158, 11, 0.25);
+
+  /* --- États sémantiques (harmonisés) --- */
+  --flow-success: #30d158;
+  --flow-success-muted: rgba(48, 209, 88, 0.15);
+  --flow-warning: #ff9f0a;
+  --flow-warning-muted: rgba(255, 159, 10, 0.15);
+  --flow-danger: #ff453a;
+  --flow-danger-muted: rgba(255, 69, 58, 0.15);
+  --flow-info: #64d2ff;
+  --flow-info-muted: rgba(100, 210, 255, 0.15);
+
+  /* --- Textes FLOW (adoptant niveaux CutX) --- */
+  --flow-text-primary: rgba(255, 255, 255, 0.95);
+  --flow-text-secondary: rgba(255, 255, 255, 0.72);
+  --flow-text-tertiary: rgba(255, 255, 255, 0.5);
+  --flow-text-muted: rgba(255, 255, 255, 0.32);
+
+  /* --- Bordures FLOW (adoptant CutX) --- */
+  --flow-border-subtle: rgba(255, 255, 255, 0.06);
+  --flow-border-default: rgba(255, 255, 255, 0.1);
+  --flow-border-strong: rgba(255, 255, 255, 0.16);
+  --flow-border-accent: rgba(10, 132, 255, 0.4);
+
+  /* --- Glassmorphism FLOW (identité - INCHANGÉ) --- */
+  --flow-glass-blur: 25px;
+  --flow-glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --flow-glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* --- Radius FLOW (réduits vers CutX) --- */
+  --flow-radius-xs: 4px; /* Était 6px */
+  --flow-radius-sm: 6px; /* Était 10px */
+  --flow-radius-md: 8px; /* Était 12px */
+  --flow-radius-lg: 12px; /* Était 16px */
+  --flow-radius-xl: 16px; /* Était 24px */
+  --flow-radius-full: 99px;
+
+  /* --- Typographie FLOW (adoptant CutX) --- */
+  --flow-font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  --flow-font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* Tailles de texte (harmonisées avec CutX) */
+  --flow-text-xs: 11px;
+  --flow-text-sm: 12px;
+  --flow-text-base: 13px;
+  --flow-text-md: 14px;
+  --flow-text-lg: 16px;
+  --flow-text-xl: 18px;
+  --flow-text-2xl: 24px;
+  --flow-text-3xl: 32px;
+
+  /* --- Espacements (système 4px) --- */
+  --flow-space-1: 4px;
+  --flow-space-2: 8px;
+  --flow-space-3: 12px;
+  --flow-space-4: 16px;
+  --flow-space-5: 20px;
+  --flow-space-6: 24px;
+  --flow-space-8: 32px;
+  --flow-space-10: 40px;
+  --flow-space-12: 48px;
+
+  /* --- Shadows --- */
+  --flow-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --flow-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --flow-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --flow-shadow-glow: 0 0 20px var(--flow-accent-glow);
+
+  /* --- Transitions FLOW (adoptant CutX) --- */
+  --flow-transition-fast: 120ms ease-out;
+  --flow-transition-base: 200ms ease-out;
+  --flow-transition-slow: 300ms ease-out;
+  --flow-ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --flow-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ═══════════════════════════════════════════════════════════════
+     ALIAS COMPATIBILITÉ ARRIÈRE
+     Pour migration progressive sans casser l'existant
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Anciens noms → Nouveaux */
+  --bg-app: var(--flow-surface-0);
+  --bg-card: var(--flow-surface-glass);
+  --bg-card-hover: var(--flow-surface-glass-hover);
+  --bg-overlay: var(--flow-surface-overlay);
+
+  --accent: var(--flow-accent);
+  --accent-glow: var(--flow-accent-glow);
+  --gold: var(--flow-accent-secondary);
+  --gold-glow: var(--flow-accent-secondary-glow);
+
+  --danger: var(--flow-danger);
+  --success: var(--flow-success);
+  --warning: var(--flow-warning);
+
+  --text-main: var(--flow-text-primary);
+  --text-sec: var(--flow-text-secondary);
+  --text-tert: var(--flow-text-tertiary);
+
+  --glass-blur: var(--flow-glass-blur);
+  --glass-border: var(--flow-glass-border);
+  --glass-shadow: var(--flow-glass-shadow);
+
+  --radius-xs: var(--flow-radius-xs);
+  --radius-s: var(--flow-radius-sm);
+  --radius-m: var(--flow-radius-md);
+  --radius-l: var(--flow-radius-lg);
+  --radius-xl: var(--flow-radius-xl);
+  --radius-full: var(--flow-radius-full);
+
+  --ease-spring: var(--flow-ease-spring);
+  --ease-smooth: var(--flow-ease-smooth);
+
+  --font-stack: var(--flow-font-sans);
+  --pad-page: var(--flow-space-5);
+}

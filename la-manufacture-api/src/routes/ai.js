@@ -2,6 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { query } from '../db/connection.js';
 import { syncEventToGoogleInternal } from './google-calendar.js';
 import buildSecondBrainPrompt from '../prompts/second-brain-v2.js';
+// QUASAR v5 - Pipeline optimisé 2-stage (Haiku fast + Sonnet enrichment)
+import quasar from '../prompts/second-brain-v5-quasar.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -2001,4 +2003,275 @@ Réponds UNIQUEMENT en JSON valide.`;
       }
     }
   );
+
+  // ============================================================================
+  // PROCESS STREAM - SSE Streaming avec QUASAR v5 (ULTRA RAPIDE)
+  // ============================================================================
+  // Endpoint optimisé pour feedback instantané:
+  // 1. Stage 1 (Haiku): Preview rapide en ~300ms
+  // 2. Stage 2 (Sonnet): Enrichissement si nécessaire
+  // 3. DB Save: Sauvegarde et retour final
+  fastify.post(
+    '/process-stream',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { text } = request.body;
+      const startTime = Date.now();
+
+      if (!text || text.trim().length === 0) {
+        return reply.status(400).send({ error: 'Missing text' });
+      }
+
+      // Setup SSE headers
+      reply.raw.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+      });
+
+      const sendEvent = (type, data) => {
+        reply.raw.write(`data: ${JSON.stringify({ type, ...data })}\n\n`);
+      };
+
+      try {
+        // ===== 1. CHARGER CONTEXTE =====
+        const [projectsResult, tagsResult, membersResult] = await Promise.all([
+          query("SELECT name FROM projects WHERE user_id = $1 AND status != 'archived'", [userId]),
+          query('SELECT name FROM tags WHERE user_id = $1', [userId]),
+          query('SELECT name FROM team_members WHERE user_id = $1 AND active = TRUE', [userId]),
+        ]);
+
+        const context = {
+          activeProjects: projectsResult.rows.map(p => p.name),
+          existingTags: tagsResult.rows.map(t => t.name),
+          teamMembers: membersResult.rows.map(m => m.name),
+        };
+
+        // Charger profil/mémoire si disponible
+        try {
+          const profileResult = await query('SELECT * FROM user_profiles WHERE user_id = $1', [
+            userId,
+          ]);
+          if (profileResult.rows.length > 0) {
+            const p = profileResult.rows[0];
+            context.userProfile = {
+              profession: p.profession,
+              domain: p.domain,
+              vocabulary: p.vocabulary,
+            };
+          }
+
+          const correctionsResult = await query(
+            'SELECT corrected_field, original_value, corrected_value FROM ai_corrections WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5',
+            [userId]
+          );
+          if (correctionsResult.rows.length > 0) {
+            context.memoryContext = { corrections_history: correctionsResult.rows };
+          }
+        } catch {
+          // Tables pas encore créées
+        }
+
+        // ===== 2. ROUTING INTELLIGENT =====
+        const routing = quasar.routeToModel(text, context);
+        sendEvent('routing', {
+          model: routing.model,
+          complexity: routing.complexity,
+          reasons: routing.reasons,
+        });
+
+        // ===== 3. STAGE 1: FAST PARSE (Haiku) =====
+        const temporal = quasar.getTemporalContextWithTimezone('Europe/Paris');
+
+        const stage1Start = Date.now();
+        const stage1Result = await quasar.stage1FastParse(anthropic, text, temporal, 'fr');
+        const stage1Latency = Date.now() - stage1Start;
+
+        // Envoyer preview immédiatement
+        sendEvent('preview', {
+          items: stage1Result.parsed?.items || [],
+          latency_ms: stage1Latency,
+        });
+
+        let finalResult = stage1Result.parsed;
+
+        // ===== 4. STAGE 2: ENRICHISSEMENT (Sonnet) si nécessaire =====
+        if (routing.useEnrichment && stage1Result.parsed?.items?.length > 0) {
+          const stage2Start = Date.now();
+          const stage2Result = await quasar.stage2Enrich(
+            anthropic,
+            stage1Result.parsed.items,
+            text,
+            temporal,
+            'fr',
+            context
+          );
+          const stage2Latency = Date.now() - stage2Start;
+
+          finalResult = stage2Result.enriched;
+
+          sendEvent('enriched', {
+            items: finalResult?.items || [],
+            suggestions: finalResult?.suggestions || [],
+            latency_ms: stage2Latency,
+            cache_hit: stage2Result.cacheHit,
+          });
+        }
+
+        // ===== 5. SAUVEGARDE EN BDD =====
+        const itemsCreated = [];
+        const items = finalResult?.items || [];
+
+        for (const item of items) {
+          try {
+            if (item.type === 'task' || item.type === 'event') {
+              const taskDate = item.date || temporal.currentDate;
+
+              const taskResult = await query(
+                `INSERT INTO tasks (user_id, text, date, urgent, owner, is_event, start_time, end_time, location, done)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                 RETURNING *`,
+                [
+                  userId,
+                  item.text,
+                  taskDate,
+                  item.urgent || false,
+                  item.owner || 'Moi',
+                  item.type === 'event',
+                  item.start_time || null,
+                  item.end_time || null,
+                  item.location || null,
+                  false,
+                ]
+              );
+
+              const created = taskResult.rows[0];
+
+              // Auto-sync Google Calendar si event
+              if (item.type === 'event' && created.start_time) {
+                const syncResult = await syncEventToGoogleInternal(fastify, userId, created);
+                if (syncResult.success && syncResult.eventId) {
+                  await query('UPDATE tasks SET google_event_id = $1 WHERE id = $2', [
+                    syncResult.eventId,
+                    created.id,
+                  ]);
+                  created.google_event_id = syncResult.eventId;
+                }
+              }
+
+              itemsCreated.push({
+                type: item.type,
+                id: created.id,
+                text: created.text,
+                date: created.date,
+                start_time: created.start_time,
+                end_time: created.end_time,
+                urgent: created.urgent,
+                google_synced: !!created.google_event_id,
+              });
+            } else if (item.type === 'note') {
+              const noteResult = await query(
+                `INSERT INTO notes (user_id, title, content, color, is_pinned)
+                 VALUES ($1, $2, $3, $4, $5)
+                 RETURNING *`,
+                [userId, item.title || 'Note', item.content || '', item.color || null, false]
+              );
+
+              itemsCreated.push({
+                type: 'note',
+                id: noteResult.rows[0].id,
+                title: noteResult.rows[0].title,
+              });
+            }
+          } catch (itemError) {
+            fastify.log.error('Error creating item:', itemError);
+          }
+        }
+
+        // ===== 6. SAUVEGARDER SUGGESTIONS PROACTIVES =====
+        const suggestions = finalResult?.suggestions || [];
+        const savedSuggestions = [];
+
+        try {
+          for (const suggestion of suggestions.slice(0, 5)) {
+            if ((suggestion.score || 0) >= 0.6) {
+              const sugResult = await query(
+                `INSERT INTO proactive_suggestions
+                 (user_id, suggestion_type, suggested_task, suggested_date, priority_score, reason, status)
+                 VALUES ($1, $2, $3, $4, $5, $6, 'pending')
+                 RETURNING id`,
+                [
+                  userId,
+                  suggestion.type,
+                  suggestion.task,
+                  suggestion.date || null,
+                  suggestion.score,
+                  suggestion.reason,
+                ]
+              );
+              savedSuggestions.push({
+                id: sugResult.rows[0].id,
+                ...suggestion,
+              });
+            }
+          }
+        } catch {
+          // Table pas encore créée
+        }
+
+        // ===== 7. TRACKING =====
+        const processingTime = Date.now() - startTime;
+
+        await query(
+          `INSERT INTO ai_inbox_decisions (user_id, input_text, ai_response, items_created, processing_time_ms)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [userId, text, JSON.stringify(finalResult), JSON.stringify(itemsCreated), processingTime]
+        );
+
+        // ===== 8. ENVOI FINAL =====
+        sendEvent('complete', {
+          items: itemsCreated,
+          suggestions: savedSuggestions,
+          stats: {
+            total: itemsCreated.length,
+            tasks: itemsCreated.filter(i => i.type === 'task').length,
+            events: itemsCreated.filter(i => i.type === 'event').length,
+            notes: itemsCreated.filter(i => i.type === 'note').length,
+            suggestions: savedSuggestions.length,
+          },
+          processing_time_ms: processingTime,
+          routing: {
+            model: routing.model,
+            complexity: routing.complexity,
+          },
+        });
+
+        reply.raw.end();
+      } catch (error) {
+        fastify.log.error('Process stream error:', error);
+        sendEvent('error', { message: error.message });
+        reply.raw.end();
+      }
+    }
+  );
+
+  // ============================================================================
+  // GET SUGGESTIONS - Récupérer les suggestions proactives en attente
+  // ============================================================================
+  fastify.get('/suggestions', { preHandler: [fastify.authenticate] }, async request => {
+    const { userId } = request.user;
+
+    const result = await query(
+      `SELECT id, suggestion_type, suggested_task, suggested_date, priority_score, reason, created_at
+       FROM proactive_suggestions
+       WHERE user_id = $1 AND status = 'pending'
+       ORDER BY priority_score DESC
+       LIMIT 10`,
+      [userId]
+    );
+
+    return { suggestions: result.rows };
+  });
 }

@@ -1,59 +1,39 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║                         FLOW Design Variables                                   ║
+   ║            Basé sur le bridge FLOW-CutX pour harmonisation                      ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/*
+ * Ce fichier utilise les variables définies dans flow-cutx-bridge.css
+ * Les alias de compatibilité arrière sont fournis par le bridge.
+ *
+ * Toutes les variables --flow-* sont définies dans flow-cutx-bridge.css
+ * Ce fichier peut être utilisé pour des overrides spécifiques si nécessaire.
+ */
+
 :root {
-  /* --- PALETTE PREMIUM (Deep Dark) --- */
+  /* ═══════════════════════════════════════════════════════════════
+     OVERRIDES SPÉCIFIQUES FLOW (si différent du bridge)
+     ═══════════════════════════════════════════════════════════════ */
 
-  /* Backgrounds */
-  --bg-app: #050505;
-  /* Noir profond, mais pas #000 absolu */
-  --bg-card: rgba(28, 28, 30, 0.6);
-  /* Translucide pour le glassmorphism */
-  --bg-card-hover: rgba(44, 44, 46, 0.7);
-  --bg-overlay: rgba(0, 0, 0, 0.85);
-  /* Pour les focus modes */
+  /* Le fond app utilise maintenant la couleur CutX #141413 via le bridge */
+  /* Si besoin de revenir à l'ancien #050505, décommenter: */
+  /* --bg-app: #050505; */
 
-  /* Glassmorphism Tokens */
-  --glass-blur: 25px;
-  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  /* L'accent secondaire est maintenant amber CutX via le bridge */
+  /* Si besoin de revenir au gold, décommenter: */
+  /* --gold: #d4af37; */
 
-  /* Accents (Premium - Subtil et élégant) */
-  --accent: #0a84ff;
-  /* Bleu iOS - propre et pro */
-  --accent-glow: rgba(10, 132, 255, 0.3);
-  --gold: #d4af37;
-  /* Or subtil - uniquement pour highlights spéciaux */
-  --gold-glow: rgba(212, 175, 55, 0.25);
-  --danger: #ff453a;
-  /* Urgent / Delete */
-  --success: #30d158;
-  /* Terminé */
-  --warning: #ff9f0a;
-  /* Attention */
+  /* ═══════════════════════════════════════════════════════════════
+     VARIABLES ADDITIONNELLES FLOW (non dans le bridge)
+     ═══════════════════════════════════════════════════════════════ */
 
-  /* Typography */
-  --text-main: #ffffff;
-  --text-sec: #8e8e93;
-  /* Gris Apple */
-  --text-tert: #48484a;
-
-  --font-stack:
-    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
-
-  /* Spacing & Radius - UNIFIED */
-  --radius-xs: 6px;
-  --radius-s: 10px;
-  --radius-m: 12px; /* Standard buttons */
-  --radius-l: 16px; /* Large buttons, cards */
-  --radius-xl: 24px; /* Modals, large cards */
-  --radius-full: 99px; /* Pills */
-
-  --pad-page: 20px;
+  /* Aucune pour l'instant - tout est dans le bridge */
 }
 
-/* Animations Variables */
-:root {
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  /* Effet rebond */
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  /* Apple default ease */
-}
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS - Toujours défini ici
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Note: Les animations sont aussi dans le bridge via --flow-ease-* */
+/* Ces définitions sont gardées pour compatibilité des anciens composants */

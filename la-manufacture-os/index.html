@@ -15,11 +15,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <meta name="apple-mobile-web-app-title" content="FLOW" />
+    <meta name="application-name" content="FLOW" />
+    <meta name="msapplication-TileColor" content="#141413" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
     <!-- CSS imports -->
+    <link rel="stylesheet" href="/src/css/flow-cutx-bridge.css" />
     <link rel="stylesheet" href="/src/css/variables.css" />
     <link rel="stylesheet" href="/src/css/reset.css" />
     <link rel="stylesheet" href="/src/css/components.css" />
@@ -28,6 +37,8 @@
     <link rel="stylesheet" href="/src/css/planning.css" />
     <link rel="stylesheet" href="/src/css/app.css" />
     <link rel="stylesheet" href="/src/css/quick-dump.css" />
+    <link rel="stylesheet" href="/src/css/universal-input.css" />
+    <link rel="stylesheet" href="/src/css/mobile.css" />
 
     <!-- CRITICAL: Show auth form INSTANTLY on non-localhost (before any JS loads) -->
     <style id="instant-auth-style">

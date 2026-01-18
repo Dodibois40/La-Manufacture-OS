@@ -2,11 +2,14 @@
   "name": "FLOW - Master Your Time",
   "short_name": "FLOW",
   "description": "AI-powered task management for peak productivity",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#050505",
   "theme_color": "#0A84FF",
   "orientation": "portrait-primary",
+  "id": "/",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -71,10 +74,57 @@
       "description": "Voir les taches du jour",
       "url": "/?view=day",
       "icons": [{ "src": "/icons/today-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Quick Dump",
+      "short_name": "Dump",
+      "description": "Capture rapide vocale ou texte",
+      "url": "/?action=dump",
+      "icons": [{ "src": "/icons/mic-icon.png", "sizes": "96x96" }]
     }
   ],
-  "categories": ["productivity", "utilities"],
+  "categories": ["productivity", "utilities", "business"],
   "lang": "fr-FR",
   "dir": "ltr",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-light.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Vue bureau - Mode clair"
+    },
+    {
+      "src": "/screenshots/mobile-dark.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vue mobile - Mode sombre"
+    }
+  ],
+  "related_applications": [],
+  "protocol_handlers": [
+    {
+      "protocol": "web+flow",
+      "url": "/?task=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/?action=share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

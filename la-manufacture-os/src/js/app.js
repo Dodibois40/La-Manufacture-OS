@@ -30,9 +30,10 @@ import { initTeam } from './team.js';
 import { initGoogleCalendar, isGoogleConnected, syncTaskToGoogle } from './google-calendar.js';
 import { initDailyReview } from './daily-review.js';
 import { openQuickDump, initQuickDumpShortcut } from './quick-dump.js';
+import { initUniversalInput } from './universal-input.js';
 
 // Load state (local first, then sync from API)
-let state = loadState();
+const state = loadState();
 state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
 state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
 
@@ -512,6 +513,9 @@ const initApp = async () => {
       // initSpeechToText(); // removed - now in quick-dump.js
       initDailyReview(state, render);
 
+      // Universal Input (Voice-first quick capture)
+      initUniversalInput(state, render);
+
       // Quick dump handler for API mode
       const handleTasksAdded = async tasks => {
         console.log('[handleTasksAdded] Called with tasks.length:', tasks.length);
@@ -569,9 +573,13 @@ const initApp = async () => {
         });
       }
 
-      // Nav-inbox: ouvre quick dump
+      // Nav-inbox: ouvre Universal Input (voix en premier)
       document.getElementById('nav-inbox')?.addEventListener('click', () => {
-        openQuickDump(state, handleTasksAdded);
+        if (window.openUniversalInput) {
+          window.openUniversalInput();
+        } else {
+          openQuickDump(state, handleTasksAdded);
+        }
       });
 
       // ManualAddBtn (Today view "✎"): ouvre command bar
@@ -656,6 +664,9 @@ const initApp = async () => {
   // initSpeechToText(); // removed - now in quick-dump.js
   initDailyReview(state, render);
 
+  // Universal Input (Voice-first quick capture)
+  initUniversalInput(state, render);
+
   // Quick dump handler
   const handleTasksAdded = async tasks => {
     if (isApiMode && isSignedIn()) {
@@ -709,9 +720,13 @@ const initApp = async () => {
     });
   }
 
-  // Nav-inbox: ouvre quick dump (comme tous les boutons "Add")
+  // Nav-inbox: ouvre Universal Input (voix en premier)
   document.getElementById('nav-inbox')?.addEventListener('click', () => {
-    openQuickDump(state, handleTasksAdded);
+    if (window.openUniversalInput) {
+      window.openUniversalInput();
+    } else {
+      openQuickDump(state, handleTasksAdded);
+    }
   });
 
   // ManualAddBtn (Today view "✎"): ouvre command bar pour ajout manuel

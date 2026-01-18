@@ -1,0 +1,451 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║                      MOBILE OPTIMIZATIONS                                    ║
+   ║              iOS (iPhone) + Android (HyperOS) Specific Styles                ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ═══════════════════════════════════════════════════════════════
+   SAFE AREA INSETS - iPhone notch, Dynamic Island, Android cutouts
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Safe area variables avec fallbacks */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  /* Keyboard height (will be set by JS) */
+  --keyboard-height: 0px;
+}
+
+/* Body padding for safe areas */
+body {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOUCH OPTIMIZATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Disable 300ms tap delay */
+* {
+  touch-action: manipulation;
+}
+
+/* Disable text selection on interactive elements */
+button,
+[role='button'],
+.btn,
+.task-item,
+.nav-item,
+.tab {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Better tap targets (minimum 44x44px as per Apple HIG) */
+button,
+[role='button'],
+.btn,
+input[type='checkbox'],
+input[type='radio'],
+a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Remove tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL BEHAVIOR
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Smooth momentum scrolling */
+.scrollable,
+.task-list,
+.notes-list,
+main,
+.modal-content {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Prevent pull-to-refresh on entire page */
+html {
+  overscroll-behavior-y: contain;
+}
+
+/* Hide scrollbars on mobile but keep functionality */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  * {
+    scrollbar-width: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYBOARD HANDLING
+   ═══════════════════════════════════════════════════════════════ */
+
+/* When keyboard is open, adjust layout */
+body.keyboard-open {
+  --safe-bottom: var(--keyboard-height);
+}
+
+/* Keep fixed elements above keyboard */
+body.keyboard-open .bottom-bar,
+body.keyboard-open nav,
+body.keyboard-open .modal-footer {
+  transform: translateY(calc(-1 * var(--keyboard-height)));
+  transition: transform 0.25s ease-out;
+}
+
+/* Input fields should be visible above keyboard */
+body.keyboard-open input:focus,
+body.keyboard-open textarea:focus {
+  scroll-margin-bottom: calc(var(--keyboard-height) + 20px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION BAR (Bottom)
+   ═══════════════════════════════════════════════════════════════ */
+
+nav,
+.bottom-nav {
+  padding-bottom: max(var(--safe-bottom), 8px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODALS & SHEETS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Bottom sheet style for mobile */
+@media (max-width: 768px) {
+  .modal-content,
+  .bottom-sheet {
+    border-radius: 20px 20px 0 0;
+    padding-bottom: calc(20px + var(--safe-bottom));
+    max-height: calc(90vh - var(--safe-top));
+    max-height: calc(90dvh - var(--safe-top));
+  }
+
+  /* Drag handle for bottom sheets */
+  .modal-content::before,
+  .bottom-sheet::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    margin: 8px auto 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INPUTS & FORMS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Prevent zoom on input focus (iOS) */
+input,
+textarea,
+select {
+  font-size: 16px !important; /* Prevents iOS zoom on focus */
+}
+
+/* Better input styling on mobile */
+@media (max-width: 768px) {
+  input,
+  textarea {
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OFFLINE INDICATOR
+   ═══════════════════════════════════════════════════════════════ */
+
+.offline-indicator {
+  position: fixed;
+  top: calc(var(--safe-top) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 59, 48, 0.95);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: slideDown 0.3s ease-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.offline-indicator.syncing {
+  background: rgba(255, 149, 0, 0.95);
+}
+
+.offline-indicator.online {
+  background: rgba(52, 199, 89, 0.95);
+  animation: slideUp 0.3s ease-out forwards;
+  animation-delay: 2s;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%);
+  }
+}
+
+.offline-indicator .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PWA INSTALL PROMPT
+   ═══════════════════════════════════════════════════════════════ */
+
+.pwa-install-banner {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 16px);
+  left: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.4s ease-out reverse;
+}
+
+.pwa-install-banner .icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #0a84ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pwa-install-banner .content {
+  flex: 1;
+}
+
+.pwa-install-banner .title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.pwa-install-banner .subtitle {
+  font-size: 13px;
+  color: #8e8e93;
+}
+
+.pwa-install-banner .install-btn {
+  background: #0a84ff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.pwa-install-banner .install-btn:active {
+  transform: scale(0.95);
+}
+
+.pwa-install-banner .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #8e8e93;
+  padding: 8px;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HAPTIC FEEDBACK HINTS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Visual feedback for haptic-enabled interactions */
+.haptic-light:active {
+  transform: scale(0.98);
+}
+
+.haptic-medium:active {
+  transform: scale(0.96);
+}
+
+.haptic-heavy:active {
+  transform: scale(0.94);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANDROID SPECIFIC (HyperOS, MIUI, etc.)
+   ═══════════════════════════════════════════════════════════════ */
+
+@supports (-webkit-touch-callout: none) {
+  /* iOS specific styles */
+}
+
+@supports not (-webkit-touch-callout: none) {
+  /* Android specific styles */
+
+  /* Android ripple effect simulation */
+  .btn,
+  button,
+  [role='button'] {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::after,
+  button::after,
+  [role='button']::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition:
+      width 0.3s ease,
+      height 0.3s ease;
+  }
+
+  .btn:active::after,
+  button:active::after,
+  [role='button']:active::after {
+    width: 200%;
+    height: 200%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PERFORMANCE OPTIMIZATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* GPU acceleration for animated elements */
+.modal,
+.toast,
+.task-item,
+.bottom-sheet,
+.offline-indicator,
+.pwa-install-banner {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SYNC STATUS BADGE
+   ═══════════════════════════════════════════════════════════════ */
+
+.sync-badge {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 70px);
+  right: 16px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.sync-badge .spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
