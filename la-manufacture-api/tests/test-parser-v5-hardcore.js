@@ -64,10 +64,8 @@ const HARDCORE_TESTS = [
     input: 'Appeler Marie pour le meeting',
     expected: {
       minItems: 1,
-      // This is ambiguous: "meeting" suggests event but no time = task
-      // We accept either but document what we get
+      // Accept both: "meeting" suggests event context, but no time could mean task
       types: ['task', 'event'],
-      needsAnalysis: true,
     },
     risk: 'Wrong classification without explicit time',
   },
@@ -77,9 +75,8 @@ const HARDCORE_TESTS = [
     input: 'RDV demain lundi', // What if today is Tuesday? "demain" != "lundi"
     expected: {
       minItems: 1,
-      types: ['event'],
-      // Should pick one date, ideally "demain" as more precise
-      needsAnalysis: true,
+      types: ['task', 'event'], // Accept either - RDV without time can be task or event
+      // DECISION: "demain" takes precedence as it's more specific
     },
     risk: 'Incorrect date resolution',
   },
@@ -118,10 +115,10 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
     input: 'rdv dr martin 2m 10h30 + appel marc asap + id notif push pr app mob',
     expected: {
       minItems: 2,
-      // "2m" could be "2 minutes" or "2 months" or "demain" (typo)
-      // "asap" = urgent
-      // "id" = idée
-      needsAnalysis: true,
+      // DECISION: "2m" = demain (common French SMS abbreviation)
+      // "asap" = urgent, "id" = idée
+      types: ['event', 'task', 'note'], // Accept any of these
+      hasUrgent: true, // "asap" should trigger urgent
     },
     risk: 'Abbreviation parsing failure',
   },
@@ -132,8 +129,8 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
     expected: {
       minItems: 1,
       types: ['event'],
-      // 5h could be 05:00 (unusual) or 17:00 (5pm, more likely for business)
-      needsAnalysis: true,
+      // DECISION: 5h without context = 17:00 (business hours per TIME DISAMBIGUATION rule)
+      shouldContainTime: '17:00',
     },
     risk: 'Wrong time interpretation (05:00 vs 17:00)',
   },
@@ -144,8 +141,7 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
     expected: {
       minItems: 1,
       types: ['task'],
-      // Should create a task even without context
-      needsAnalysis: true,
+      // DECISION: Create task even with minimal context
     },
     risk: 'Empty or invalid item',
   },
@@ -156,8 +152,7 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
     expected: {
       minItems: 2,
       types: ['task'],
-      // Both should be tasks: "Appeler Jean" and "Ne pas envoyer mail à Paul"
-      needsAnalysis: true,
+      // DECISION: "Ne pas oublier X" = task "X", "Ne pas envoyer" = task with negation preserved
     },
     risk: 'Negation misinterpretation',
   },
@@ -180,9 +175,8 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
     expected: {
       minItems: 1,
       types: ['event'],
-      // Date should be 2 weeks + next Tuesday
-      // Time should be 14:00 (primary) or handle alternative
-      needsAnalysis: true,
+      // DECISION: Primary time 14:00 is used, "sinon 15h" is ignored
+      shouldContainTime: '14:00',
     },
     risk: 'Date calculation error',
   },
@@ -204,6 +198,7 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
     input: 'Acheter 3 pommes au marché et appeler les 3 clients du projet Beta',
     expected: {
       minItems: 2,
+      maxItems: 3, // 2-3 items, NOT 6
       types: ['task'],
       // Should be 2 separate tasks, not 6
     },
@@ -216,8 +211,8 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
     expected: {
       minItems: 1,
       types: ['task'],
-      // How does it handle contradictions?
-      needsAnalysis: true,
+      // DECISION: First signal wins - URGENT takes precedence
+      hasUrgent: true,
     },
     risk: 'Inconsistent urgent/important flags',
   },
@@ -229,6 +224,8 @@ et idée: migrer vers GraphQL et implémenter le SSO`,
       minItems: 3,
       types: ['task', 'note', 'event'],
       // Emojis should not break parsing
+      hasEvents: true,
+      hasNotes: true,
     },
     risk: 'Unicode/emoji breaking parsing',
   },
