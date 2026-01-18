@@ -276,7 +276,7 @@
 .quick-dump-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #0a84ff, #bf5af2);
+  background: #f59e0b;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -328,14 +328,14 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0a84ff, #bf5af2);
+  background: #f59e0b;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 .quick-dump-mic-btn svg {
@@ -347,7 +347,7 @@
 
 .quick-dump-mic-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
 }
 
 .quick-dump-mic-btn:hover svg {
@@ -441,13 +441,13 @@
 }
 
 .quick-dump-btn.primary {
-  background: linear-gradient(135deg, #0a84ff, #0066cc);
+  background: #f59e0b;
   color: white;
 }
 
 .quick-dump-btn.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
 }
 
 .quick-dump-btn.loading {
@@ -478,20 +478,20 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0a84ff, #bf5af2);
+  background: #f59e0b;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
   transition: all 0.3s ease;
   z-index: 100;
 }
 
 .quick-dump-trigger:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 30px rgba(10, 132, 255, 0.5);
+  box-shadow: 0 6px 30px rgba(245, 158, 11, 0.5);
 }
 
 .quick-dump-trigger svg {

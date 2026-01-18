@@ -2117,4 +2117,9 @@ textarea:focus {
   .daily-inspiration {
     display: none;
   }
+
+  /* Hide keyboard shortcut hints on mobile */
+  .empty-hint {
+    display: none;
+  }
 }
