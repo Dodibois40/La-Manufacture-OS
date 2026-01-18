@@ -449,3 +449,26 @@ select {
     transform: rotate(360deg);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   NOTIFICATION DROPDOWN - Mobile Fix
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .notification-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: calc(70px + var(--safe-bottom));
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+    border-radius: 16px;
+    z-index: 9999;
+  }
+
+  /* Centrer le container de notification */
+  .notification-container {
+    position: static;
+  }
+}
