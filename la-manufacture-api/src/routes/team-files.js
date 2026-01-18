@@ -2,9 +2,8 @@ import { query } from '../db/connection.js';
 import { randomUUID } from 'crypto';
 import { createWriteStream, createReadStream, existsSync, mkdirSync, unlinkSync, statSync } from 'fs';
 import { pipeline } from 'stream/promises';
-import { join, extname } from 'path';
+import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

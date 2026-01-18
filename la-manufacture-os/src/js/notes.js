@@ -373,7 +373,7 @@ async function saveNote() {
       toast('Note créée', 'success');
     }
 
-    closeModal('noteModal');
+    window.closeModal('noteModal');
     await loadNotes();
   } catch (error) {
     console.error('Save note error:', error);
@@ -389,7 +389,7 @@ async function deleteNote() {
   try {
     await api.notes.delete(noteId);
     toast('Note supprimée', 'success');
-    closeModal('noteModal');
+    window.closeModal('noteModal');
     await loadNotes();
   } catch (error) {
     console.error('Delete note error:', error);
@@ -429,7 +429,7 @@ async function shareNote() {
     });
 
     toast('Note partagée', 'success');
-    closeModal('shareModal');
+    window.closeModal('shareModal');
     await loadNoteShares(noteId);
   } catch (error) {
     console.error('Share note error:', error);
