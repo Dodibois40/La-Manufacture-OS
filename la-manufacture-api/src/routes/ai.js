@@ -314,6 +314,16 @@ Reponds UNIQUEMENT en JSON:
       const currentDayName = dayNames[now.getDay()];
       const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
 
+      // Dates relatives calculées (IMPORTANT: fournir explicitement à l'IA)
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowDate = tomorrow.toISOString().split('T')[0];
+      const tomorrowDayName = dayNames[tomorrow.getDay()];
+
+      const afterTomorrow = new Date(now);
+      afterTomorrow.setDate(afterTomorrow.getDate() + 2);
+      const afterTomorrowDate = afterTomorrow.toISOString().split('T')[0];
+
       // Projets actifs
       const projectsResult = await query(
         "SELECT id, name FROM projects WHERE user_id = $1 AND status != 'archived' ORDER BY name",
@@ -411,10 +421,13 @@ EXTRACTION DE DATES & HEURES
 
 Dates relatives (base: ${currentDate} = ${currentDayName}) :
 - "aujourd'hui" → ${currentDate}
-- "demain" → ${currentDate} + 1 jour
+- "demain" → ${tomorrowDate} (${tomorrowDayName})
+- "après-demain" → ${afterTomorrowDate}
 - "lundi", "mardi" → prochain jour de la semaine
 - "lundi prochain" → semaine suivante
 - "dans X jours/semaines/mois"
+
+IMPORTANT: Utilise TOUJOURS les dates ISO exactes ci-dessus. "demain" = ${tomorrowDate}, PAS une formule à calculer.
 
 Heures :
 - "14h", "14h30", "9h" → formats standards
