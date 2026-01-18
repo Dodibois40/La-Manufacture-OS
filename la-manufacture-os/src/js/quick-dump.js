@@ -256,10 +256,18 @@ export const openQuickDump = (state, onTasksAdded) => {
     }
   });
 
-  // Click outside to close
+  // Click outside to close (only if no text entered)
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
-      closeQuickDump();
+      if (textarea.value.trim()) {
+        // Don't close if there's text - flash the modal instead
+        const modal = overlay.querySelector('.quick-dump-modal');
+        modal.classList.add('shake');
+        setTimeout(() => modal.classList.remove('shake'), 500);
+        toast('Clique sur Annuler pour fermer', 'warning');
+      } else {
+        closeQuickDump();
+      }
     }
   });
 };
