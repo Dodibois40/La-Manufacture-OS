@@ -500,8 +500,18 @@ const initApp = async () => {
   // Storage UI
   initStorageUI();
 
+  // Flag to prevent multiple handlePostLogin calls (race condition fix)
+  let postLoginCompleted = false;
+
   // Helper function for post-login flow (defined early so it's available everywhere)
   async function handlePostLogin() {
+    // Prevent multiple calls (race condition when Clerk init completes while user navigates)
+    if (postLoginCompleted) {
+      console.log('[App] handlePostLogin already completed, skipping');
+      return;
+    }
+    postLoginCompleted = true;
+
     // Remove instant-auth-mode CSS override
     document.body.classList.remove('instant-auth-mode');
 
@@ -620,11 +630,18 @@ const initApp = async () => {
       startNotificationPolling();
       initTeam(user?.id);
       initGoogleCalendar();
-      setView('day');
+
+      // Only switch to day view if still on auth view (don't override user navigation)
+      if (currentView === 'auth') {
+        setView('day');
+      }
     } catch (err) {
       console.error('Sync error:', err);
       toast('Erreur de synchronisation');
-      setView('day');
+      // Only switch to day view if still on auth view
+      if (currentView === 'auth') {
+        setView('day');
+      }
     }
   }
 
