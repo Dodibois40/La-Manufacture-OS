@@ -20,12 +20,12 @@
      CutX BASE TOKENS (référence)
      ═══════════════════════════════════════════════════════════════ */
 
-  /* Surfaces CutX (5 niveaux opaques) */
-  --cx-surface-0: #141413;
-  --cx-surface-1: #1a1a19;
-  --cx-surface-2: #1f1f1e;
-  --cx-surface-3: #252524;
-  --cx-surface-4: #2b2b29;
+  /* Surfaces CutX (5 niveaux opaques) - Noir profond */
+  --cx-surface-0: #050505;
+  --cx-surface-1: #0a0a0a;
+  --cx-surface-2: #111111;
+  --cx-surface-3: #181818;
+  --cx-surface-4: #1f1f1f;
 
   /* Accents CutX */
   --cx-accent-olive: #8b9a4b;
@@ -60,17 +60,17 @@
      FLOW BRIDGE TOKENS (adapté CutX)
      ═══════════════════════════════════════════════════════════════ */
 
-  /* --- Surfaces FLOW (adoptant fond CutX) --- */
-  --flow-surface-0: #141413; /* Fond app → CutX */
-  --flow-surface-1: #1a1a19; /* Sidebar → CutX */
-  --flow-surface-2: #1f1f1e; /* Cards base → CutX */
-  --flow-surface-3: #252524; /* Hover → CutX */
-  --flow-surface-4: #2b2b29; /* Active → CutX */
+  /* --- Surfaces FLOW (noir profond) --- */
+  --flow-surface-0: #050505; /* Fond app - noir profond */
+  --flow-surface-1: #0a0a0a; /* Sidebar */
+  --flow-surface-2: #111111; /* Cards base */
+  --flow-surface-3: #181818; /* Hover */
+  --flow-surface-4: #1f1f1f; /* Active */
 
-  /* Surfaces avec glassmorphism (identité FLOW) */
-  --flow-surface-glass: rgba(28, 28, 30, 0.6);
-  --flow-surface-glass-hover: rgba(44, 44, 46, 0.7);
-  --flow-surface-overlay: rgba(0, 0, 0, 0.85);
+  /* Surfaces avec glassmorphism (identité FLOW) - ajusté noir profond */
+  --flow-surface-glass: rgba(10, 10, 10, 0.7);
+  --flow-surface-glass-hover: rgba(20, 20, 20, 0.8);
+  --flow-surface-overlay: rgba(0, 0, 0, 0.92);
 
   /* --- Accents FLOW --- */
   /* Principal : BLEU iOS (identité FLOW - INCHANGÉ) */
