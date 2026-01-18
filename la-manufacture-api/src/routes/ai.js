@@ -211,7 +211,7 @@ RÉPONDS UNIQUEMENT avec un JSON array valide :
   // Detect if text is an event/RDV (for Google Calendar sync)
   fastify.post('/detect-event', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     const { userId } = request.user;
-    const { text, date } = request.body;
+    const { text } = request.body;
 
     if (!text) {
       return reply.status(400).send({ error: 'Missing text' });
