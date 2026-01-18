@@ -192,11 +192,15 @@ export const openQuickDump = (state, onTasksAdded) => {
         toast(`✅ ${messages.join(', ')} créé(s)!`, 'success');
 
         // Reload state from API directly (items are already in DB)
+        console.log('[QuickDump] isApiMode:', isApiMode);
         if (isApiMode) {
+          console.log('[QuickDump] Reloading state from API...');
           const apiState = await loadStateFromApi();
+          console.log('[QuickDump] apiState:', apiState ? `${apiState.tasks?.length} tasks` : 'null');
           if (apiState) {
             state.tasks = apiState.tasks;
             state.settings = apiState.settings || state.settings;
+            console.log('[QuickDump] state.tasks updated:', state.tasks.length);
           }
         }
 
