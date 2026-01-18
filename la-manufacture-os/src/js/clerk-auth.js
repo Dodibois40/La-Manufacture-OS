@@ -468,10 +468,6 @@ export async function signOut() {
   if (!clerk) return;
   cachedToken = null; // Clear token cache
   tokenExpiry = 0;
-  // Clear session flag to show login form on next visit
-  try {
-    localStorage.removeItem('flow_auth_session');
-  } catch (e) {}
   await clerk.signOut();
   window.location.reload();
 }

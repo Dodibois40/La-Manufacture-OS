@@ -62,20 +62,6 @@
         opacity: 1 !important;
         pointer-events: auto !important;
       }
-      /* Auth checking state: user was logged in, show loader while verifying */
-      .auth-checking #appLoader {
-        display: flex !important;
-        opacity: 1 !important;
-      }
-      .auth-checking #view-auth {
-        display: none !important;
-      }
-      .auth-checking #view-day {
-        display: none !important;
-      }
-      .auth-checking nav {
-        display: none !important;
-      }
     </style>
   </head>
 
@@ -86,19 +72,7 @@
         var isLocalhost =
           window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         if (!isLocalhost) {
-          // Check if user was previously logged in
-          var hasAuthSession = false;
-          try {
-            hasAuthSession = localStorage.getItem('flow_auth_session') === 'true';
-          } catch (e) {}
-
-          if (hasAuthSession) {
-            // User was logged in - show loader while checking auth
-            document.body.classList.add('auth-checking');
-          } else {
-            // New user or logged out - show login form immediately
-            document.body.classList.add('instant-auth-mode');
-          }
+          document.body.classList.add('instant-auth-mode');
           // Skip briefing check - user needs to login first
           return;
         }
