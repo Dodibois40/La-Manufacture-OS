@@ -2,7 +2,6 @@
 import { getToken as getClerkToken } from './clerk-auth.js';
 
 const MODE = import.meta.env.VITE_MODE || 'local';
-const DEFAULT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 // If we are on a different host (like a local IP), try to use the same host for the API if not explicitly set
 const API_URL =
   import.meta.env.VITE_API_URL ||
@@ -37,9 +36,43 @@ export const tokenStorage = {
   },
 };
 
-// Helper pour les requêtes API
+// Configuration retry et timeout
+const DEFAULT_TIMEOUT = 30000; // 30 secondes
+const MAX_RETRIES = 3;
+const RETRY_DELAY_BASE = 1000; // 1 seconde, exponential backoff
+
+// Helper pour fetch avec timeout
+async function fetchWithTimeout(url, options, timeout = DEFAULT_TIMEOUT) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// Helper pour le délai exponentiel
+function getRetryDelay(attempt) {
+  return RETRY_DELAY_BASE * Math.pow(2, attempt) + Math.random() * 500;
+}
+
+// Helper pour déterminer si on doit retry
+function shouldRetry(error, attempt) {
+  if (attempt >= MAX_RETRIES) return false;
+  // Retry sur erreurs réseau ou timeout
+  if (error.name === 'AbortError') return true; // Timeout
+  if (error.message?.includes('fetch')) return true; // Network error
+  if (error.message?.includes('network')) return true;
+  return false;
+}
+
+// Helper pour les requêtes API avec retry et timeout
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
+  const timeout = options.timeout || DEFAULT_TIMEOUT;
 
   // Get Clerk token for authentication
   const token = await getClerkToken();
@@ -60,20 +93,49 @@ async function apiRequest(endpoint, options = {}) {
     headers,
   };
 
-  const response = await fetch(url, { ...defaultOptions, ...options });
-
-  if (!response.ok) {
-    let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+  let lastError;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const errorJson = await response.json();
-      errorMessage = errorJson.error || errorJson.message || errorMessage;
-    } catch (_) {
-      // Not JSON or empty body
+      const response = await fetchWithTimeout(url, { ...defaultOptions, ...options }, timeout);
+
+      if (!response.ok) {
+        let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+        try {
+          const errorJson = await response.json();
+          errorMessage = errorJson.error || errorJson.message || errorMessage;
+        } catch (_) {
+          // Not JSON or empty body
+        }
+        // Ne pas retry sur les erreurs 4xx (sauf 429 rate limit)
+        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          throw new Error(errorMessage);
+        }
+        lastError = new Error(errorMessage);
+        lastError.status = response.status;
+      } else {
+        return response.json();
+      }
+    } catch (error) {
+      lastError = error;
+      if (error.name === 'AbortError') {
+        lastError = new Error('Connexion timeout - le serveur met trop de temps à répondre');
+      }
     }
-    throw new Error(errorMessage);
+
+    // Retry si possible
+    if (shouldRetry(lastError, attempt)) {
+      const delay = getRetryDelay(attempt);
+      console.warn(
+        `API retry ${attempt + 1}/${MAX_RETRIES} après ${Math.round(delay)}ms:`,
+        endpoint
+      );
+      await new Promise(resolve => setTimeout(resolve, delay));
+    } else {
+      break;
+    }
   }
 
-  return response.json();
+  throw lastError;
 }
 
 // API Client

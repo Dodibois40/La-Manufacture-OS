@@ -59,7 +59,7 @@ export default async function memberRoutes(fastify) {
   // GET /api/member/tasks - Get tasks assigned to member
   fastify.get('/tasks', { preHandler: [fastify.authenticate, requireMember] }, async request => {
     const { userId } = request.user;
-    const { date, project_id } = request.query;
+    const { date, project_id: _project_id } = request.query;
 
     try {
       // Get team member ID
@@ -113,7 +113,7 @@ export default async function memberRoutes(fastify) {
     '/:id',
     { preHandler: [fastify.authenticate, requireMember, canAccessTask] },
     async (request, reply) => {
-      const { userId } = request.user;
+      const { userId: _userId } = request.user;
       const { id } = request.params;
       const { done, status, time_spent, urgent } = request.body;
 

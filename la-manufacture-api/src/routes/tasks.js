@@ -268,7 +268,7 @@ export default async function tasksRoutes(fastify) {
         ]
       );
 
-      let task = result.rows[0];
+      const task = result.rows[0];
 
       // If it's an event and Google Calendar is connected, sync it
       if (task.is_event && task.start_time) {

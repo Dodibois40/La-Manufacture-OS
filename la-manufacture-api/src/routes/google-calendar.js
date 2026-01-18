@@ -125,7 +125,7 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
 export default async function googleCalendarRoutes(fastify) {
   // Helper to get an authenticated client
   async function getAuthClient(userId) {
-    const client = getOAuth2Client();
+    const _client = getOAuth2Client();
     // Clone or use a new instance to avoid singleton state issues
     const newClient = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,

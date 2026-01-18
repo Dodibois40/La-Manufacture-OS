@@ -127,36 +127,50 @@ export default async function teamFilesRoutes(fastify) {
   });
 
   // GET /api/team/files/:id/download - Telecharger un fichier
-  fastify.get('/files/:id/download', async (request, reply) => {
-    const { id } = request.params;
+  // Sécurisé: vérifie que le fichier appartient à l'utilisateur authentifié
+  fastify.get(
+    '/files/:id/download',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { userId } = request.user;
+      const { id } = request.params;
 
-    const result = await query('SELECT * FROM team_files WHERE id = $1', [id]);
+      const result = await query('SELECT * FROM team_files WHERE id = $1 AND user_id = $2', [
+        id,
+        userId,
+      ]);
 
-    if (result.rows.length === 0) {
-      return reply.status(404).send({ error: 'Fichier non trouve' });
+      if (result.rows.length === 0) {
+        return reply.status(404).send({ error: 'Fichier non trouve' });
+      }
+
+      const file = result.rows[0];
+      const filepath = join(UPLOADS_DIR, file.filename);
+
+      if (!existsSync(filepath)) {
+        return reply.status(404).send({ error: 'Fichier physique non trouve' });
+      }
+
+      reply.header('Content-Type', file.mime_type);
+      reply.header(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(file.original_name)}"`
+      );
+
+      return reply.send(createReadStream(filepath));
     }
-
-    const file = result.rows[0];
-    const filepath = join(UPLOADS_DIR, file.filename);
-
-    if (!existsSync(filepath)) {
-      return reply.status(404).send({ error: 'Fichier physique non trouve' });
-    }
-
-    reply.header('Content-Type', file.mime_type);
-    reply.header(
-      'Content-Disposition',
-      `attachment; filename="${encodeURIComponent(file.original_name)}"`
-    );
-
-    return reply.send(createReadStream(filepath));
-  });
+  );
 
   // GET /api/team/files/:id/view - Voir un fichier (pour affichage inline)
-  fastify.get('/files/:id/view', async (request, reply) => {
+  // Sécurisé: vérifie que le fichier appartient à l'utilisateur authentifié
+  fastify.get('/files/:id/view', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
     const { id } = request.params;
 
-    const result = await query('SELECT * FROM team_files WHERE id = $1', [id]);
+    const result = await query('SELECT * FROM team_files WHERE id = $1 AND user_id = $2', [
+      id,
+      userId,
+    ]);
 
     if (result.rows.length === 0) {
       return reply.status(404).send({ error: 'Fichier non trouve' });
@@ -206,34 +220,39 @@ export default async function teamFilesRoutes(fastify) {
   // ============================================
 
   // GET /api/team/atelier/:managerId/files - Fichiers pour l'atelier
-  fastify.get('/atelier/:managerId/files', async (request, reply) => {
-    const { managerId } = request.params;
-    const { member_id } = request.query;
+  // Sécurisé: nécessite authentification pour accéder aux fichiers
+  fastify.get(
+    '/atelier/:managerId/files',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { managerId } = request.params;
+      const { member_id } = request.query;
 
-    // Verifier que le manager existe
-    const managerCheck = await query('SELECT id FROM users WHERE id = $1', [managerId]);
-    if (managerCheck.rows.length === 0) {
-      return reply.status(404).send({ error: 'Compte non trouve' });
-    }
+      // Verifier que le manager existe
+      const managerCheck = await query('SELECT id FROM users WHERE id = $1', [managerId]);
+      if (managerCheck.rows.length === 0) {
+        return reply.status(404).send({ error: 'Compte non trouve' });
+      }
 
-    // Recuperer les fichiers globaux + ceux du membre si specifie
-    let sql = `
+      // Recuperer les fichiers globaux + ceux du membre si specifie
+      let sql = `
       SELECT f.id, f.original_name, f.mime_type, f.size, f.created_at,
              CASE WHEN f.team_member_id IS NULL THEN 'global' ELSE 'member' END as scope
       FROM team_files f
       WHERE f.user_id = $1
         AND (f.team_member_id IS NULL`;
 
-    const params = [managerId];
+      const params = [managerId];
 
-    if (member_id) {
-      sql += ` OR f.team_member_id = $2`;
-      params.push(member_id);
+      if (member_id) {
+        sql += ` OR f.team_member_id = $2`;
+        params.push(member_id);
+      }
+
+      sql += `) ORDER BY f.created_at DESC`;
+
+      const result = await query(sql, params);
+      return { files: result.rows };
     }
-
-    sql += `) ORDER BY f.created_at DESC`;
-
-    const result = await query(sql, params);
-    return { files: result.rows };
-  });
+  );
 }

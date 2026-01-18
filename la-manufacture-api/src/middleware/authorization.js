@@ -58,7 +58,7 @@ export async function requireMember(request, reply) {
  * This adds member profile to request if exists, but doesn't block access
  * Useful for routes that work for both managers and members
  */
-export async function loadTeamMemberProfile(request, reply) {
+export async function loadTeamMemberProfile(request, _reply) {
   const { userId } = request.user;
 
   try {

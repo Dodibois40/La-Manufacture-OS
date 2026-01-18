@@ -281,11 +281,11 @@ export const stopQuoteRotation = () => {
 
 // Edit mode state (main day view)
 let editMode = false;
-let selectedTasks = new Set();
+const selectedTasks = new Set();
 
 // Edit mode state (day detail view in planning)
 let editModeDetail = false;
-let selectedTasksDetail = new Set();
+const selectedTasksDetail = new Set();
 
 // Focus 3 collapse state (session only)
 let moreTasksExpanded = false;
@@ -1192,7 +1192,7 @@ export const renderDay = state => {
 };
 
 // Planning calendar state
-let currentMonth = new Date();
+const currentMonth = new Date();
 let selectedDate = null;
 
 export const renderWeek = state => {

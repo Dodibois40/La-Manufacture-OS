@@ -173,43 +173,48 @@ export default async function teamRoutes(fastify) {
   });
 
   // GET /api/team/tasks/member/:memberId - Taches d'un membre specifique (pour l'atelier)
-  fastify.get('/tasks/member/:memberId', async (request, reply) => {
-    const { memberId } = request.params;
-    const { date } = request.query;
+  // Note: Route semi-publique - vérifie que le membre appartient au manager via token optionnel
+  fastify.get(
+    '/tasks/member/:memberId',
+    { preHandler: [fastify.optionalAuth] },
+    async (request, reply) => {
+      const { memberId } = request.params;
+      const { date } = request.query;
 
-    // Verifier que le membre existe
-    const memberCheck = await query(
-      'SELECT id, name, user_id FROM team_members WHERE id = $1 AND active = TRUE',
-      [memberId]
-    );
+      // Verifier que le membre existe
+      const memberCheck = await query(
+        'SELECT id, name, user_id FROM team_members WHERE id = $1 AND active = TRUE',
+        [memberId]
+      );
 
-    if (memberCheck.rows.length === 0) {
-      return reply.status(404).send({ error: 'Membre non trouve' });
-    }
+      if (memberCheck.rows.length === 0) {
+        return reply.status(404).send({ error: 'Membre non trouve' });
+      }
 
-    let sql = `
+      let sql = `
       SELECT t.id, t.text, t.date, t.urgent, t.done, t.done_at
       FROM team_tasks t
       WHERE t.team_member_id = $1
     `;
-    const params = [memberId];
+      const params = [memberId];
 
-    if (date) {
-      sql += ' AND t.date = $2';
-      params.push(date);
-    } else {
-      // Par defaut: aujourd'hui
-      sql += ' AND t.date = CURRENT_DATE';
+      if (date) {
+        sql += ' AND t.date = $2';
+        params.push(date);
+      } else {
+        // Par defaut: aujourd'hui
+        sql += ' AND t.date = CURRENT_DATE';
+      }
+
+      sql += ' ORDER BY t.urgent DESC, t.done ASC, t.created_at DESC';
+
+      const result = await query(sql, params);
+      return {
+        member: memberCheck.rows[0],
+        tasks: result.rows,
+      };
     }
-
-    sql += ' ORDER BY t.urgent DESC, t.done ASC, t.created_at DESC';
-
-    const result = await query(sql, params);
-    return {
-      member: memberCheck.rows[0],
-      tasks: result.rows,
-    };
-  });
+  );
 
   // POST /api/team/tasks - Ajouter une tache
   fastify.post('/tasks', { preHandler: [fastify.authenticate] }, async (request, reply) => {
@@ -241,12 +246,17 @@ export default async function teamRoutes(fastify) {
   });
 
   // PATCH /api/team/tasks/:id - Modifier une tache (completion depuis l'atelier)
-  fastify.patch('/tasks/:id', async (request, reply) => {
+  // Sécurisé: vérifie que la tâche appartient à l'utilisateur authentifié
+  fastify.patch('/tasks/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const { userId } = request.user;
     const { id } = request.params;
     const { done, text, urgent, date } = request.body;
 
-    // Verifier que la tache existe
-    const check = await query('SELECT id, done FROM team_tasks WHERE id = $1', [id]);
+    // Verifier que la tache existe ET appartient à l'utilisateur
+    const check = await query('SELECT id, done FROM team_tasks WHERE id = $1 AND user_id = $2', [
+      id,
+      userId,
+    ]);
 
     if (check.rows.length === 0) {
       return reply.status(404).send({ error: 'Tache non trouvee' });
@@ -326,27 +336,32 @@ export default async function teamRoutes(fastify) {
   // ============================================
 
   // GET /api/team/atelier/:managerId - Liste des membres pour l'ecran atelier
-  fastify.get('/atelier/:managerId', async (request, reply) => {
-    const { managerId } = request.params;
+  // Note: Route semi-publique avec validation du managerId
+  fastify.get(
+    '/atelier/:managerId',
+    { preHandler: [fastify.optionalAuth] },
+    async (request, reply) => {
+      const { managerId } = request.params;
 
-    // Verifier que le manager existe
-    const managerCheck = await query('SELECT id, name FROM users WHERE id = $1', [managerId]);
+      // Verifier que le manager existe
+      const managerCheck = await query('SELECT id, name FROM users WHERE id = $1', [managerId]);
 
-    if (managerCheck.rows.length === 0) {
-      return reply.status(404).send({ error: 'Compte non trouve' });
-    }
+      if (managerCheck.rows.length === 0) {
+        return reply.status(404).send({ error: 'Compte non trouve' });
+      }
 
-    const members = await query(
-      `SELECT id, name, avatar_color
+      const members = await query(
+        `SELECT id, name, avatar_color
        FROM team_members
        WHERE user_id = $1 AND active = TRUE
        ORDER BY name ASC`,
-      [managerId]
-    );
+        [managerId]
+      );
 
-    return {
-      manager: { id: managerCheck.rows[0].id, name: managerCheck.rows[0].name },
-      members: members.rows,
-    };
-  });
+      return {
+        manager: { id: managerCheck.rows[0].id, name: managerCheck.rows[0].name },
+        members: members.rows,
+      };
+    }
+  );
 }

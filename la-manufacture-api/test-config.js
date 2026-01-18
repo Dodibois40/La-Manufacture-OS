@@ -25,7 +25,7 @@ const requiredVars = [
   'FRONTEND_URL',
 ];
 
-let missingVars = [];
+const missingVars = [];
 requiredVars.forEach(varName => {
   const value = process.env[varName];
   const status = value && value !== 'A_REMPLIR' && value !== 'A_REMPLIRE' ? '✅' : '❌';

@@ -5,7 +5,7 @@ import { toast } from './utils.js';
 let teamMembers = [];
 let teamFiles = [];
 let currentUserId = null;
-let onMembersChangeCallbacks = [];
+const onMembersChangeCallbacks = [];
 
 // Export team members for other modules (inbox)
 export const getTeamMembers = () => teamMembers;

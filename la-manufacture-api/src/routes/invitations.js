@@ -314,7 +314,7 @@ export default async function invitationsRoutes(fastify) {
 
   // POST /api/invitations/:token/accept - Accept invitation (AUTHENTICATED)
   fastify.post('/:token/accept', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    const { userId, clerkId } = request.user;
+    const { userId, clerkId: _clerkId } = request.user;
     const { token } = request.params;
 
     try {

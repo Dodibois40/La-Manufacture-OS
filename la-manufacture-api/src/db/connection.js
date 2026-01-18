@@ -22,7 +22,7 @@ pool.on('connect', () => {
 
 pool.on('error', err => {
   console.error('❌ Unexpected error on idle client', err);
-  process.exit(-1);
+  // Ne pas crash le serveur - laisser le pool se reconnecter automatiquement
 });
 
 export async function query(text, params) {

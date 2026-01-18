@@ -22,11 +22,11 @@ function buildPrompt(text) {
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowDate = tomorrow.toISOString().split('T')[0];
-  const tomorrowDayName = dayNames[tomorrow.getDay()];
+  const _tomorrowDayName = dayNames[tomorrow.getDay()];
 
   const afterTomorrow = new Date(now);
   afterTomorrow.setDate(afterTomorrow.getDate() + 2);
-  const afterTomorrowDate = afterTomorrow.toISOString().split('T')[0];
+  const _afterTomorrowDate = afterTomorrow.toISOString().split('T')[0];
 
   // Jours de la semaine
   const weekDays = [];
@@ -115,7 +115,7 @@ async function testParser(testName, inputText) {
     try {
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       result = JSON.parse(jsonMatch[0]);
-    } catch (e) {
+    } catch (_e) {
       console.log(`❌ JSON Parse Error`);
       console.log(responseText);
       return { success: false };
@@ -130,7 +130,7 @@ async function testParser(testName, inputText) {
       `✅ ${items.length} item(s) | ⏱️ ${processingTime}ms | 📊 ${tasks}T ${events}E ${notes}N`
     );
 
-    items.forEach((item, i) => {
+    items.forEach((item, _i) => {
       const conf = item.metadata?.confidence
         ? ` (${(item.metadata.confidence * 100).toFixed(0)}%)`
         : '';
