@@ -26,7 +26,7 @@ npm-debug.log*
 Thumbs.db
 
 # Claude Code
-.claude/
+.claude/settings.local.json
 tmpclaude-*
 
 # Netlify
