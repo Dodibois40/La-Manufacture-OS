@@ -90,6 +90,11 @@ const closeAllModals = () => {
 };
 
 export const setView = name => {
+  console.log('[setView] Switching to:', name, 'from:', currentView);
+  console.log(
+    '[setView] instant-auth-mode on body:',
+    document.body.classList.contains('instant-auth-mode')
+  );
   const nav = document.querySelector('nav');
 
   // Close any open modals when switching views
@@ -505,12 +510,19 @@ const initApp = async () => {
 
   // Helper function for post-login flow (defined early so it's available everywhere)
   async function handlePostLogin() {
+    console.log(
+      '[App] handlePostLogin called, currentView:',
+      currentView,
+      'postLoginCompleted:',
+      postLoginCompleted
+    );
     // Prevent multiple calls (race condition when Clerk init completes while user navigates)
     if (postLoginCompleted) {
       console.log('[App] handlePostLogin already completed, skipping');
       return;
     }
     postLoginCompleted = true;
+    console.log('[App] handlePostLogin executing, removing instant-auth-mode');
 
     // Remove instant-auth-mode CSS override
     document.body.classList.remove('instant-auth-mode');
