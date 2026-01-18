@@ -3,8 +3,10 @@ node_modules/
 
 # Build output
 dist/
+build/
+.vite/
 
-# Environment files (local secrets)
+# Environment files
 .env
 .env.local
 .env.*.local
@@ -23,14 +25,15 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Claude
+# Claude Code
 .claude/
 tmpclaude-*
 
-# Temp
-your-project/
-nul
+# Netlify
+.netlify/
 
-# Local Netlify folder
-.netlify
-*.env.local
+# Uploads (local dev)
+la-manufacture-api/uploads/
+
+# Coverage
+coverage/
