@@ -1,9 +1,8 @@
 // Swipe Gestures for Tasks
-// Swipe left = tomorrow, Swipe right = done
+// Swipe right = done, Swipe left = delete
 
 const SWIPE_THRESHOLD = 80;
-const SWIPE_DELETE_THRESHOLD = 150; // Long swipe left = delete
-const SWIPE_MAX = 180;
+const SWIPE_MAX = 120;
 
 export const initSwipeGestures = (container, callbacks) => {
   let startX = 0;
@@ -74,20 +73,12 @@ export const initSwipeGestures = (container, callbacks) => {
           callbacks.onDone?.(taskId);
           resetTask(taskEl);
         }, 200);
-      } else if (Math.abs(currentX) >= SWIPE_DELETE_THRESHOLD) {
-        // Long swipe left = delete
+      } else {
+        // Swipe left = delete
         taskEl.style.transform = `translateX(-100%)`;
         taskEl.style.opacity = '0';
         setTimeout(() => {
           callbacks.onDelete?.(taskId);
-          resetTask(taskEl);
-        }, 200);
-      } else {
-        // Short swipe left = tomorrow
-        taskEl.style.transform = `translateX(-100%)`;
-        taskEl.style.opacity = '0';
-        setTimeout(() => {
-          callbacks.onTomorrow?.(taskId);
           resetTask(taskEl);
         }, 200);
       }
@@ -118,10 +109,9 @@ export const initSwipeGestures = (container, callbacks) => {
     }
 
     const progress = Math.min(Math.abs(x) / SWIPE_THRESHOLD, 1);
-    const deleteProgress = Math.abs(x) / SWIPE_DELETE_THRESHOLD;
-    const isDeleteZone = Math.abs(x) >= SWIPE_DELETE_THRESHOLD;
 
     if (x > 0) {
+      // Swipe right = done
       indicator.className = 'swipe-indicator swipe-done';
       indicator.innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -132,26 +122,14 @@ export const initSwipeGestures = (container, callbacks) => {
       indicator.style.opacity = progress;
       indicator.style.left = '16px';
       indicator.style.right = 'auto';
-    } else if (isDeleteZone) {
-      // Long swipe left = delete
+    } else {
+      // Swipe left = delete
       indicator.className = 'swipe-indicator swipe-delete';
       indicator.innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
         </svg>
-        <span>Supprimer!</span>
-      `;
-      indicator.style.opacity = 1;
-      indicator.style.right = '16px';
-      indicator.style.left = 'auto';
-    } else {
-      // Short swipe left = tomorrow
-      indicator.className = 'swipe-indicator swipe-tomorrow';
-      indicator.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-        <span>${progress >= 1 ? 'Demain!' : 'Demain'}</span>
+        <span>${progress >= 1 ? 'Supprimer!' : 'Supprimer'}</span>
       `;
       indicator.style.opacity = progress;
       indicator.style.right = '16px';

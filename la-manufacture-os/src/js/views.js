@@ -1160,7 +1160,7 @@ export const renderDay = state => {
     }
   }
 
-  // Init swipe gestures
+  // Init swipe gestures: right = done, left = delete
   initSwipeGestures(dayList, {
     onDone: taskId => {
       const task = state.tasks.find(t => t.id === taskId);
@@ -1170,18 +1170,6 @@ export const renderDay = state => {
         saveState(state);
         celebrate();
         toast('Fait!');
-        appCallbacks.render?.();
-      }
-    },
-    onTomorrow: taskId => {
-      const task = state.tasks.find(t => t.id === taskId);
-      if (task) {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        task.date = isoLocal(d);
-        task.updatedAt = nowISO();
-        saveState(state);
-        toast('-> Demain');
         appCallbacks.render?.();
       }
     },
