@@ -9,6 +9,48 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+/**
+ * Extract the first complete JSON object from text by matching balanced braces.
+ * Handles nested objects and strings containing braces.
+ */
+function extractJSON(text) {
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === '\\' && inString) {
+      escape = true;
+      continue;
+    }
+
+    if (char === '"' && !escape) {
+      inString = !inString;
+      continue;
+    }
+
+    if (!inString) {
+      if (char === '{') depth++;
+      if (char === '}') depth--;
+      if (depth === 0) {
+        return text.substring(start, i + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
 export default async function aiRoutes(fastify) {
   // Focus Mode - AI decides next task
   fastify.post('/focus-mode', { preHandler: [fastify.authenticate] }, async (request, reply) => {
@@ -274,10 +316,10 @@ Reponds UNIQUEMENT en JSON:
       // Parse JSON response
       let result;
       try {
-        // Extract JSON from response (non-greedy)
-        const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
-        if (jsonMatch) {
-          result = JSON.parse(jsonMatch[0]);
+        // Extract JSON from response using balanced brace matching
+        const jsonString = extractJSON(responseText);
+        if (jsonString) {
+          result = JSON.parse(jsonString);
         } else {
           throw new Error('No JSON found');
         }
@@ -1142,12 +1184,12 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
 
       let aiResponse;
       try {
-        // Extract JSON from response (non-greedy pour capturer le premier JSON valide)
-        const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
-        if (!jsonMatch) {
+        // Extract JSON from response using balanced brace matching
+        const jsonString = extractJSON(responseText);
+        if (!jsonString) {
           throw new Error('No JSON found in response');
         }
-        aiResponse = JSON.parse(jsonMatch[0]);
+        aiResponse = JSON.parse(jsonString);
       } catch (parseError) {
         fastify.log.error('AI response JSON parse failed:', parseError);
         fastify.log.error('Raw response:', responseText);
@@ -1483,9 +1525,9 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
 
         let aiResponse;
         try {
-          const jsonMatch = responseText.match(/\{[\s\S]*?\}/); // Non-greedy
-          if (!jsonMatch) throw new Error('No JSON found');
-          aiResponse = JSON.parse(jsonMatch[0]);
+          const jsonString = extractJSON(responseText);
+          if (!jsonString) throw new Error('No JSON found');
+          aiResponse = JSON.parse(jsonString);
         } catch (parseError) {
           fastify.log.error('AI response JSON parse failed:', parseError);
           fastify.log.error('Raw response:', responseText);
@@ -1810,9 +1852,9 @@ Réponds UNIQUEMENT en JSON valide.`;
             let learnedRule = {};
             try {
               const ruleText = ruleResponse.content[0].text;
-              const jsonMatch = ruleText.match(/\{[\s\S]*?\}/); // Non-greedy
-              if (jsonMatch) {
-                learnedRule = JSON.parse(jsonMatch[0]);
+              const jsonString = extractJSON(ruleText);
+              if (jsonString) {
+                learnedRule = JSON.parse(jsonString);
               }
             } catch (e) {
               learnedRule = {
