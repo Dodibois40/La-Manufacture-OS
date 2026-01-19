@@ -1648,6 +1648,66 @@ textarea:focus {
 }
 
 /* ========================================
+   SWIPE GESTURES - iOS STYLE
+   ======================================== */
+
+.swipe-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.swipe-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.swipe-bg svg {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.15s ease;
+}
+
+.swipe-bg span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.swipe-bg-left {
+  background: linear-gradient(90deg, #ff453a 0%, #ff6961 100%);
+  color: white;
+  justify-content: flex-end;
+}
+
+.swipe-bg-right {
+  background: linear-gradient(90deg, #30d158 0%, #34c759 100%);
+  color: white;
+  justify-content: flex-start;
+}
+
+.swipe-bg.active {
+  opacity: 1;
+}
+
+.swipe-wrapper .task {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
+  background: var(--bg-secondary, #2c2c2e);
+}
+
+/* ========================================
    PROJECT/DURATION BADGES IN TASKS
    ======================================== */
 
