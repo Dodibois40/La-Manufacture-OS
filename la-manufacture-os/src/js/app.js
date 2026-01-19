@@ -632,13 +632,6 @@ const initApp = async () => {
         }
       });
 
-      // ManualAddBtn (Today view "✎"): ouvre command bar
-      document.getElementById('manualAddBtn')?.addEventListener('click', () => {
-        if (window.openCommandBar) {
-          window.openCommandBar();
-        }
-      });
-
       initQuickDumpShortcut(state, handleTasksAdded);
 
       initNotifications();
@@ -779,13 +772,6 @@ const initApp = async () => {
       window.openUniversalInput();
     } else {
       openQuickDump(state, handleTasksAdded);
-    }
-  });
-
-  // ManualAddBtn (Today view "✎"): ouvre command bar pour ajout manuel
-  document.getElementById('manualAddBtn')?.addEventListener('click', () => {
-    if (window.openCommandBar) {
-      window.openCommandBar();
     }
   });
 

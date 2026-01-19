@@ -623,6 +623,32 @@ textarea:focus {
   color: var(--accent);
 }
 
+/* Settings Button in Header */
+.settings-btn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+}
+
+.settings-btn svg {
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.5);
+  transition:
+    color 0.2s,
+    transform 0.3s;
+}
+
+.settings-btn:hover svg {
+  color: var(--accent);
+  transform: rotate(45deg);
+}
+
 .notification-badge {
   position: absolute;
   top: 2px;

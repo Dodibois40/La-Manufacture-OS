@@ -562,41 +562,4 @@ select {
     font-size: 0.8rem;
     justify-content: center;
   }
-
-  /* ═══════════════════════════════════════════════════════════════
-     FLOATING MANUAL ADD BUTTON - Thumb-friendly position
-     ═══════════════════════════════════════════════════════════════ */
-
-  #manualAddBtn {
-    position: fixed !important;
-    bottom: calc(90px + var(--safe-bottom));
-    right: 20px;
-    left: auto !important;
-    width: 56px !important;
-    height: 56px !important;
-    border-radius: 50% !important;
-    background: var(--accent) !important;
-    border: none !important;
-    box-shadow: 0 4px 20px rgba(10, 132, 255, 0.4);
-    z-index: 100;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #manualAddBtn svg {
-    width: 24px !important;
-    height: 24px !important;
-    color: white;
-  }
-
-  #manualAddBtn:active {
-    transform: scale(0.95);
-    box-shadow: 0 2px 10px rgba(10, 132, 255, 0.3);
-  }
-
-  /* Hide from day-actions flow */
-  .day-actions #manualAddBtn {
-    position: fixed !important;
-  }
 }
