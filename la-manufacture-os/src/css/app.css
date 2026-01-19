@@ -10,11 +10,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* FAB - Hidden on desktop, shown on mobile via mobile.css */
-.fab-add {
-  display: none;
-}
-
 /* === Layout === */
 .container {
   max-width: 600px;
