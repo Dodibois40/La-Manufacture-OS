@@ -30,16 +30,15 @@
   transform: scale(0.98);
 }
 
-/* Swipe state - disable all CSS transitions/transforms */
+/* Swipe state - disable CSS transitions, let JS control transform */
 .task.swiping {
   transition: none !important;
-  transform: var(--swipe-x, translateX(0)) !important;
   z-index: 100;
 }
 
 .task.swiping:hover,
 .task.swiping:active {
-  transform: var(--swipe-x, translateX(0)) !important;
+  transform: none;
 }
 
 /* Completed Task */
