@@ -1,34 +1,69 @@
 // Swipe Gestures for Tasks
-// Swipe RIGHT = Done, Swipe LEFT = Delete
+// Swipe RIGHT = Done (green), Swipe LEFT = Delete (red)
 
 const SWIPE_THRESHOLD = 80;
 
 export const initSwipeGestures = (container, callbacks) => {
   let startX = 0;
+  let startY = 0;
   let currentX = 0;
   let taskEl = null;
+  let isHorizontalSwipe = null; // null = undecided, true = horizontal, false = vertical
 
-  const start = (x, target) => {
+  const start = (x, y, target) => {
     const task = target.closest('.task');
     if (!task || target.closest('.check') || target.closest('.task-more')) return;
 
     taskEl = task;
     startX = x;
+    startY = y;
     currentX = 0;
+    isHorizontalSwipe = null;
 
     // Add swiping class to disable CSS transitions
     taskEl.classList.add('swiping');
   };
 
-  const move = x => {
+  const move = (x, y, e) => {
     if (!taskEl) return;
 
-    currentX = x - startX;
+    const deltaX = x - startX;
+    const deltaY = y - startY;
+
+    // Determine swipe direction on first significant movement
+    if (isHorizontalSwipe === null && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+      isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
+    }
+
+    // If vertical scroll, cancel swipe
+    if (isHorizontalSwipe === false) {
+      reset();
+      return;
+    }
+
+    // If horizontal swipe, prevent page navigation
+    if (isHorizontalSwipe === true && e) {
+      e.preventDefault();
+    }
+
+    currentX = deltaX;
     // Limit swipe distance
     currentX = Math.max(-120, Math.min(120, currentX));
 
-    // Use CSS variable for transform
-    taskEl.style.setProperty('--swipe-x', `translateX(${currentX}px)`);
+    // Visual feedback with colors
+    if (currentX > 30) {
+      // Swiping right = green (done)
+      const intensity = Math.min(currentX / 120, 1);
+      taskEl.style.background = `rgba(52, 199, 89, ${intensity * 0.3})`;
+    } else if (currentX < -30) {
+      // Swiping left = red (delete)
+      const intensity = Math.min(Math.abs(currentX) / 120, 1);
+      taskEl.style.background = `rgba(255, 69, 58, ${intensity * 0.3})`;
+    } else {
+      taskEl.style.background = '';
+    }
+
+    taskEl.style.transform = `translateX(${currentX}px)`;
   };
 
   const end = () => {
@@ -38,13 +73,13 @@ export const initSwipeGestures = (container, callbacks) => {
 
     // Remove swiping class and apply final animation
     taskEl.classList.remove('swiping');
-    taskEl.style.removeProperty('--swipe-x');
-    taskEl.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+    taskEl.style.transition = 'transform 0.2s ease, opacity 0.2s ease, background 0.2s ease';
 
     if (currentX > SWIPE_THRESHOLD) {
       // Swipe RIGHT = Done
       taskEl.style.transform = 'translateX(100%)';
       taskEl.style.opacity = '0';
+      taskEl.style.background = 'rgba(52, 199, 89, 0.5)';
       setTimeout(() => {
         callbacks.onDone?.(taskId);
         reset();
@@ -53,6 +88,7 @@ export const initSwipeGestures = (container, callbacks) => {
       // Swipe LEFT = Delete
       taskEl.style.transform = 'translateX(-100%)';
       taskEl.style.opacity = '0';
+      taskEl.style.background = 'rgba(255, 69, 58, 0.5)';
       setTimeout(() => {
         callbacks.onDelete?.(taskId);
         reset();
@@ -60,6 +96,7 @@ export const initSwipeGestures = (container, callbacks) => {
     } else {
       // Snap back
       taskEl.style.transform = '';
+      taskEl.style.background = '';
       reset();
     }
   };
@@ -69,26 +106,37 @@ export const initSwipeGestures = (container, callbacks) => {
       taskEl.style.transform = '';
       taskEl.style.opacity = '';
       taskEl.style.transition = '';
+      taskEl.style.background = '';
+      taskEl.classList.remove('swiping');
     }
     taskEl = null;
     currentX = 0;
+    isHorizontalSwipe = null;
   };
 
-  // Touch events
-  container.addEventListener('touchstart', e => start(e.touches[0].clientX, e.target), {
-    passive: true,
-  });
-  container.addEventListener('touchmove', e => move(e.touches[0].clientX), { passive: true });
+  // Touch events - passive: false to allow preventDefault for horizontal swipes
+  container.addEventListener(
+    'touchstart',
+    e => start(e.touches[0].clientX, e.touches[0].clientY, e.target),
+    {
+      passive: true,
+    }
+  );
+  container.addEventListener(
+    'touchmove',
+    e => move(e.touches[0].clientX, e.touches[0].clientY, e),
+    { passive: false }
+  );
   container.addEventListener('touchend', end);
 
   // Mouse events (for desktop testing)
   let mouseDown = false;
   container.addEventListener('mousedown', e => {
     mouseDown = true;
-    start(e.clientX, e.target);
+    start(e.clientX, e.clientY, e.target);
   });
   container.addEventListener('mousemove', e => {
-    if (mouseDown) move(e.clientX);
+    if (mouseDown) move(e.clientX, e.clientY, null);
   });
   container.addEventListener('mouseup', () => {
     mouseDown = false;

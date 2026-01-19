@@ -1096,22 +1096,34 @@ export const renderDay = state => {
 
   // Init swipe gestures: right = done, left = delete
   initSwipeGestures(dayList, {
-    onDone: taskId => {
+    onDone: async taskId => {
       const task = state.tasks.find(t => t.id === taskId);
       if (task && !task.done) {
         task.done = true;
         task.updatedAt = nowISO();
+
+        // Sync to API if authenticated
+        const isAuthenticated = isLoggedIn() || isSignedIn();
+        if (isApiMode && isAuthenticated) {
+          try {
+            await taskApi.update(taskId, { done: true, updatedAt: task.updatedAt });
+          } catch (err) {
+            console.error('Update error:', err);
+          }
+        }
+
         saveState(state);
         celebrate();
-        toast('Fait!');
+        toast('✅ Fait!');
         appCallbacks.render?.();
       }
     },
     onDelete: async taskId => {
       const task = state.tasks.find(t => t.id === taskId);
       if (task) {
-        // Delete from API if logged in
-        if (isApiMode && isLoggedIn()) {
+        // Delete from API if authenticated
+        const isAuthenticated = isLoggedIn() || isSignedIn();
+        if (isApiMode && isAuthenticated) {
           try {
             await taskApi.delete(taskId);
           } catch (err) {
