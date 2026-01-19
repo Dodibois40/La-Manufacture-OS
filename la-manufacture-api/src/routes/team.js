@@ -1,5 +1,34 @@
+/**
+ * Team Routes - Manage team members and their tasks
+ *
+ * Endpoints:
+ * - GET /team/members         - List team members
+ * - POST /team/members        - Create team member
+ * - PATCH /team/members/:id   - Update team member
+ * - DELETE /team/members/:id  - Delete team member
+ * - GET /team/tasks           - List team tasks (filterable)
+ * - GET /team/tasks/member/:memberId - Get tasks for specific member
+ * - POST /team/tasks          - Create team task
+ * - PATCH /team/tasks/:id     - Update team task
+ * - DELETE /team/tasks/:id    - Delete team task
+ * - GET /team/atelier/:managerId - Public atelier endpoint
+ *
+ * @module routes/team
+ */
+
 import { query } from '../db/connection.js';
 
+/**
+ * @typedef {import('../types.js').TeamMember} TeamMember
+ * @typedef {import('../types.js').TeamTask} TeamTask
+ * @typedef {import('../types.js').TeamMemberCreateInput} TeamMemberCreateInput
+ * @typedef {import('../types.js').TeamTaskCreateInput} TeamTaskCreateInput
+ */
+
+/**
+ * Register team routes
+ * @param {import('fastify').FastifyInstance} fastify - Fastify instance
+ */
 export default async function teamRoutes(fastify) {
   // ============================================
   // TEAM MEMBERS

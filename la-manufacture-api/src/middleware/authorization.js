@@ -174,18 +174,14 @@ export async function canAccessTask(request, reply) {
  * @param {number} userId - User ID
  * @param {number} memberId - Team member ID
  * @returns {Promise<boolean>}
+ * @throws {Error} Database query errors are propagated (fail-safe)
  */
 export async function userOwnsTeamMember(userId, memberId) {
-  try {
-    const result = await query('SELECT id FROM team_members WHERE id = $1 AND user_id = $2', [
-      memberId,
-      userId,
-    ]);
-    return result.rows.length > 0;
-  } catch (error) {
-    console.error('Error checking team member ownership:', error);
-    return false;
-  }
+  const result = await query('SELECT id FROM team_members WHERE id = $1 AND user_id = $2', [
+    memberId,
+    userId,
+  ]);
+  return result.rows.length > 0;
 }
 
 /**
@@ -193,16 +189,12 @@ export async function userOwnsTeamMember(userId, memberId) {
  * @param {number} userId - User ID
  * @param {number} invitationId - Invitation ID
  * @returns {Promise<boolean>}
+ * @throws {Error} Database query errors are propagated (fail-safe)
  */
 export async function userOwnsInvitation(userId, invitationId) {
-  try {
-    const result = await query(
-      'SELECT id FROM team_invitations WHERE id = $1 AND manager_id = $2',
-      [invitationId, userId]
-    );
-    return result.rows.length > 0;
-  } catch (error) {
-    console.error('Error checking invitation ownership:', error);
-    return false;
-  }
+  const result = await query('SELECT id FROM team_invitations WHERE id = $1 AND manager_id = $2', [
+    invitationId,
+    userId,
+  ]);
+  return result.rows.length > 0;
 }

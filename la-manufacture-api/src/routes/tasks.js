@@ -1,5 +1,34 @@
+/**
+ * Tasks Routes - CRUD operations for personal tasks
+ *
+ * Endpoints:
+ * - GET /tasks          - List all tasks (owned + shared)
+ * - GET /tasks/today    - Get today's tasks
+ * - GET /tasks/late     - Get overdue tasks
+ * - POST /tasks/carry-over - Move/duplicate late tasks to today
+ * - POST /tasks         - Create task
+ * - PATCH /tasks/:id    - Update task
+ * - DELETE /tasks/:id   - Delete task
+ * - POST /tasks/:id/time - Add time tracking
+ * - POST /tasks/:id/share - Share task with user
+ * - GET /tasks/:id/shares - Get task shares
+ * - DELETE /tasks/:id/share/:targetUserId - Remove share
+ *
+ * @module routes/tasks
+ */
+
 import { query } from '../db/connection.js';
 
+/**
+ * @typedef {import('../types.js').Task} Task
+ * @typedef {import('../types.js').TaskCreateInput} TaskCreateInput
+ * @typedef {import('../types.js').TaskUpdateInput} TaskUpdateInput
+ */
+
+/**
+ * Register tasks routes
+ * @param {import('fastify').FastifyInstance} fastify - Fastify instance
+ */
 export default async function tasksRoutes(fastify) {
   // Get all tasks for user (owned + shared with user)
   fastify.get('/', { preHandler: [fastify.authenticate] }, async request => {

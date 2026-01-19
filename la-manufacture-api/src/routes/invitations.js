@@ -1,13 +1,45 @@
+/**
+ * Invitations Routes - Team member invitation system
+ *
+ * Endpoints:
+ * - POST /invitations              - Create and send invitation
+ * - GET /invitations               - List invitations (manager only)
+ * - DELETE /invitations/:id        - Revoke invitation
+ * - POST /invitations/:id/resend   - Resend invitation email
+ * - GET /invitations/validate/:token - Validate token (public)
+ * - POST /invitations/:token/accept  - Accept invitation (auth)
+ *
+ * Flow:
+ * 1. Manager creates invitation → email sent with token
+ * 2. Invitee validates token → sees invitation details
+ * 3. Invitee signs up/logs in → accepts invitation
+ * 4. Team member profile created/linked
+ *
+ * @module routes/invitations
+ */
+
 import { query } from '../db/connection.js';
 import { sendInvitationEmail } from '../services/email.js';
 import { requireManager, userOwnsInvitation } from '../middleware/authorization.js';
 import { randomBytes } from 'crypto';
 
-// Generate secure token for invitation
+/**
+ * @typedef {import('../types.js').TeamInvitation} TeamInvitation
+ * @typedef {import('../types.js').InvitationCreateInput} InvitationCreateInput
+ */
+
+/**
+ * Generate cryptographically secure invitation token
+ * @returns {string} 64-character hex token
+ */
 function generateInvitationToken() {
   return randomBytes(32).toString('hex');
 }
 
+/**
+ * Register invitations routes
+ * @param {import('fastify').FastifyInstance} fastify - Fastify instance
+ */
 export default async function invitationsRoutes(fastify) {
   // POST /api/invitations - Create invitation and send email
   fastify.post(

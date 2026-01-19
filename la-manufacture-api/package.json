@@ -7,7 +7,15 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "db:migrate": "node src/db/migrate.js"
+    "db:migrate": "node src/db/migrate.js",
+    "db:migrate:status": "node src/db/migrate.js status",
+    "db:migrate:rollback": "node src/db/migrate.js rollback",
+    "test": "node --test tests/api-*.test.js",
+    "test:tasks": "node --test tests/api-tasks.test.js",
+    "test:team": "node --test tests/api-team.test.js",
+    "test:invitations": "node --test tests/api-invitations.test.js",
+    "test:parser": "node tests/test-parser-v5-hardcore.js && node tests/test-parser-v5-ultimate.js",
+    "test:all": "npm run test && npm run test:parser"
   },
   "keywords": [],
   "author": "",

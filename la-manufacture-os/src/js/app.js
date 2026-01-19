@@ -31,6 +31,7 @@ import { initGoogleCalendar, isGoogleConnected, syncTaskToGoogle } from './googl
 import { initDailyReview } from './daily-review.js';
 import { openQuickDump, initQuickDumpShortcut } from './quick-dump.js';
 import { initUniversalInput } from './universal-input.js';
+import { initPWA } from './pwa.js';
 
 // Load state (local first, then sync from API)
 const state = loadState();
@@ -504,6 +505,9 @@ const initApp = async () => {
 
   // Storage UI
   initStorageUI();
+
+  // PWA: Service Worker, Install Prompt, Offline Mode
+  await initPWA();
 
   // Flag to prevent multiple handlePostLogin calls (race condition fix)
   let postLoginCompleted = false;
