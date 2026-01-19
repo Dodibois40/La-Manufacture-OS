@@ -637,6 +637,28 @@ nav button.active .nav-icon {
   opacity: 0.8;
 }
 
+/* Add button - Primary action, larger and highlighted */
+nav button#nav-inbox {
+  background: rgba(10, 132, 255, 0.15);
+  transform: scale(1.15);
+  border-radius: 16px;
+  margin: 0 4px;
+}
+
+nav button#nav-inbox .nav-icon {
+  transform: scale(1.2);
+  color: var(--accent);
+}
+
+nav button#nav-inbox:hover {
+  background: rgba(10, 132, 255, 0.25);
+  transform: scale(1.45) translateY(-8px);
+}
+
+nav button#nav-inbox.active {
+  background: rgba(10, 132, 255, 0.3);
+}
+
 /* ========================================
    AUTH VIEW - SpaceX/Tesla Style
    ======================================== */
