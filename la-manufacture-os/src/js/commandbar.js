@@ -1,5 +1,6 @@
 import { isoLocal, ensureTask, nowISO, toast } from './utils.js';
 import { saveState, taskApi, isLoggedIn } from './storage.js';
+import { isSignedIn } from './clerk-auth.js';
 import {
   smartParseDate,
   smartParseUrgent,
@@ -186,8 +187,9 @@ export const initCommandBar = (state, renderCallback) => {
       );
 
       try {
-        // Sync to API if in API mode
-        if (isApiMode && isLoggedIn()) {
+        // Sync to API if in API mode (check both old auth and Clerk)
+        const isAuthenticated = isLoggedIn() || isSignedIn();
+        if (isApiMode && isAuthenticated) {
           const created = await taskApi.create(newTask);
           state.tasks.push(created);
 
