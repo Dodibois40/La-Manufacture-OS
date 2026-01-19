@@ -30,6 +30,18 @@
   transform: scale(0.98);
 }
 
+/* Swipe state - disable all CSS transitions/transforms */
+.task.swiping {
+  transition: none !important;
+  transform: var(--swipe-x, translateX(0)) !important;
+  z-index: 100;
+}
+
+.task.swiping:hover,
+.task.swiping:active {
+  transform: var(--swipe-x, translateX(0)) !important;
+}
+
 /* Completed Task */
 .task.completed {
   background: rgba(20, 20, 22, 0.4);
