@@ -1648,54 +1648,10 @@ textarea:focus {
 }
 
 /* ========================================
-   SWIPE GESTURES - iOS STYLE (CSS-only)
+   SWIPE GESTURES - Simple
    ======================================== */
 
-/* Swipe background containers using pseudo-elements */
-.task {
-  --swipe-progress: 0;
-  overflow: visible;
-}
-
-/* Left swipe indicator (delete - red) */
-.task.swiping-left::before {
-  content: '🗑️';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(90deg, #ff6961 0%, #ff453a 100%);
-  border-radius: 0 20px 20px 0;
-  font-size: 1.5rem;
-  opacity: var(--swipe-progress);
-  transform: translateX(100%);
-  z-index: -1;
-}
-
-/* Right swipe indicator (done - green) */
-.task.swiping-right::after {
-  content: '✓';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(90deg, #30d158 0%, #34c759 100%);
-  border-radius: 20px 0 0 20px;
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: white;
-  opacity: var(--swipe-progress);
-  transform: translateX(-100%);
-  z-index: -1;
-}
+/* Swipe is handled purely by JS transform - no fancy CSS needed */
 
 /* ========================================
    PROJECT/DURATION BADGES IN TASKS
