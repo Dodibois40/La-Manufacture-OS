@@ -1535,21 +1535,23 @@ textarea:focus {
   color: #ff6961;
 }
 
-/* Mobile: always show quick actions */
+/* Mobile: always show quick actions with touch-friendly sizes */
 @media (max-width: 640px) {
   .task-quick-actions {
     opacity: 1;
     transform: translateX(0);
+    gap: 8px; /* Plus d'espace entre boutons */
   }
 
   .quick-action-btn {
-    width: 28px;
-    height: 28px;
+    width: 44px; /* Apple HIG minimum touch target */
+    height: 44px;
+    padding: 10px;
   }
 
   .quick-action-btn svg {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
   }
 }
 

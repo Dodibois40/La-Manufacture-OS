@@ -379,12 +379,14 @@ export const initUniversalInput = (state, renderCallback) => {
         }
         console.log('[UniversalInput] Complete in', data.processingTime, 'ms');
 
-        // Auto-close and refresh
-        toast(`${data.stats.total} \u00e9l\u00e9ment(s) cr\u00e9\u00e9(s)`);
+        // Show success toast - user closes modal manually
+        toast(`${data.stats.total} élément(s) créé(s)`);
+
+        // Auto-close after showing success + refresh
         setTimeout(() => {
           close();
           renderCallback?.();
-        }, 500);
+        }, 1000);
       },
       onError: error => {
         console.error('[UniversalInput] Stream error:', error);
@@ -419,15 +421,13 @@ export const initUniversalInput = (state, renderCallback) => {
     }
   });
 
-  // Text input
+  // Text input - enable/disable create button based on content
+  // NO auto-submit on debounce - user must click "Créer" explicitly
   textInput.addEventListener('input', e => {
     currentText = e.target.value;
 
-    // Debounce to avoid too many requests
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      processInput(currentText);
-    }, 500);
+    // Enable create button if there's text
+    createBtn.disabled = !currentText.trim() || currentText.trim().length < 3;
   });
 
   // Create button (manual submit if not auto-created)

@@ -274,8 +274,8 @@ Reponds UNIQUEMENT en JSON:
       // Parse JSON response
       let result;
       try {
-        // Extract JSON from response (in case there's extra text)
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        // Extract JSON from response (non-greedy)
+        const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
         if (jsonMatch) {
           result = JSON.parse(jsonMatch[0]);
         } else {
@@ -1142,8 +1142,8 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
 
       let aiResponse;
       try {
-        // Extract JSON from response
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        // Extract JSON from response (non-greedy pour capturer le premier JSON valide)
+        const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
         if (!jsonMatch) {
           throw new Error('No JSON found in response');
         }
@@ -1183,7 +1183,16 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
       const itemsCreated = [];
       const items = aiResponse.items || [];
 
-      for (const item of items) {
+      // Déduplication par text + date + type pour éviter les doublons
+      const seen = new Set();
+      const uniqueItems = items.filter(item => {
+        const key = `${item.type}|${(item.text || '').toLowerCase()}|${item.date}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      for (const item of uniqueItems) {
         try {
           if (item.type === 'task' || item.type === 'event') {
             // ===== CRÉATION TASK/EVENT =====
@@ -1474,7 +1483,7 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
 
         let aiResponse;
         try {
-          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          const jsonMatch = responseText.match(/\{[\s\S]*?\}/); // Non-greedy
           if (!jsonMatch) throw new Error('No JSON found');
           aiResponse = JSON.parse(jsonMatch[0]);
         } catch (parseError) {
@@ -1500,7 +1509,16 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
         const itemsCreated = [];
         const items = aiResponse.items || [];
 
-        for (const item of items) {
+        // Déduplication par text + date + type
+        const seen = new Set();
+        const uniqueItems = items.filter(item => {
+          const key = `${item.type}|${(item.text || '').toLowerCase()}|${item.date}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        for (const item of uniqueItems) {
           try {
             if (item.type === 'task' || item.type === 'event') {
               const taskDate = item.date || temporal.currentDate;
@@ -1792,7 +1810,7 @@ Réponds UNIQUEMENT en JSON valide.`;
             let learnedRule = {};
             try {
               const ruleText = ruleResponse.content[0].text;
-              const jsonMatch = ruleText.match(/\{[\s\S]*\}/);
+              const jsonMatch = ruleText.match(/\{[\s\S]*?\}/); // Non-greedy
               if (jsonMatch) {
                 learnedRule = JSON.parse(jsonMatch[0]);
               }
@@ -2124,7 +2142,16 @@ Réponds UNIQUEMENT en JSON valide.`;
         const itemsCreated = [];
         const items = finalResult?.items || [];
 
-        for (const item of items) {
+        // Déduplication par text + date + type
+        const seen = new Set();
+        const uniqueItems = items.filter(item => {
+          const key = `${item.type}|${(item.text || '').toLowerCase()}|${item.date}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        for (const item of uniqueItems) {
           try {
             if (item.type === 'task' || item.type === 'event') {
               const taskDate = item.date || temporal.currentDate;
