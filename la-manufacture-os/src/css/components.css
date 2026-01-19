@@ -31,14 +31,12 @@
 }
 
 /* Swipe state - disable CSS transitions, let JS control transform */
-.task.swiping {
-  transition: none !important;
-  z-index: 100;
-}
-
+.task.swiping,
 .task.swiping:hover,
 .task.swiping:active {
-  transform: none;
+  transition: none !important;
+  z-index: 100;
+  /* Allow inline style to control transform */
 }
 
 /* Completed Task */

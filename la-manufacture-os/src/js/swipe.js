@@ -54,16 +54,17 @@ export const initSwipeGestures = (container, callbacks) => {
     if (currentX > 30) {
       // Swiping right = green (done)
       const intensity = Math.min(currentX / 120, 1);
-      taskEl.style.background = `rgba(52, 199, 89, ${intensity * 0.3})`;
+      taskEl.style.setProperty('background', `rgba(52, 199, 89, ${intensity * 0.3})`, 'important');
     } else if (currentX < -30) {
       // Swiping left = red (delete)
       const intensity = Math.min(Math.abs(currentX) / 120, 1);
-      taskEl.style.background = `rgba(255, 69, 58, ${intensity * 0.3})`;
+      taskEl.style.setProperty('background', `rgba(255, 69, 58, ${intensity * 0.3})`, 'important');
     } else {
-      taskEl.style.background = '';
+      taskEl.style.removeProperty('background');
     }
 
-    taskEl.style.transform = `translateX(${currentX}px)`;
+    // Use setProperty with important to override CSS :active/:hover
+    taskEl.style.setProperty('transform', `translateX(${currentX}px)`, 'important');
   };
 
   const end = () => {
@@ -77,36 +78,36 @@ export const initSwipeGestures = (container, callbacks) => {
 
     if (currentX > SWIPE_THRESHOLD) {
       // Swipe RIGHT = Done
-      taskEl.style.transform = 'translateX(100%)';
-      taskEl.style.opacity = '0';
-      taskEl.style.background = 'rgba(52, 199, 89, 0.5)';
+      taskEl.style.setProperty('transform', 'translateX(100%)', 'important');
+      taskEl.style.setProperty('opacity', '0', 'important');
+      taskEl.style.setProperty('background', 'rgba(52, 199, 89, 0.5)', 'important');
       setTimeout(() => {
         callbacks.onDone?.(taskId);
         reset();
       }, 200);
     } else if (currentX < -SWIPE_THRESHOLD) {
       // Swipe LEFT = Delete
-      taskEl.style.transform = 'translateX(-100%)';
-      taskEl.style.opacity = '0';
-      taskEl.style.background = 'rgba(255, 69, 58, 0.5)';
+      taskEl.style.setProperty('transform', 'translateX(-100%)', 'important');
+      taskEl.style.setProperty('opacity', '0', 'important');
+      taskEl.style.setProperty('background', 'rgba(255, 69, 58, 0.5)', 'important');
       setTimeout(() => {
         callbacks.onDelete?.(taskId);
         reset();
       }, 200);
     } else {
       // Snap back
-      taskEl.style.transform = '';
-      taskEl.style.background = '';
+      taskEl.style.removeProperty('transform');
+      taskEl.style.removeProperty('background');
       reset();
     }
   };
 
   const reset = () => {
     if (taskEl) {
-      taskEl.style.transform = '';
-      taskEl.style.opacity = '';
-      taskEl.style.transition = '';
-      taskEl.style.background = '';
+      taskEl.style.removeProperty('transform');
+      taskEl.style.removeProperty('opacity');
+      taskEl.style.removeProperty('transition');
+      taskEl.style.removeProperty('background');
       taskEl.classList.remove('swiping');
     }
     taskEl = null;
