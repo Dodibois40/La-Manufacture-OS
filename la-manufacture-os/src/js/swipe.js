@@ -1,5 +1,6 @@
 // Swipe Gestures for Tasks
 // Swipe right = done, Swipe left = delete
+// Simple CSS-only approach (no DOM wrapping)
 
 const SWIPE_THRESHOLD = 80;
 const SWIPE_MAX = 150;
@@ -11,53 +12,16 @@ export const initSwipeGestures = (container, callbacks) => {
   let isDragging = false;
   let taskEl = null;
   let direction = null;
-  let swipeWrapper = null;
 
   const getTaskElement = target => {
     return target.closest('.task');
-  };
-
-  const createSwipeBackground = el => {
-    // Create wrapper for swipe background effect
-    const wrapper = document.createElement('div');
-    wrapper.className = 'swipe-wrapper';
-
-    // Left background (delete - red)
-    const leftBg = document.createElement('div');
-    leftBg.className = 'swipe-bg swipe-bg-left';
-    leftBg.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="3 6 5 6 21 6"/>
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-      </svg>
-      <span>Supprimer</span>
-    `;
-
-    // Right background (done - green)
-    const rightBg = document.createElement('div');
-    rightBg.className = 'swipe-bg swipe-bg-right';
-    rightBg.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-      <span>Fait</span>
-    `;
-
-    wrapper.appendChild(leftBg);
-    wrapper.appendChild(rightBg);
-
-    // Insert wrapper before the task and move task inside
-    el.parentNode.insertBefore(wrapper, el);
-    wrapper.appendChild(el);
-
-    return wrapper;
   };
 
   const handleTouchStart = e => {
     const task = getTaskElement(e.target);
     if (!task) return;
 
-    // Don't swipe if clicking on buttons or checkbox
+    // Don't swipe if clicking on interactive elements
     if (e.target.closest('button') || e.target.closest('.check') || e.target.closest('.task-more'))
       return;
 
@@ -66,13 +30,6 @@ export const initSwipeGestures = (container, callbacks) => {
     startY = e.touches ? e.touches[0].clientY : e.clientY;
     isDragging = true;
     direction = null;
-
-    // Create swipe background
-    if (!taskEl.parentNode.classList.contains('swipe-wrapper')) {
-      swipeWrapper = createSwipeBackground(taskEl);
-    } else {
-      swipeWrapper = taskEl.parentNode;
-    }
 
     taskEl.style.transition = 'none';
   };
@@ -96,54 +53,23 @@ export const initSwipeGestures = (container, callbacks) => {
     e.preventDefault();
     currentX = Math.max(-SWIPE_MAX, Math.min(SWIPE_MAX, deltaX));
 
-    // Apply transform with slight rotation for depth
-    const rotation = currentX * 0.02;
-    taskEl.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+    // Apply transform
+    taskEl.style.transform = `translateX(${currentX}px)`;
 
-    // Update visual feedback
-    updateSwipeIndicator(currentX);
-  };
+    // Update visual feedback with CSS classes
+    const progress = Math.min(Math.abs(currentX) / SWIPE_THRESHOLD, 1);
+    taskEl.style.setProperty('--swipe-progress', progress);
 
-  const updateSwipeIndicator = x => {
-    if (!swipeWrapper) return;
-
-    const progress = Math.min(Math.abs(x) / SWIPE_THRESHOLD, 1);
-    const leftBg = swipeWrapper.querySelector('.swipe-bg-left');
-    const rightBg = swipeWrapper.querySelector('.swipe-bg-right');
-
-    if (x > 0) {
+    if (currentX > 0) {
       // Swipe right = done (green)
-      rightBg.classList.add('active');
-      leftBg.classList.remove('active');
-
-      const scale = 0.5 + progress * 0.5;
-      const icon = rightBg.querySelector('svg');
-      if (icon) icon.style.transform = `scale(${scale})`;
-
-      // Update text when threshold reached
-      const span = rightBg.querySelector('span');
-      if (span) span.textContent = progress >= 1 ? 'Fait !' : 'Fait';
-
-      rightBg.style.opacity = progress;
-    } else if (x < 0) {
+      taskEl.classList.add('swiping-right');
+      taskEl.classList.remove('swiping-left');
+    } else if (currentX < 0) {
       // Swipe left = delete (red)
-      leftBg.classList.add('active');
-      rightBg.classList.remove('active');
-
-      const scale = 0.5 + progress * 0.5;
-      const icon = leftBg.querySelector('svg');
-      if (icon) icon.style.transform = `scale(${scale})`;
-
-      // Update text when threshold reached
-      const span = leftBg.querySelector('span');
-      if (span) span.textContent = progress >= 1 ? 'Supprimer !' : 'Supprimer';
-
-      leftBg.style.opacity = progress;
+      taskEl.classList.add('swiping-left');
+      taskEl.classList.remove('swiping-right');
     } else {
-      leftBg.classList.remove('active');
-      rightBg.classList.remove('active');
-      leftBg.style.opacity = 0;
-      rightBg.style.opacity = 0;
+      taskEl.classList.remove('swiping-left', 'swiping-right');
     }
   };
 
@@ -174,7 +100,7 @@ export const initSwipeGestures = (container, callbacks) => {
     } else {
       // Snap back
       taskEl.style.transform = '';
-      setTimeout(() => cleanupSwipe(), 300);
+      cleanupSwipe();
     }
 
     isDragging = false;
@@ -183,20 +109,15 @@ export const initSwipeGestures = (container, callbacks) => {
   };
 
   const cleanupSwipe = () => {
-    if (!taskEl || !swipeWrapper) return;
+    if (!taskEl) return;
 
-    // Move task out of wrapper
-    if (swipeWrapper.parentNode) {
-      swipeWrapper.parentNode.insertBefore(taskEl, swipeWrapper);
-      swipeWrapper.remove();
-    }
-
-    // Reset task styles
+    // Just remove the classes - no DOM manipulation needed!
+    taskEl.classList.remove('swiping-left', 'swiping-right');
+    taskEl.style.removeProperty('--swipe-progress');
     taskEl.style.transform = '';
     taskEl.style.opacity = '';
     taskEl.style.transition = '';
 
-    swipeWrapper = null;
     taskEl = null;
   };
 
