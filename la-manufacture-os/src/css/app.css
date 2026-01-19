@@ -1507,6 +1507,158 @@ nav button.active .nav-icon {
 }
 
 /* ========================================
+   EMPTY STATES - Enhanced with CTA
+   ======================================== */
+
+.empty-state {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  opacity: 0.8;
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(10, 132, 255, 0.05));
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--accent);
+}
+
+.empty-state-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.empty-state-text {
+  color: var(--text-sec);
+  margin-bottom: 24px;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.empty-state-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-m);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.empty-state-cta:hover {
+  background: #007aff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.empty-state-cta:active {
+  transform: scale(0.98);
+}
+
+.empty-state-cta svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ========================================
+   TABLET BREAKPOINT (768-1024px)
+   ======================================== */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    max-width: 720px;
+    padding: 24px 32px;
+    padding-bottom: 140px;
+  }
+
+  /* Tasks in 2-column grid on tablet */
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Reset animation delays for grid layout */
+  .list .task:nth-child(n) {
+    animation-delay: 0.05s;
+  }
+
+  /* Wider navigation dock */
+  nav {
+    min-width: 380px;
+    padding: 10px 16px;
+  }
+
+  nav button {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* View headers */
+  .view-header h2 {
+    font-size: 1.8rem;
+  }
+
+  /* Day view header */
+  #view-day .view-header h1 {
+    font-size: 6rem;
+  }
+
+  #view-day .view-header .date-sub {
+    font-size: 1.2rem;
+  }
+
+  /* Settings layout */
+  .settings-section {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Focus mode duration buttons */
+  .focus-duration-select {
+    gap: 16px;
+  }
+
+  .focus-duration-btn {
+    min-width: 100px;
+    padding: 18px 24px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 80px 40px;
+  }
+
+  .empty-state-icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .empty-state-title {
+    font-size: 1.2rem;
+  }
+}
+
+/* ========================================
    MOBILE OPTIMIZATIONS - Espace vertical
    ======================================== */
 

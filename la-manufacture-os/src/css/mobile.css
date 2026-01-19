@@ -471,4 +471,38 @@ select {
   .notification-container {
     position: static;
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     MOBILE QUICK ACTIONS - Always visible on touch devices
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Quick actions always visible on mobile */
+  .task-quick-actions {
+    opacity: 1 !important;
+    transform: none !important;
+    position: relative;
+    right: 0;
+    gap: 8px;
+  }
+
+  .quick-action-btn {
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+  }
+
+  .quick-action-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Tasks need flex-wrap for better layout */
+  .task {
+    flex-wrap: wrap;
+  }
+
+  .task-content {
+    flex: 1;
+    min-width: 0;
+  }
 }
