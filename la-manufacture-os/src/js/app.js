@@ -559,10 +559,7 @@ const initApp = async () => {
       // initSpeechToText(); // removed - now in quick-dump.js
       initDailyReview(state, render);
 
-      // Universal Input (Voice-first quick capture)
-      initUniversalInput(state, render);
-
-      // Quick dump handler for API mode
+      // Quick dump handler for API mode - defined before initUniversalInput so it can be used as callback
       const handleTasksAdded = async tasks => {
         console.log('[handleTasksAdded] Called with tasks.length:', tasks.length);
         // Si array vide = items créés via l'API (process-inbox), recharger le state
@@ -611,6 +608,9 @@ const initApp = async () => {
         render();
         console.log('[handleTasksAdded] render() completed');
       };
+
+      // Universal Input (Voice-first quick capture) - uses handleTasksAdded to reload state after creation
+      initUniversalInput(state, () => handleTasksAdded([]));
 
       const quickDumpBtn = document.getElementById('quickDumpBtn');
       if (quickDumpBtn) {
@@ -713,10 +713,7 @@ const initApp = async () => {
   // initSpeechToText(); // removed - now in quick-dump.js
   initDailyReview(state, render);
 
-  // Universal Input (Voice-first quick capture)
-  initUniversalInput(state, render);
-
-  // Quick dump handler
+  // Quick dump handler - defined before initUniversalInput so it can be used as callback
   const handleTasksAdded = async tasks => {
     if (isApiMode && isSignedIn()) {
       // Si array vide = items créés via l'API (process-inbox), recharger le state
@@ -761,6 +758,9 @@ const initApp = async () => {
     saveState(state);
     render();
   };
+
+  // Universal Input (Voice-first quick capture) - uses handleTasksAdded to reload state after creation
+  initUniversalInput(state, () => handleTasksAdded([]));
 
   const quickDumpBtn = document.getElementById('quickDumpBtn');
   if (quickDumpBtn) {
