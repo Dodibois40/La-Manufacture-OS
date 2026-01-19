@@ -296,6 +296,34 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* Tabs scrollable horizontalement sur mobile */
+  .tabs-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .tabs-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    min-width: max-content;
+  }
+
+  .tab {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   .team-grid {
     grid-template-columns: 1fr;
   }

@@ -160,6 +160,13 @@
   letter-spacing: -0.01em;
   color: #fff;
   margin-bottom: 4px;
+  /* Truncation pour textes longs */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .text.done {
@@ -437,6 +444,23 @@
 
 .btn-link:hover {
   opacity: 0.7;
+}
+
+/* Calendar Add Button - More visible */
+#addTaskToDay {
+  background: var(--accent, #0a84ff);
+  color: white !important;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  opacity: 1 !important;
+  transition: all 0.2s ease;
+}
+
+#addTaskToDay:hover {
+  background: #007aff;
+  opacity: 1 !important;
+  transform: translateY(-1px);
 }
 
 .btn-icon-only {

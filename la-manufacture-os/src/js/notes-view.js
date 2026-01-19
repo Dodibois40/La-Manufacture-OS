@@ -556,6 +556,14 @@ function setupEventListeners() {
     });
   }
 
+  // Empty state create note button
+  const emptyCreateNoteBtn = document.getElementById('emptyCreateNoteBtn');
+  if (emptyCreateNoteBtn) {
+    emptyCreateNoteBtn.addEventListener('click', () => {
+      openNoteModal();
+    });
+  }
+
   // Note modal - color picker
   document.querySelectorAll('#noteModal .color-btn').forEach(btn => {
     btn.addEventListener('click', () => {

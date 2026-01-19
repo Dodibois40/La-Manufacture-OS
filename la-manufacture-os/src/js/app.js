@@ -703,6 +703,13 @@ const initApp = async () => {
   document.getElementById('nav-team')?.addEventListener('click', () => setView('team'));
   document.getElementById('nav-config')?.addEventListener('click', () => setView('config'));
 
+  // FAB Mobile - Quick add task
+  document.getElementById('fabAddTask')?.addEventListener('click', () => {
+    if (window.openUniversalInput) {
+      window.openUniversalInput();
+    }
+  });
+
   // macOS Dock Magnification Effect
   initDockMagnification();
 

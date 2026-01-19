@@ -498,11 +498,78 @@ select {
 
   /* Tasks need flex-wrap for better layout */
   .task {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .task-content {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
+  }
+
+  .task-quick-actions {
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     EDIT BAR - Mobile optimized
+     ═══════════════════════════════════════════════════════════════ */
+
+  .edit-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .edit-bar span {
+    width: 100%;
+    text-align: center;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+
+  .edit-bar-btn {
+    flex: 1;
+    min-width: 70px;
+    padding: 12px 8px;
+    font-size: 0.8rem;
+    justify-content: center;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     FAB - Floating Action Button pour création de tâche
+     ═══════════════════════════════════════════════════════════════ */
+
+  .fab-add {
+    position: fixed;
+    bottom: calc(80px + var(--safe-bottom));
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent, #0a84ff);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 16px rgba(10, 132, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .fab-add:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 24px rgba(10, 132, 255, 0.5);
+  }
+
+  .fab-add:active {
+    transform: scale(0.95);
+  }
+
+  .fab-add svg {
+    width: 24px;
+    height: 24px;
   }
 }

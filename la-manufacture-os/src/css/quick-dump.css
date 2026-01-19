@@ -374,7 +374,7 @@
 }
 
 .quick-dump-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .quick-dump-textarea:focus {
