@@ -570,7 +570,7 @@ select {
 
 .fab-add-task {
   position: fixed;
-  bottom: calc(80px + var(--safe-bottom, 0px));
+  bottom: calc(100px + var(--safe-bottom, 0px));
   right: 20px;
   width: 56px;
   height: 56px;
