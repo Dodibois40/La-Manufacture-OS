@@ -563,3 +563,42 @@ select {
     justify-content: center;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   FLOATING ADD BUTTON - Bottom right, above dock
+   ═══════════════════════════════════════════════════════════════ */
+
+.fab-add-task {
+  position: fixed;
+  bottom: calc(80px + var(--safe-bottom, 0px));
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.4);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.fab-add-task svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.fab-add-task:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 24px rgba(10, 132, 255, 0.5);
+}
+
+.fab-add-task:active {
+  transform: scale(0.95);
+}
