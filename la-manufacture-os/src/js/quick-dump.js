@@ -3,7 +3,7 @@
 
 import { api, isApiMode } from './api-client.js';
 import { toast } from './utils.js';
-import { loadStateFromApi } from './storage.js';
+import { loadStateFromApi, saveState } from './storage.js';
 
 // Create quick dump modal
 export const openQuickDump = (state, onTasksAdded) => {
@@ -226,6 +226,10 @@ export const openQuickDump = (state, onTasksAdded) => {
             state.tasks = apiState.tasks;
             state.settings = apiState.settings || state.settings;
             console.log('[QuickDump] state.tasks updated:', state.tasks.length);
+
+            // IMPORTANT: Save to localStorage as backup for page reload
+            saveState(state);
+            console.log('[QuickDump] State saved to localStorage');
           }
         }
 

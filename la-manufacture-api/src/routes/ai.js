@@ -1278,10 +1278,33 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
               }
             }
 
+            // Log task creation for debugging
+            fastify.log.info(
+              {
+                action: 'task_created',
+                taskId: createdTask.id,
+                type: item.type,
+                text: createdTask.text,
+                date: createdTask.date,
+                is_event: createdTask.is_event,
+                start_time: createdTask.start_time,
+                end_time: createdTask.end_time,
+              },
+              'Task/Event created in DB'
+            );
+
             // Auto-sync to Google Calendar if event with start_time
             let syncResult = { success: false, reason: 'skipped' };
             if (item.type === 'event' && createdTask.start_time) {
+              fastify.log.info(
+                { taskId: createdTask.id, start_time: createdTask.start_time },
+                'Attempting Google Calendar sync'
+              );
               syncResult = await syncEventToGoogleInternal(fastify, userId, createdTask);
+              fastify.log.info(
+                { taskId: createdTask.id, syncResult },
+                'Google Calendar sync result'
+              );
               if (syncResult.success && syncResult.eventId) {
                 await query('UPDATE tasks SET google_event_id = $1 WHERE id = $2', [
                   syncResult.eventId,

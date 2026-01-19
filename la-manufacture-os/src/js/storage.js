@@ -139,10 +139,16 @@ export const loadStateFromApi = async () => {
   }
 
   try {
+    console.log('[loadStateFromApi] Fetching from API...');
     const [tasksResult, settingsResult] = await Promise.all([
       api.tasks.getAll(),
       api.settings.get().catch(() => null),
     ]);
+
+    console.log('[loadStateFromApi] API response:', {
+      tasksCount: tasksResult?.tasks?.length || tasksResult?.length || 0,
+      hasSettings: !!settingsResult,
+    });
 
     const state = defaultState();
     state.tasks = Array.isArray(tasksResult.tasks)
@@ -150,16 +156,26 @@ export const loadStateFromApi = async () => {
       : Array.isArray(tasksResult)
         ? tasksResult
         : [];
+
+    // Log events specifically
+    const events = state.tasks.filter(t => t.is_event);
+    console.log(
+      '[loadStateFromApi] Events found:',
+      events.length,
+      events.map(e => ({ id: e.id, text: e.text, date: e.date, start_time: e.start_time }))
+    );
+
     if (settingsResult) {
       state.settings = { ...state.settings, ...settingsResult };
     }
 
     // Cache in localStorage
+    console.log('[loadStateFromApi] Saving to localStorage, tasks:', state.tasks.length);
     saveStateLocal(state);
 
     return state;
   } catch (error) {
-    console.error('Failed to load from API:', error);
+    console.error('[loadStateFromApi] Failed to load from API:', error);
     return loadState(); // Fallback to local
   }
 };

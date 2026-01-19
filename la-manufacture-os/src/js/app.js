@@ -574,6 +574,9 @@ const initApp = async () => {
             console.log('[handleTasksAdded] Got apiState with', apiState.tasks?.length, 'tasks');
             state.tasks = apiState.tasks;
             state.settings = apiState.settings || state.settings;
+            // IMPORTANT: Save to localStorage immediately after API reload
+            saveState(state);
+            console.log('[handleTasksAdded] State saved to localStorage after API reload');
           }
         } else {
           for (const t of tasks) {
@@ -686,6 +689,20 @@ const initApp = async () => {
       })
       .catch(err => {
         console.warn('[App] Background Clerk init failed:', err.message);
+        // Check if we have cached data in localStorage - show app with cached data
+        const cachedState = loadState();
+        if (cachedState && cachedState.tasks && cachedState.tasks.length > 0) {
+          console.log(
+            '[App] Clerk failed but found cached data, showing app with',
+            cachedState.tasks.length,
+            'tasks'
+          );
+          state.tasks = cachedState.tasks;
+          state.settings = cachedState.settings || state.settings;
+          // Show app with cached data (read-only mode essentially)
+          handlePostLogin();
+          toast('Mode hors-ligne (données en cache)', 'warning');
+        }
         // User can still click login - it will retry init
       });
 
@@ -726,6 +743,8 @@ const initApp = async () => {
         if (apiState) {
           state.tasks = apiState.tasks;
           state.settings = apiState.settings || state.settings;
+          // IMPORTANT: Save to localStorage immediately after API reload
+          saveState(state);
         }
       } else {
         // Sinon, créer les tâches une par une
