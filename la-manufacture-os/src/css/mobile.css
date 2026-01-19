@@ -473,42 +473,69 @@ select {
   }
 
   /* ═══════════════════════════════════════════════════════════════
-     MOBILE QUICK ACTIONS - Always visible on touch devices
+     MOBILE TASK OPTIMIZATION - Compact actions, prominent text
      ═══════════════════════════════════════════════════════════════ */
 
-  /* Quick actions always visible on mobile */
+  /* Task container - tighter padding */
+  .task {
+    padding: 14px 12px !important;
+    gap: 12px !important;
+    flex-wrap: nowrap;
+  }
+
+  /* Task text - more prominent */
+  .task .tx {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Meta info - smaller */
+  .task .meta {
+    font-size: 0.7rem !important;
+    margin-top: 4px !important;
+  }
+
+  /* Checkbox - slightly smaller */
+  .task .check {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+  }
+
+  /* Quick actions - MUCH smaller */
   .task-quick-actions {
     opacity: 1 !important;
     transform: none !important;
     position: relative;
     right: 0;
-    gap: 8px;
+    gap: 4px !important;
+    padding-left: 8px !important;
+    flex-shrink: 0;
   }
 
   .quick-action-btn {
-    width: 44px;
-    height: 44px;
-    padding: 10px;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 6px !important;
+    border-radius: 6px !important;
   }
 
   .quick-action-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 14px !important;
+    height: 14px !important;
   }
 
-  /* Tasks need flex-wrap for better layout */
-  .task {
-    flex-wrap: nowrap;
-  }
-
-  .task-content {
+  /* Task body takes more space */
+  .task .body {
     flex: 1;
     min-width: 0;
     overflow: hidden;
   }
 
-  .task-quick-actions {
-    flex-shrink: 0;
+  /* Swipe hint text */
+  .task-row {
+    position: relative;
   }
 
   /* ═══════════════════════════════════════════════════════════════

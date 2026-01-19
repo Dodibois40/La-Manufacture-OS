@@ -1185,6 +1185,24 @@ export const renderDay = state => {
         appCallbacks.render?.();
       }
     },
+    onDelete: async taskId => {
+      const task = state.tasks.find(t => t.id === taskId);
+      if (task) {
+        // Delete from API if logged in
+        if (isApiMode && isLoggedIn()) {
+          try {
+            await taskApi.delete(taskId);
+          } catch (err) {
+            console.error('Delete error:', err);
+          }
+        }
+        // Remove from local state
+        state.tasks = state.tasks.filter(t => t.id !== taskId);
+        saveState(state);
+        toast('🗑️ Supprimé');
+        appCallbacks.render?.();
+      }
+    },
   });
 
   // Start quote rotation only when day view is active
