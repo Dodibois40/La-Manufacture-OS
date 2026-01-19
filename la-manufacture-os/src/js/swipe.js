@@ -13,7 +13,7 @@ export const initSwipeGestures = (container, callbacks) => {
   let direction = null;
 
   const getTaskElement = target => {
-    return target.closest('.task-row');
+    return target.closest('.task');
   };
 
   const handleTouchStart = e => {
@@ -61,7 +61,7 @@ export const initSwipeGestures = (container, callbacks) => {
   const handleTouchEnd = () => {
     if (!isDragging || !taskEl) return;
 
-    const taskId = taskEl.dataset.id;
+    const taskId = taskEl.dataset.taskId;
     taskEl.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
 
     if (Math.abs(currentX) >= SWIPE_THRESHOLD) {

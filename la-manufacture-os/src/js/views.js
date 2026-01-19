@@ -473,85 +473,8 @@ const taskRow = (t, state, options = {}) => {
   el.appendChild(c);
   el.appendChild(body);
 
-  // Quick Actions Bar (visible on hover)
+  // Context menu (three dots) - swipe for delete/done
   if (!editMode) {
-    const quickActions = document.createElement('div');
-    quickActions.className = 'task-quick-actions';
-
-    // Tomorrow action
-    const tomorrowBtn = document.createElement('button');
-    tomorrowBtn.className = 'quick-action-btn';
-    tomorrowBtn.title = 'Reporter à demain';
-    tomorrowBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-    tomorrowBtn.addEventListener('click', async e => {
-      e.stopPropagation();
-      const d = new Date();
-      d.setDate(d.getDate() + 1);
-      const newDate = isoLocal(d);
-      task.date = newDate;
-      task.updatedAt = nowISO();
-
-      if (isApiMode && isLoggedIn()) {
-        try {
-          await taskApi.update(task.id, { date: newDate });
-          // Re-sync to Google if it's an event
-          if (task.is_event) {
-            if (isGoogleConnected()) {
-              await syncTaskToGoogle(task);
-            } else {
-              toast('Mis à jour, mais Google non connecté', 'info');
-            }
-          }
-        } catch (e) {
-          console.error('API update failed:', e);
-        }
-      }
-
-      saveState(state);
-      appCallbacks.render?.();
-      toast('→ Demain');
-    });
-
-    // Focus/Timer action
-    const focusBtn = document.createElement('button');
-    focusBtn.className = 'quick-action-btn focus';
-    focusBtn.title = 'Lancer le timer';
-    focusBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-    focusBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      import('./focus-mode.js').then(mod => mod.startFocusMode(task, state, appCallbacks.render));
-    });
-
-    // Urgent toggle action
-    const urgentBtn = document.createElement('button');
-    urgentBtn.className = 'quick-action-btn' + (task.urgent ? ' active' : '');
-    urgentBtn.title = task.urgent ? 'Enlever urgence' : 'Marquer urgent';
-    urgentBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
-    urgentBtn.addEventListener('click', async e => {
-      e.stopPropagation();
-      const newUrgent = !task.urgent;
-      task.urgent = newUrgent;
-      task.updatedAt = nowISO();
-
-      if (isApiMode && isLoggedIn()) {
-        try {
-          await taskApi.update(task.id, { urgent: newUrgent });
-        } catch (e) {
-          console.error('API update failed:', e);
-        }
-      }
-
-      saveState(state);
-      appCallbacks.render?.();
-      toast(task.urgent ? '🔥 Urgent' : 'Urgence retirée');
-    });
-
-    quickActions.appendChild(tomorrowBtn);
-    if (!task.done) quickActions.appendChild(focusBtn);
-    quickActions.appendChild(urgentBtn);
-
-    el.appendChild(quickActions);
-
     // Context menu (three dots)
     const more = document.createElement('div');
     more.className = 'task-more';
@@ -568,7 +491,12 @@ const taskRow = (t, state, options = {}) => {
       const shareOption =
         isApiMode && isOwned ? `<div class="menu-item" data-action="share">📤 Partager</div>` : '';
 
+      const focusOption = !task.done
+        ? `<div class="menu-item" data-action="focus">⏱️ Mode Focus</div>`
+        : '';
+
       menu.innerHTML = `
+        ${focusOption}
         <div class="menu-item" data-action="urgent">🔥 ${task.urgent ? 'Enlever urgence' : 'Marquer urgent'}</div>
         <div class="menu-item" data-action="tomorrow">⏭️ Reporter à demain</div>
         <div class="menu-item" data-action="next-week">📅 Semaine prochaine</div>
@@ -631,6 +559,12 @@ const taskRow = (t, state, options = {}) => {
           if (isApiMode && isLoggedIn()) {
             await taskApi.update(task.id, { urgent: newUrgent });
           }
+        } else if (action === 'focus') {
+          import('./focus-mode.js').then(mod =>
+            mod.startFocusMode(task, state, appCallbacks.render)
+          );
+          menu.remove();
+          return;
         } else if (action === 'share') {
           openShareModal(task.id, task.text);
           menu.remove();
