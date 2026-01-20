@@ -325,7 +325,7 @@ export async function signInWithEmail(email, password) {
   }
 }
 
-// Sign in/up with Google OAuth
+// Sign in/up with Google OAuth - uses authenticateWithRedirect to bypass Turnstile
 export async function signInWithGoogle() {
   console.log('[Clerk] signInWithGoogle called');
 
@@ -338,61 +338,20 @@ export async function signInWithGoogle() {
   }
 
   try {
-    // Utiliser signIn avec OAuth - plus simple
-    const result = await clerk.client.signIn.create({
+    // Use authenticateWithRedirect - bypasses Turnstile challenge
+    await clerk.client.signIn.authenticateWithRedirect({
       strategy: 'oauth_google',
       redirectUrl: window.location.origin,
-      actionCompleteRedirectUrl: window.location.origin,
+      redirectUrlComplete: window.location.origin,
     });
-
-    // Si external auth URL, rediriger
-    if (result.firstFactorVerification?.externalVerificationRedirectURL) {
-      window.location.href = result.firstFactorVerification.externalVerificationRedirectURL;
-      return { success: true };
-    }
-
-    // Si déjà complete
-    if (result.status === 'complete' && result.createdSessionId) {
-      await clerk.setActive({ session: result.createdSessionId });
-      return { success: true, user: clerk.user };
-    }
-
-    return { success: false, error: 'OAuth flow failed' };
+    // Browser redirects to Google - won't return here
+    return { success: true };
   } catch (err) {
     console.error('[Clerk] Google sign-in error:', err);
-    // Si l'erreur est "user doesn't exist", essayer signUp
-    if (err.errors?.[0]?.code === 'form_identifier_not_found') {
-      return signUpWithGoogle();
-    }
     return {
       success: false,
       error: err.errors?.[0]?.message || 'Erreur Google Sign-in',
     };
-  }
-}
-
-// Sign up with Google (new user)
-async function signUpWithGoogle() {
-  try {
-    const result = await clerk.client.signUp.create({
-      strategy: 'oauth_google',
-      redirectUrl: window.location.origin,
-      actionCompleteRedirectUrl: window.location.origin,
-    });
-
-    if (result.verifications?.externalAccount?.externalVerificationRedirectURL) {
-      window.location.href = result.verifications.externalAccount.externalVerificationRedirectURL;
-      return { success: true };
-    }
-
-    if (result.status === 'complete' && result.createdSessionId) {
-      await clerk.setActive({ session: result.createdSessionId });
-      return { success: true, user: clerk.user };
-    }
-
-    return { success: false, error: 'OAuth signup failed' };
-  } catch (err) {
-    return { success: false, error: err.errors?.[0]?.message || 'Erreur' };
   }
 }
 
