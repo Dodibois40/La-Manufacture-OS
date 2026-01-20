@@ -321,9 +321,10 @@ export async function signInWithGoogle() {
   try {
     // Use signUp for OAuth - it handles both new AND existing users
     // If user exists, Clerk automatically converts to sign-in
+    // Both redirects go to origin - Clerk JS handles the callback automatically
     await clerk.client.signUp.authenticateWithRedirect({
       strategy: 'oauth_google',
-      redirectUrl: window.location.origin + '/sso-callback',
+      redirectUrl: window.location.origin,
       redirectUrlComplete: window.location.origin,
     });
     // This won't return - browser redirects to Google
