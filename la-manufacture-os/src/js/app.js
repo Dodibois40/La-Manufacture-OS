@@ -25,6 +25,7 @@ import {
   resetPassword,
   completeEmailCode,
   onAuthStateChange,
+  handleOAuthCallback,
 } from './clerk-auth.js';
 import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
@@ -715,27 +716,36 @@ const initApp = async () => {
         // Check for OAuth callback - Clerk might still be processing
         // This handles the case where user returns from Google OAuth
         const urlParams = new URLSearchParams(window.location.search);
+        const currentUrl = window.location.href;
+        console.log('[App] Checking for OAuth callback. URL:', currentUrl);
+        console.log('[App] URL params:', Array.from(urlParams.entries()));
+
+        // Detect OAuth callback from various indicators
         const hasOAuthCallback =
           urlParams.has('__clerk_status') ||
           urlParams.has('__clerk_created_session') ||
-          window.location.href.includes('#__clerk');
+          urlParams.has('code') || // Google OAuth returns 'code' param
+          urlParams.has('state') || // OAuth state param
+          currentUrl.includes('#__clerk') ||
+          currentUrl.includes('/sso-callback');
 
         if (hasOAuthCallback) {
-          console.log('[App] OAuth callback detected, waiting for session...');
+          console.log('[App] OAuth callback detected, attempting to complete...');
 
-          // Wait a bit for Clerk to process the OAuth callback
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Try explicit OAuth callback handling
+          const oauthResult = await handleOAuthCallback();
+          console.log('[App] OAuth callback result:', oauthResult);
 
-          if (isSignedIn()) {
+          if (oauthResult.success && isSignedIn()) {
             console.log('[App] Session established after OAuth callback');
-            // Clean up URL by removing Clerk params
+            // Clean up URL by removing OAuth params
             window.history.replaceState({}, '', window.location.pathname);
             handlePostLogin();
             return;
           }
 
           // If still not signed in, wait for auth state change
-          console.log('[App] Still not signed in, setting up listener...');
+          console.log('[App] OAuth not complete yet, setting up listener...');
         }
 
         // Set up listener for auth state changes (handles OAuth completion)
