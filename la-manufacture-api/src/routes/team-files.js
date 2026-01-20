@@ -91,7 +91,7 @@ export default async function teamFilesRoutes(fastify) {
 
       return { file: result.rows[0] };
     } catch (error) {
-      console.error('Error uploading file:', error);
+      fastify.log.error({ error: error.message }, 'File upload error');
       // Nettoyer le fichier si erreur
       if (existsSync(filepath)) {
         unlinkSync(filepath);

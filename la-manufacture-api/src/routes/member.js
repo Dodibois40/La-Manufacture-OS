@@ -172,9 +172,7 @@ export default async function memberRoutes(fastify) {
         return { task: result.rows[0] };
       } catch (error) {
         request.log.error(error);
-        return reply
-          .status(500)
-          .send({ error: 'Erreur lors de la mise à jour de la tâche', details: error.message });
+        return reply.status(500).send({ error: 'Erreur lors de la mise à jour de la tâche' });
       }
     }
   );
@@ -218,9 +216,7 @@ export default async function memberRoutes(fastify) {
         return { timeLog: result.rows[0] };
       } catch (error) {
         request.log.error(error);
-        return reply
-          .status(500)
-          .send({ error: "Erreur lors de l'enregistrement du temps", details: error.message });
+        return reply.status(500).send({ error: "Erreur lors de l'enregistrement du temps" });
       }
     }
   );
@@ -258,9 +254,7 @@ export default async function memberRoutes(fastify) {
         return { timeLog: result.rows[0] };
       } catch (error) {
         request.log.error(error);
-        return reply
-          .status(500)
-          .send({ error: "Erreur lors de l'enregistrement du temps", details: error.message });
+        return reply.status(500).send({ error: "Erreur lors de l'enregistrement du temps" });
       }
     }
   );

@@ -4,6 +4,7 @@ import cookie from '@fastify/cookie';
 import compress from '@fastify/compress';
 import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
+import helmet from '@fastify/helmet';
 import { clerkPlugin, getAuth } from '@clerk/fastify';
 import { createClerkClient } from '@clerk/backend';
 import dotenv from 'dotenv';
@@ -88,6 +89,27 @@ await fastify.register(cors, {
 });
 
 await fastify.register(cookie);
+
+// Security headers (CSP, X-Frame-Options, HSTS, etc.)
+await fastify.register(helmet, {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://challenges.cloudflare.com'],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'https://api.clerk.com', 'https://*.clerk.accounts.dev'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      frameSrc: ["'self'", 'https://challenges.cloudflare.com'],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Required for some third-party integrations
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+});
 
 // Enable compression for responses (gzip/brotli)
 await fastify.register(compress, {
@@ -184,9 +206,7 @@ fastify.decorate('authenticate', async function (request, reply) {
         clerkId: auth.userId,
       });
 
-      return reply
-        .status(500)
-        .send({ error: 'Failed to create/update user', details: err.message });
+      return reply.status(500).send({ error: 'Authentication failed' });
     }
   }
 });

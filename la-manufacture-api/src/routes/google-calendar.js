@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { query } from '../db/connection.js';
+import { createOAuthState, verifyOAuthState, encrypt, decrypt } from '../utils/crypto.js';
 
 // Helper function for internal sync (called from ai.js for auto-sync)
 export async function syncEventToGoogleInternal(fastify, userId, task) {
@@ -16,6 +17,10 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
     const tokens = tokensResult.rows[0];
     const calendar_id = tokens.calendar_id || 'primary';
 
+    // Decrypt tokens (they're stored encrypted)
+    const decryptedAccessToken = decrypt(tokens.access_token) || tokens.access_token;
+    const decryptedRefreshToken = decrypt(tokens.refresh_token) || tokens.refresh_token;
+
     // Setup OAuth client
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
@@ -23,8 +28,8 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
       process.env.GOOGLE_REDIRECT_URI
     );
     oauth2Client.setCredentials({
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
+      access_token: decryptedAccessToken,
+      refresh_token: decryptedRefreshToken,
       expiry_date: new Date(tokens.token_expiry).getTime(),
     });
 
@@ -32,9 +37,13 @@ export async function syncEventToGoogleInternal(fastify, userId, task) {
     if (new Date(tokens.token_expiry) < new Date()) {
       fastify.log.info({ userId }, 'Auto-sync: Refreshing Google token...');
       const { credentials } = await oauth2Client.refreshAccessToken();
+
+      // Encrypt the new token before storing
+      const encryptedNewToken = encrypt(credentials.access_token);
+
       await query(
         'UPDATE google_tokens SET access_token = $1, token_expiry = $2, updated_at = CURRENT_TIMESTAMP WHERE user_id = $3',
-        [credentials.access_token, new Date(credentials.expiry_date), userId]
+        [encryptedNewToken, new Date(credentials.expiry_date), userId]
       );
       oauth2Client.setCredentials(credentials);
     }
@@ -125,8 +134,7 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
 export default async function googleCalendarRoutes(fastify) {
   // Helper to get an authenticated client
   async function getAuthClient(userId) {
-    const _client = getOAuth2Client();
-    // Clone or use a new instance to avoid singleton state issues
+    // Create new instance to avoid singleton state issues
     const newClient = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
@@ -144,9 +152,13 @@ export default async function googleCalendarRoutes(fastify) {
 
     const { access_token, refresh_token, token_expiry } = tokenResult.rows[0];
 
+    // Decrypt tokens (they're stored encrypted)
+    const decryptedAccessToken = decrypt(access_token) || access_token;
+    const decryptedRefreshToken = decrypt(refresh_token) || refresh_token;
+
     newClient.setCredentials({
-      access_token,
-      refresh_token,
+      access_token: decryptedAccessToken,
+      refresh_token: decryptedRefreshToken,
       expiry_date: new Date(token_expiry).getTime(),
     });
 
@@ -154,9 +166,13 @@ export default async function googleCalendarRoutes(fastify) {
     if (new Date(token_expiry) < new Date()) {
       fastify.log.info({ userId }, 'Refreshing Google access token...');
       const { credentials } = await newClient.refreshAccessToken();
+
+      // Encrypt the new token before storing
+      const encryptedNewToken = encrypt(credentials.access_token);
+
       await query(
         `UPDATE google_tokens SET access_token = $1, token_expiry = $2, updated_at = CURRENT_TIMESTAMP WHERE user_id = $3`,
-        [credentials.access_token, new Date(credentials.expiry_date), userId]
+        [encryptedNewToken, new Date(credentials.expiry_date), userId]
       );
       newClient.setCredentials(credentials);
       fastify.log.info({ userId }, 'Google access token refreshed');
@@ -170,31 +186,40 @@ export default async function googleCalendarRoutes(fastify) {
     const { userId } = request.user;
 
     try {
+      // Create secure signed state token (prevents CSRF)
+      const state = createOAuthState(userId);
+
       const authUrl = getOAuth2Client().generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES,
         prompt: 'consent', // Force to get refresh token
-        state: String(userId), // Pass userId in state
+        state, // Secure signed state token
       });
       return { authUrl };
     } catch (error) {
-      fastify.log.error('Failed to generate auth URL:', error);
-      return reply.status(500).send({ error: error.message });
+      fastify.log.error({ error: error.message }, 'Failed to generate auth URL');
+      return reply.status(500).send({ error: 'Failed to generate authorization URL' });
     }
   });
 
   // OAuth2 callback - exchange code for tokens
   fastify.get('/callback', async (request, reply) => {
     const { code, state } = request.query;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
     if (!code || !state) {
-      return reply.status(400).send({ error: 'Missing code or state' });
+      fastify.log.warn('OAuth callback: Missing code or state');
+      return reply.redirect(`${frontendUrl}/#settings?google=error&reason=missing_params`);
     }
 
-    const userId = parseInt(state);
-    if (isNaN(userId)) {
-      return reply.status(400).send({ error: 'Invalid state' });
+    // Verify the signed state token (prevents CSRF attacks)
+    const stateResult = verifyOAuthState(state);
+    if (!stateResult.valid) {
+      fastify.log.warn({ error: stateResult.error }, 'OAuth callback: Invalid state token');
+      return reply.redirect(`${frontendUrl}/#settings?google=error&reason=invalid_state`);
     }
+
+    const userId = stateResult.userId;
 
     try {
       // Exchange code for tokens
@@ -204,7 +229,11 @@ export default async function googleCalendarRoutes(fastify) {
       // Calculate expiry timestamp
       const expiryDate = new Date(tokens.expiry_date);
 
-      // Save tokens to database (upsert)
+      // Encrypt tokens before storing (AES-256-GCM)
+      const encryptedAccessToken = encrypt(tokens.access_token);
+      const encryptedRefreshToken = tokens.refresh_token ? encrypt(tokens.refresh_token) : null;
+
+      // Save encrypted tokens to database (upsert)
       await query(
         `INSERT INTO google_tokens (user_id, access_token, refresh_token, token_expiry)
          VALUES ($1, $2, $3, $4)
@@ -213,15 +242,15 @@ export default async function googleCalendarRoutes(fastify) {
            refresh_token = COALESCE($3, google_tokens.refresh_token),
            token_expiry = $4,
            updated_at = CURRENT_TIMESTAMP`,
-        [userId, tokens.access_token, tokens.refresh_token, expiryDate]
+        [userId, encryptedAccessToken, encryptedRefreshToken, expiryDate]
       );
 
+      fastify.log.info({ userId }, 'Google Calendar connected successfully');
+
       // Redirect to frontend with success
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       return reply.redirect(`${frontendUrl}/#settings?google=connected`);
     } catch (error) {
-      fastify.log.error('Google OAuth callback error:', error);
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      fastify.log.error({ userId, error: error.message }, 'Google OAuth callback error');
       return reply.redirect(`${frontendUrl}/#settings?google=error`);
     }
   });
@@ -371,11 +400,9 @@ export default async function googleCalendarRoutes(fastify) {
         htmlLink: result.data.htmlLink,
       };
     } catch (error) {
-      fastify.log.error(error, 'Google Calendar sync error');
+      fastify.log.error({ error: error.message, code: error.code }, 'Google Calendar sync error');
       return reply.status(500).send({
         error: 'Calendar sync failed',
-        details: error.message,
-        code: error.code,
       });
     }
   });
@@ -409,8 +436,8 @@ export default async function googleCalendarRoutes(fastify) {
         if (error.code === 404) {
           return { success: true };
         }
-        fastify.log.error(error, 'Google Calendar delete error');
-        return reply.status(500).send({ error: 'Delete failed', details: error.message });
+        fastify.log.error({ error: error.message }, 'Google Calendar delete error');
+        return reply.status(500).send({ error: 'Delete failed' });
       }
     }
   );

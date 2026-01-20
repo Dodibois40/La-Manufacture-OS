@@ -30,10 +30,14 @@ export async function query(text, params) {
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.rowCount });
+    // Only log in development mode, and never log the query text (security)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Query executed', { duration, rows: res.rowCount });
+    }
     return res;
   } catch (error) {
-    console.error('Database query error:', error);
+    // Don't log query text in errors (could contain sensitive data)
+    console.error('Database query error');
     throw error;
   }
 }

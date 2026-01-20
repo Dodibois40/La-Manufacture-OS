@@ -177,10 +177,8 @@ export default async function projectsRoutes(fastify) {
         },
       };
     } catch (error) {
-      fastify.log.error(error);
-      return reply
-        .status(500)
-        .send({ error: 'Erreur lors de la creation du projet', details: error.message });
+      fastify.log.error({ error: error.message }, 'Project creation error');
+      return reply.status(500).send({ error: 'Erreur lors de la creation du projet' });
     }
   });
 
@@ -287,10 +285,8 @@ export default async function projectsRoutes(fastify) {
         },
       };
     } catch (error) {
-      reply.log.error(error);
-      return reply
-        .status(500)
-        .send({ error: 'Erreur lors de la mise a jour du projet', details: error.message });
+      fastify.log.error({ error: error.message }, 'Project update error');
+      return reply.status(500).send({ error: 'Erreur lors de la mise a jour du projet' });
     }
   });
 
@@ -313,10 +309,8 @@ export default async function projectsRoutes(fastify) {
 
       return { success: true };
     } catch (error) {
-      reply.log.error(error);
-      return reply
-        .status(500)
-        .send({ error: 'Erreur lors de la suppression du projet', details: error.message });
+      fastify.log.error({ error: error.message }, 'Project delete error');
+      return reply.status(500).send({ error: 'Erreur lors de la suppression du projet' });
     }
   });
 }

@@ -128,10 +128,8 @@ export default async function invitationsRoutes(fastify) {
           emailError: emailResult.error,
         };
       } catch (error) {
-        request.log.error(error);
-        return reply
-          .status(500)
-          .send({ error: "Erreur lors de la création de l'invitation", details: error.message });
+        fastify.log.error({ error: error.message }, 'Invitation creation error');
+        return reply.status(500).send({ error: "Erreur lors de la création de l'invitation" });
       }
     }
   );
@@ -211,10 +209,8 @@ export default async function invitationsRoutes(fastify) {
 
         return { success: true };
       } catch (error) {
-        request.log.error(error);
-        return reply
-          .status(500)
-          .send({ error: 'Erreur lors de la révocation', details: error.message });
+        fastify.log.error({ error: error.message }, 'Invitation revocation error');
+        return reply.status(500).send({ error: 'Erreur lors de la révocation' });
       }
     }
   );
@@ -269,9 +265,7 @@ export default async function invitationsRoutes(fastify) {
         };
       } catch (error) {
         request.log.error(error);
-        return reply
-          .status(500)
-          .send({ error: "Erreur lors du renvoi de l'invitation", details: error.message });
+        return reply.status(500).send({ error: "Erreur lors du renvoi de l'invitation" });
       }
     }
   );
@@ -338,9 +332,7 @@ export default async function invitationsRoutes(fastify) {
       };
     } catch (error) {
       request.log.error(error);
-      return reply
-        .status(500)
-        .send({ error: 'Erreur lors de la validation', details: error.message });
+      return reply.status(500).send({ error: 'Erreur lors de la validation' });
     }
   });
 
@@ -436,9 +428,7 @@ export default async function invitationsRoutes(fastify) {
       };
     } catch (error) {
       request.log.error(error);
-      return reply
-        .status(500)
-        .send({ error: "Erreur lors de l'acceptation", details: error.message });
+      return reply.status(500).send({ error: "Erreur lors de l'acceptation" });
     }
   });
 }

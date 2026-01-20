@@ -1421,7 +1421,6 @@ Structure : { "items": [...], "parsing_notes": "..." }`;
       fastify.log.error('Process inbox error:', error);
       return reply.status(500).send({
         error: 'Inbox processing failed',
-        details: error.message,
       });
     }
   });
@@ -1980,9 +1979,7 @@ Réponds UNIQUEMENT en JSON valide.`;
         };
       } catch (error) {
         fastify.log.error('Feedback error:', error);
-        return reply
-          .status(500)
-          .send({ error: 'Feedback recording failed', details: error.message });
+        return reply.status(500).send({ error: 'Feedback recording failed' });
       }
     }
   );

@@ -127,9 +127,7 @@ export default async function teamRoutes(fastify) {
       return { member: result.rows[0] };
     } catch (error) {
       reply.log.error(error);
-      return reply
-        .status(500)
-        .send({ error: 'Erreur lors de la mise a jour du membre', details: error.message });
+      return reply.status(500).send({ error: 'Erreur lors de la mise a jour du membre' });
     }
   });
 
@@ -138,7 +136,6 @@ export default async function teamRoutes(fastify) {
     const { userId } = request.user;
     const { id } = request.params;
     const memberId = parseInt(id, 10);
-    console.log(`[Team] Delete attempt: member ${memberId} by user ${userId}`);
 
     if (isNaN(memberId)) {
       reply.log.error(`Delete member: invalid ID provided: ${id}`);
@@ -161,9 +158,7 @@ export default async function teamRoutes(fastify) {
       return { success: true };
     } catch (error) {
       reply.log.error(error);
-      return reply
-        .status(500)
-        .send({ error: 'Erreur lors de la suppression du membre', details: error.message });
+      return reply.status(500).send({ error: 'Erreur lors de la suppression du membre' });
     }
   });
 
