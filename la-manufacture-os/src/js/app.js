@@ -673,17 +673,14 @@ const initApp = async () => {
       initTeam(user?.id);
       initGoogleCalendar();
 
-      // Only switch to day view if still on auth view (don't override user navigation)
-      if (currentView === 'auth') {
-        setView('day');
-      }
+      // Always switch to day view after login (OAuth callback or regular login)
+      // currentView might be 'auth', undefined, or loader was showing
+      setView('day');
     } catch (err) {
       console.error('Sync error:', err);
       toast('Erreur de synchronisation');
-      // Only switch to day view if still on auth view
-      if (currentView === 'auth') {
-        setView('day');
-      }
+      // Still show day view even on error
+      setView('day');
     }
   }
 
