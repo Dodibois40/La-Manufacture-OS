@@ -878,6 +878,12 @@ nav button#nav-inbox.active {
     background 0.2s,
     color 0.2s;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .password-toggle-minimal:hover {
@@ -885,14 +891,18 @@ nav button#nav-inbox.active {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.password-toggle-minimal:active {
+.password-toggle-minimal:active,
+.password-toggle-minimal:focus {
   background: rgba(0, 0, 0, 0.6);
+  outline: none;
+  transform: translateY(-50%);
 }
 
 .password-toggle-minimal .eye-icon {
   width: 20px;
   height: 20px;
   display: block;
+  flex-shrink: 0;
 }
 
 /* Minimal button - with rounded corners */
