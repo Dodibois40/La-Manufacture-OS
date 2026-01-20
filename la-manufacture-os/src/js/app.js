@@ -693,24 +693,29 @@ const initApp = async () => {
   // API Mode Logic
   // Auth is now required even on localhost (Google Sign-in works)
   if (isApiMode) {
-    // Auth form is already visible via instant-auth-mode CSS
-    hideLoader();
+    // Keep loader visible while checking auth - prevents flash of login form
+    // Don't show auth form yet - wait for Clerk to tell us if user is signed in
     initAuthUI();
-    setView('auth');
 
-    // Start Clerk init in background (non-blocking) + check if already signed in
+    // Start Clerk init - this determines if we show auth or app
     initClerk()
       .then(async () => {
         console.log('[App] Clerk ready in background');
 
-        // Check if already signed in
+        // Check if already signed in (includes OAuth callback)
         if (isSignedIn()) {
           console.log('[App] Already signed in, calling handlePostLogin');
+          hideLoader();
           handlePostLogin();
           return;
         }
 
-        // Écouter les changements d'auth (OAuth callback sera détecté automatiquement)
+        // Not signed in - now show auth form
+        console.log('[App] Not signed in, showing auth form');
+        hideLoader();
+        setView('auth');
+
+        // Listen for auth changes (in case user logs in)
         const unsubscribe = onAuthStateChange((signedIn, user) => {
           console.log('[App] Auth state changed:', signedIn, user?.firstName);
           if (signedIn && !postLoginCompleted) {
@@ -721,6 +726,8 @@ const initApp = async () => {
       })
       .catch(err => {
         console.warn('[App] Background Clerk init failed:', err.message);
+        hideLoader();
+
         // Check if we have cached data in localStorage - show app with cached data
         const cachedState = loadState();
         if (cachedState && cachedState.tasks && cachedState.tasks.length > 0) {
@@ -734,8 +741,10 @@ const initApp = async () => {
           // Show app with cached data (read-only mode essentially)
           handlePostLogin();
           toast('Mode hors-ligne (données en cache)', 'warning');
+        } else {
+          // No cached data, show auth form
+          setView('auth');
         }
-        // User can still click login - it will retry init
       });
 
     return; // Don't continue to local mode logic
