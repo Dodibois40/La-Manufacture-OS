@@ -302,7 +302,8 @@ export async function signInWithEmail(email, password) {
   }
 }
 
-// Sign in with Google OAuth (Clerk handles the redirect flow)
+// Sign in/up with Google OAuth (Clerk handles the redirect flow)
+// Uses signUp which handles both new users AND existing users automatically
 export async function signInWithGoogle() {
   console.log('[Clerk] signInWithGoogle called');
 
@@ -318,8 +319,9 @@ export async function signInWithGoogle() {
   }
 
   try {
-    // Clerk's OAuth redirect - opens Google consent page
-    await clerk.client.signIn.authenticateWithRedirect({
+    // Use signUp for OAuth - it handles both new AND existing users
+    // If user exists, Clerk automatically converts to sign-in
+    await clerk.client.signUp.authenticateWithRedirect({
       strategy: 'oauth_google',
       redirectUrl: window.location.origin + '/sso-callback',
       redirectUrlComplete: window.location.origin,
