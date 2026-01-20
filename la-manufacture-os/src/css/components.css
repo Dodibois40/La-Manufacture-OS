@@ -6,15 +6,17 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  /* Solid background instead of blur for performance */
-  background: rgba(28, 28, 30, 0.95);
+  /* Elevated background for better visibility */
+  background: rgba(38, 38, 42, 0.95);
   padding: 18px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition:
     transform 0.2s ease,
     background 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   position: relative;
 }
 
@@ -188,7 +190,7 @@
 
 .meta {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.55);
   font-weight: 600;
 }
 

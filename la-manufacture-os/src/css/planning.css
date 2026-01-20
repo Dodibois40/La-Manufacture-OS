@@ -240,3 +240,35 @@
     font-size: 1.1rem;
   }
 }
+
+/* ========================================
+   MOBILE - iPhone fix (prevent overflow)
+   ======================================== */
+
+@media (max-width: 480px) {
+  .planning-container {
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .calendar-grid {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 10px;
+    gap: 2px;
+  }
+
+  .calendar-day {
+    font-size: 0.8rem;
+  }
+
+  .calendar-day-number {
+    font-size: 0.85rem;
+  }
+
+  /* Hide other month days on small screens */
+  .calendar-day.other-month {
+    visibility: hidden;
+  }
+}
