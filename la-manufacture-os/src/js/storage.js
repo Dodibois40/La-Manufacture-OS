@@ -17,38 +17,37 @@ export const defaultState = () => ({
   },
 });
 
-// Auth state
+// Auth state (in-memory only for security)
 let currentUser = null;
-let authToken = null;
 
-// Load auth from localStorage
+// Load auth from localStorage (user info only, not token)
 export const loadAuth = () => {
   if (!okStorage) return null;
   try {
     const raw = localStorage.getItem(AUTH_KEY);
     if (raw) {
       const auth = JSON.parse(raw);
+      // Only load user info, not token (security: token managed by Clerk)
       currentUser = auth.user;
-      authToken = auth.token;
-      return auth;
+      return { user: auth.user };
     }
   } catch (_) {}
   return null;
 };
 
-// Save auth to localStorage
-export const saveAuth = (user, token) => {
+// Save auth to localStorage (user info only, not token for security)
+export const saveAuth = (user, _token) => {
   currentUser = user;
-  authToken = token;
+  // Don't store token in localStorage (XSS risk)
+  // Token is managed by Clerk session
   if (okStorage) {
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ user, token }));
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ user }));
   }
 };
 
 // Clear auth
 export const clearAuth = () => {
   currentUser = null;
-  authToken = null;
   if (okStorage) {
     localStorage.removeItem(AUTH_KEY);
   }
