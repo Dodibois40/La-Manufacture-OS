@@ -88,51 +88,28 @@ export async function initClerk() {
       `Clerk.load() timeout ${loadTimeout / 1000}s`
     );
 
-    console.log('[Clerk] load() complete');
-    console.log('[Clerk] User after load:', clerk.user?.firstName || 'none');
-    console.log('[Clerk] Session after load:', clerk.session?.id || 'none');
+    console.log('[Clerk] load() complete, user:', clerk.user?.firstName || 'none');
 
-    // Check for OAuth callback - Clerk may have an in-progress external auth
-    // This handles returning from Google OAuth
+    // Si déjà connecté après load(), rien à faire
+    if (clerk.user) {
+      console.log('[Clerk] Already signed in after load');
+      initialized = true;
+      return clerk;
+    }
+
+    // Vérifier si OAuth a créé une session qu'on doit activer
     const signUp = clerk.client?.signUp;
     const signIn = clerk.client?.signIn;
 
-    console.log('[Clerk] SignUp status:', signUp?.status);
-    console.log('[Clerk] SignIn status:', signIn?.status);
-    console.log('[Clerk] SignUp verifications:', signUp?.verifications?.externalAccount?.status);
-
-    // Handle external account verification from OAuth redirect
-    if (
-      signUp?.status === 'missing_requirements' ||
-      signUp?.verifications?.externalAccount?.status === 'unverified'
-    ) {
-      console.log('[Clerk] OAuth signUp in progress, attempting to complete...');
-      try {
-        // For OAuth, the external account verification should already be complete
-        // We just need to create the session
-        if (
-          signUp.verifications?.externalAccount?.status === 'verified' ||
-          signUp.externalAccount
-        ) {
-          console.log('[Clerk] External account verified, creating session...');
-          const completeResult = await signUp.create({});
-          console.log('[Clerk] SignUp create result:', completeResult?.status);
-          if (completeResult?.createdSessionId) {
-            await clerk.setActive({ session: completeResult.createdSessionId });
-            console.log('[Clerk] Session activated from OAuth signUp');
-          }
-        }
-      } catch (oauthErr) {
-        console.log('[Clerk] OAuth completion attempt:', oauthErr.message);
-      }
+    // SignUp complete (nouveau user via Google)
+    if (signUp?.status === 'complete' && signUp?.createdSessionId) {
+      console.log('[Clerk] Activating signUp session...');
+      await clerk.setActive({ session: signUp.createdSessionId });
     }
-
-    // Check signIn for OAuth (existing user)
-    if (
-      signIn?.status === 'needs_identifier' ||
-      signIn?.firstFactorVerification?.status === 'transferable'
-    ) {
-      console.log('[Clerk] OAuth signIn may need completion');
+    // SignIn complete (user existant via Google)
+    else if (signIn?.status === 'complete' && signIn?.createdSessionId) {
+      console.log('[Clerk] Activating signIn session...');
+      await clerk.setActive({ session: signIn.createdSessionId });
     }
 
     initialized = true;
@@ -384,72 +361,11 @@ export async function signInWithGoogle() {
   }
 }
 
-// Handle OAuth callback explicitly (call this after page loads from OAuth redirect)
+// Handle OAuth callback - simplified
 export async function handleOAuthCallback() {
-  console.log('[Clerk] handleOAuthCallback called');
-
-  if (!clerk || !initialized) {
-    console.log('[Clerk] Not initialized for OAuth callback');
-    return { success: false, error: 'Clerk not initialized' };
-  }
-
-  // Check if already signed in
-  if (clerk.user) {
-    console.log('[Clerk] Already signed in:', clerk.user.firstName);
-    return { success: true, user: clerk.user };
-  }
-
-  const signUp = clerk.client?.signUp;
-  const signIn = clerk.client?.signIn;
-
-  console.log('[Clerk] Callback - SignUp status:', signUp?.status);
-  console.log('[Clerk] Callback - SignIn status:', signIn?.status);
-  console.log('[Clerk] Callback - External account:', signUp?.externalAccount?.provider);
-
-  try {
-    // If signUp has external account info, try to complete
-    if (signUp?.externalAccount) {
-      console.log('[Clerk] Found external account, completing signup...');
-
-      // Check if this is actually an existing user (transfer to signIn)
-      if (signUp.verifications?.externalAccount?.error?.code === 'external_account_exists') {
-        console.log('[Clerk] User exists, transferring to sign-in...');
-        // The user already exists, need to sign in instead
-        const signInResult = await clerk.client.signIn.create({
-          transfer: true,
-        });
-        if (signInResult?.createdSessionId) {
-          await clerk.setActive({ session: signInResult.createdSessionId });
-          console.log('[Clerk] Signed in existing user via OAuth');
-          return { success: true, user: clerk.user };
-        }
-      }
-
-      // Try to complete new user signup
-      if (signUp.status === 'complete' && signUp.createdSessionId) {
-        await clerk.setActive({ session: signUp.createdSessionId });
-        console.log('[Clerk] New user session activated');
-        return { success: true, user: clerk.user };
-      }
-    }
-
-    // If signIn has completed OAuth
-    if (signIn?.status === 'complete' && signIn.createdSessionId) {
-      await clerk.setActive({ session: signIn.createdSessionId });
-      console.log('[Clerk] Existing user session activated');
-      return { success: true, user: clerk.user };
-    }
-
-    // No active OAuth to complete
-    console.log('[Clerk] No OAuth callback to handle');
-    return { success: false, error: 'No OAuth session to complete' };
-  } catch (err) {
-    console.error('[Clerk] OAuth callback error:', err);
-    return {
-      success: false,
-      error: err.errors?.[0]?.message || err.message || 'OAuth callback failed',
-    };
-  }
+  if (!clerk) return { success: false, error: 'Clerk not ready' };
+  if (clerk.user) return { success: true, user: clerk.user };
+  return { success: false, error: 'No session' };
 }
 
 // Complete 2FA with email code

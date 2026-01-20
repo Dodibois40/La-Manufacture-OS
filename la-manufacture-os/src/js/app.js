@@ -713,54 +713,11 @@ const initApp = async () => {
           return;
         }
 
-        // Check for OAuth callback - Clerk might still be processing
-        // This handles the case where user returns from Google OAuth
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentUrl = window.location.href;
-        console.log('[App] Checking for OAuth callback. URL:', currentUrl);
-        console.log('[App] URL params:', Array.from(urlParams.entries()));
-
-        // Detect OAuth callback from various indicators
-        const hasOAuthCallback =
-          urlParams.has('__clerk_status') ||
-          urlParams.has('__clerk_created_session') ||
-          urlParams.has('code') || // Google OAuth returns 'code' param
-          urlParams.has('state') || // OAuth state param
-          currentUrl.includes('#__clerk') ||
-          currentUrl.includes('/sso-callback');
-
-        if (hasOAuthCallback) {
-          console.log('[App] OAuth callback detected, attempting to complete...');
-
-          // Try explicit OAuth callback handling
-          const oauthResult = await handleOAuthCallback();
-          console.log('[App] OAuth callback result:', oauthResult);
-
-          if (oauthResult.success && isSignedIn()) {
-            console.log('[App] Session established after OAuth callback');
-            // Clean up URL by removing OAuth params
-            window.history.replaceState({}, '', window.location.pathname);
-            handlePostLogin();
-            return;
-          }
-
-          // If still not signed in, wait for auth state change
-          console.log('[App] OAuth not complete yet, setting up listener...');
-        }
-
-        // Set up listener for auth state changes (handles OAuth completion)
+        // Écouter les changements d'auth (OAuth callback sera détecté automatiquement)
         const unsubscribe = onAuthStateChange((signedIn, user) => {
           console.log('[App] Auth state changed:', signedIn, user?.firstName);
           if (signedIn && !postLoginCompleted) {
-            console.log('[App] User signed in via state change, calling handlePostLogin');
             unsubscribe?.();
-            // Clean up URL if it has Clerk params
-            if (
-              window.location.search.includes('__clerk') ||
-              window.location.hash.includes('__clerk')
-            ) {
-              window.history.replaceState({}, '', window.location.pathname);
-            }
             handlePostLogin();
           }
         });
