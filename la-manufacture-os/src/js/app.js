@@ -42,7 +42,16 @@ state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
 state.settings = state.settings && typeof state.settings === 'object' ? state.settings : {};
 
 // macOS Dock Magnification
+let dockMagnificationInitialized = false;
+
 const initDockMagnification = () => {
+  // Prevent multiple initialization (duplicate event listeners)
+  if (dockMagnificationInitialized) return;
+  dockMagnificationInitialized = true;
+
+  // Skip on touch devices - they don't have true hover, causes icons to jump
+  if (!window.matchMedia('(hover: hover)').matches) return;
+
   const nav = document.querySelector('nav');
   if (!nav) return;
 
