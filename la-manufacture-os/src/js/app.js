@@ -24,6 +24,7 @@ import {
   forgotPassword,
   resetPassword,
   completeEmailCode,
+  onAuthStateChange,
 } from './clerk-auth.js';
 import { initNotifications, startNotificationPolling } from './notifications.js';
 import { initShareModal } from './share.js';
@@ -701,12 +702,58 @@ const initApp = async () => {
 
     // Start Clerk init in background (non-blocking) + check if already signed in
     initClerk()
-      .then(() => {
+      .then(async () => {
         console.log('[App] Clerk ready in background');
+
+        // Check if already signed in
         if (isSignedIn()) {
-          // Already logged in -> redirect to app
+          console.log('[App] Already signed in, calling handlePostLogin');
           handlePostLogin();
+          return;
         }
+
+        // Check for OAuth callback - Clerk might still be processing
+        // This handles the case where user returns from Google OAuth
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasOAuthCallback =
+          urlParams.has('__clerk_status') ||
+          urlParams.has('__clerk_created_session') ||
+          window.location.href.includes('#__clerk');
+
+        if (hasOAuthCallback) {
+          console.log('[App] OAuth callback detected, waiting for session...');
+
+          // Wait a bit for Clerk to process the OAuth callback
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          if (isSignedIn()) {
+            console.log('[App] Session established after OAuth callback');
+            // Clean up URL by removing Clerk params
+            window.history.replaceState({}, '', window.location.pathname);
+            handlePostLogin();
+            return;
+          }
+
+          // If still not signed in, wait for auth state change
+          console.log('[App] Still not signed in, setting up listener...');
+        }
+
+        // Set up listener for auth state changes (handles OAuth completion)
+        const unsubscribe = onAuthStateChange((signedIn, user) => {
+          console.log('[App] Auth state changed:', signedIn, user?.firstName);
+          if (signedIn && !postLoginCompleted) {
+            console.log('[App] User signed in via state change, calling handlePostLogin');
+            unsubscribe?.();
+            // Clean up URL if it has Clerk params
+            if (
+              window.location.search.includes('__clerk') ||
+              window.location.hash.includes('__clerk')
+            ) {
+              window.history.replaceState({}, '', window.location.pathname);
+            }
+            handlePostLogin();
+          }
+        });
       })
       .catch(err => {
         console.warn('[App] Background Clerk init failed:', err.message);
