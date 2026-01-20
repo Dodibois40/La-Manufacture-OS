@@ -691,11 +691,8 @@ const initApp = async () => {
   window._handlePostLogin = handlePostLogin;
 
   // API Mode Logic
-  // TEMP: Bypass auth for local testing
-  const bypassAuth =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-  if (isApiMode && !bypassAuth) {
+  // Auth is now required even on localhost (Google Sign-in works)
+  if (isApiMode) {
     // Auth form is already visible via instant-auth-mode CSS
     hideLoader();
     initAuthUI();
