@@ -302,6 +302,39 @@ export async function signInWithEmail(email, password) {
   }
 }
 
+// Sign in with Google OAuth (Clerk handles the redirect flow)
+export async function signInWithGoogle() {
+  console.log('[Clerk] signInWithGoogle called');
+
+  // Auto-init Clerk if not ready
+  if (!clerk || !initialized) {
+    console.log('[Clerk] Not initialized, initializing now...');
+    try {
+      await initClerk();
+    } catch (initErr) {
+      console.error('[Clerk] Init failed:', initErr);
+      return { success: false, error: 'Service auth indisponible' };
+    }
+  }
+
+  try {
+    // Clerk's OAuth redirect - opens Google consent page
+    await clerk.client.signIn.authenticateWithRedirect({
+      strategy: 'oauth_google',
+      redirectUrl: window.location.origin + '/sso-callback',
+      redirectUrlComplete: window.location.origin,
+    });
+    // This won't return - browser redirects to Google
+    return { success: true };
+  } catch (err) {
+    console.error('[Clerk] Google sign-in error:', err);
+    return {
+      success: false,
+      error: err.errors?.[0]?.message || 'Erreur Google Sign-in',
+    };
+  }
+}
+
 // Complete 2FA with email code
 export async function completeEmailCode(signIn, code) {
   console.log('[Clerk] completeEmailCode called');

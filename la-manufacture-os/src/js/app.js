@@ -18,6 +18,7 @@ import {
   initClerk,
   isSignedIn,
   signInWithEmail,
+  signInWithGoogle,
   signUpWithEmail,
   verifyEmailCode,
   forgotPassword,
@@ -310,6 +311,26 @@ const initAuthUI = () => {
   // Single click handler (touchend was causing double-fires on iOS)
   if (loginBtn) {
     loginBtn.addEventListener('click', handleLogin);
+  }
+
+  // Google Sign-In handler
+  const googleSignInBtn = document.getElementById('googleSignInBtn');
+  if (googleSignInBtn) {
+    googleSignInBtn.addEventListener('click', async () => {
+      googleSignInBtn.disabled = true;
+      const originalHTML = googleSignInBtn.innerHTML;
+      googleSignInBtn.textContent = 'Redirecting...';
+
+      const result = await signInWithGoogle();
+
+      if (!result.success) {
+        // Restore button if error (no redirect happened)
+        googleSignInBtn.disabled = false;
+        googleSignInBtn.innerHTML = originalHTML;
+        if (loginError) loginError.textContent = result.error;
+      }
+      // If success, browser redirects to Google - nothing else to do
+    });
   }
 
   // Register handler
