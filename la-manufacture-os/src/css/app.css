@@ -865,24 +865,28 @@ nav button#nav-inbox.active {
 
 .password-toggle-minimal {
   position: absolute;
-  right: 0;
+  right: 4px;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: rgba(0, 0, 0, 0.3);
   border: none;
+  border-radius: 6px;
   cursor: pointer;
   padding: 8px;
-  color: rgba(255, 255, 255, 0.3);
-  transition: color 0.2s;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s;
+  z-index: 10;
 }
 
 .password-toggle-minimal:hover {
-  color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .password-toggle-minimal .eye-icon {
   width: 20px;
   height: 20px;
+  display: block;
 }
 
 /* Minimal button - with rounded corners */
