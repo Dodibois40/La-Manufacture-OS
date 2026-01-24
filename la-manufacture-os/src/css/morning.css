@@ -74,6 +74,19 @@
   z-index: 2;
 }
 
+/* Dégradé sombre en bas pour cacher le watermark */
+.sunrise-bg::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
 /* ===== RESPONSIVE MOBILE ===== */
 @media (max-width: 768px) {
   .sunrise-bg {
@@ -193,16 +206,15 @@
   animation: fadeToWhite 0.8s ease-out forwards;
 }
 
-/* Solar flare overlay - expands from sun position (bottom center) */
+/* Solar flare overlay - expands from sun position (center of sun) */
 .brief-overlay-spacex.launching::after {
   content: '';
   position: absolute;
-  bottom: 15%;
+  top: 58%;
   left: 50%;
   width: 100px;
   height: 100px;
-  margin-left: -50px;
-  margin-bottom: -50px;
+  transform: translate(-50%, -50%);
   background: radial-gradient(
     circle,
     rgba(255, 255, 250, 1) 0%,
@@ -228,22 +240,16 @@
   0% {
     width: 100px;
     height: 100px;
-    margin-left: -50px;
-    margin-bottom: -50px;
     opacity: 0.8;
   }
   40% {
-    width: 200vmax;
-    height: 200vmax;
-    margin-left: -100vmax;
-    margin-bottom: -100vmax;
+    width: 250vmax;
+    height: 250vmax;
     opacity: 1;
   }
   100% {
-    width: 300vmax;
-    height: 300vmax;
-    margin-left: -150vmax;
-    margin-bottom: -150vmax;
+    width: 350vmax;
+    height: 350vmax;
     opacity: 1;
   }
 }
