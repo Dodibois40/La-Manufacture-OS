@@ -52,7 +52,7 @@
   width: 100%;
   height: 100%;
   /* Recadré pour couper le watermark en bas et centrer le soleil */
-  background: url('/sunrise-space.webp') center 35% / cover no-repeat;
+  background: url('/sunrise-space.webp.jpg') center 35% / cover no-repeat;
   z-index: 1;
 }
 
