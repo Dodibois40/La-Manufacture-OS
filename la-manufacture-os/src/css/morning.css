@@ -44,69 +44,40 @@
   opacity: 0.6;
 }
 
-/* ===== SUNRISE BACKGROUND ===== */
+/* ===== SUNRISE BACKGROUND - FULL SCREEN ===== */
 .sunrise-bg {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 70%;
-  background: url('/sunrise-space.webp') center bottom / cover no-repeat;
+  height: 100%;
+  background: url('/sunrise-space.webp') center center / cover no-repeat;
   z-index: 1;
 }
 
-/* Glow effect on the sun */
-.sunrise-bg::after {
+/* Dégradé sombre en haut pour lisibilité - smooth, pas de coupure */
+.sunrise-bg::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  height: 200px;
-  background: radial-gradient(
-    ellipse,
-    rgba(255, 200, 100, 0.3) 0%,
-    rgba(255, 180, 80, 0.15) 40%,
-    transparent 70%
+  left: 0;
+  width: 100%;
+  height: 70%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.5) 35%,
+    rgba(0, 0, 0, 0.2) 60%,
+    transparent 100%
   );
   pointer-events: none;
+  z-index: 2;
 }
 
 /* ===== RESPONSIVE MOBILE ===== */
 @media (max-width: 768px) {
   .sunrise-bg {
-    height: 60%;
-    background-position: center 70%;
-  }
-
-  .sunrise-bg::after {
-    width: 250px;
-    height: 120px;
-    top: 5%;
-  }
-}
-
-@media (max-width: 480px) {
-  .sunrise-bg {
-    height: 55%;
-    background-position: center 65%;
-  }
-
-  .sunrise-bg::after {
-    width: 200px;
-    height: 100px;
-  }
-}
-
-@media (min-width: 1400px) {
-  .sunrise-bg {
-    height: 75%;
-  }
-
-  .sunrise-bg::after {
-    width: 500px;
-    height: 250px;
+    background-position: center 60%;
   }
 }
 
@@ -114,7 +85,7 @@
 .brief-content-mission {
   position: absolute;
   left: 50%;
-  top: 40%;
+  top: 30%;
   transform: translate(-50%, -50%);
   z-index: 100;
   text-align: center;
@@ -124,15 +95,9 @@
 
 @media (max-width: 768px) {
   .brief-content-mission {
-    top: 35%;
+    top: 25%;
     width: 90%;
     padding: 0 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .brief-content-mission {
-    top: 30%;
   }
 }
 
@@ -228,11 +193,11 @@
   animation: fadeToWhite 0.8s ease-out forwards;
 }
 
-/* Solar flare overlay - expands from sun position */
-.brief-overlay-spacex.launching::before {
+/* Solar flare overlay - expands from sun position (bottom center) */
+.brief-overlay-spacex.launching::after {
   content: '';
   position: absolute;
-  bottom: 30%;
+  bottom: 15%;
   left: 50%;
   width: 100px;
   height: 100px;
