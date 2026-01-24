@@ -1,22 +1,6 @@
 import { isoLocal } from './utils.js';
 import { playStartupSound } from './startup-sound.js';
 
-// Preload Earth textures for smooth display
-const preloadTextures = () => {
-  const textures = ['/earth-day.webp', '/earth-clouds.webp', '/earth-night.webp'];
-
-  return Promise.all(
-    textures.map(src => {
-      return new Promise(resolve => {
-        const img = new Image();
-        img.onload = () => resolve(src);
-        img.onerror = () => resolve(src); // Continue even if failed
-        img.src = src;
-      });
-    })
-  );
-};
-
 export const initMorningBriefing = async (state, user = null) => {
   // Check if first launch of the day
   const today = isoLocal();
@@ -32,9 +16,6 @@ export const initMorningBriefing = async (state, user = null) => {
 
   const userName = user?.name || 'Moi';
 
-  // Preload textures before showing briefing
-  await preloadTextures();
-
   // Stats calculation
   const tasks = state.tasks || [];
   const todayCount = tasks.filter(t => !t.done && (t.date || '').split('T')[0] === today).length;
@@ -43,18 +24,7 @@ export const initMorningBriefing = async (state, user = null) => {
   const html = `
     <div id="briefOverlay" class="brief-overlay-spacex">
       <div class="stars"></div>
-      <div class="planet-container">
-        <div class="planet-glow"></div>
-        <div class="planet">
-          <div class="planet-day"></div>
-          <div class="planet-clouds"></div>
-          <div class="planet-cities-mask">
-            <div class="planet-night"></div>
-          </div>
-          <div class="planet-shadow"></div>
-          <div class="planet-atmosphere"></div>
-        </div>
-      </div>
+      <div class="sunrise-bg"></div>
 
       <!-- Content - Centered Mission Control Style -->
       <div class="brief-content-mission">
@@ -85,7 +55,7 @@ export const initMorningBriefing = async (state, user = null) => {
     // Feedback immédiat
     btn.style.transform = 'scale(0.95)';
 
-    // Zoom into planet effect
+    // Solar flare effect
     el.classList.add('launching');
 
     // Show main content
